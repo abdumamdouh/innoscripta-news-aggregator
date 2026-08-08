@@ -10,9 +10,12 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 
 ## Definition of done (every item)
 
-- `npm run typecheck && npm run lint && npm run test` pass.
+- `npm run typecheck && npm run lint && npm run test && npm run test:e2e` pass.
+- **Unit tests** for any pure logic added, and a **Playwright spec** for any user-visible behaviour
+  added. A feature without tests is not done; a suite that runs zero specs is a failure, not a pass.
 - No `any`, no `../../../` imports, no raw hex in components, no `VITE_*` key reachable from client code.
-- New i18n keys exist in **both** `en.json` and `ar.json`.
+- New i18n keys exist in **all three** locales — `en.json`, `ar.json`, `de.json`. A key in one and
+  missing from another is a bug.
 - Renders correctly at 375 / 768 / 1280 with no horizontal scroll; desktop must not regress.
 - Loading, empty and error states exist for anything that fetches.
 - Follows `.claude/rules/patterns.md`.
@@ -21,7 +24,9 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 
 | #   | Item                                            | Status      | Branch | Notes |
 | --- | ----------------------------------------------- | ----------- | ------ | ----- |
-| 1   | App shell + design system                       | needs human review | feat/app-shell-design-system | e2e: BLOCKED: The mandated browser MCP 'playwright-chrome' cannot connect to Chrome — mcp__playwright-chrome__browser_navigate to http://localhost:3100 fails with 'Could not connect to chrome... ws://localhost:9222/devtools/browser 403 Forbidden'. Retried once with the same result. Per instructions, not falling back to another browser MCP. The dev server itself was started successfully and IS serving on http://localhost:3100 (npm run dev -- --port 3100 --strictPort, confirmed via Vite startup log: 'VITE v8.2.1 ready ... Local: http://localhost:3100/'), and a static code review of the app-shell/design-system item looked consistent with the spec (src/App.tsx is provider-stack-only with QueryClientProvider -> TooltipProvider -> RouterProvider though ToastProvider is intentionally deferred per a code comment to backlog item 11; src/routes/router.tsx uses createBrowserRouter with AppLayout wrapping two placeholder routes; src/components/layout/ has AppLayout, Header, Footer, Navigation, LanguageSelect, ThemeToggle(+test); src/components/common/design-system/ has all listed App* components plus index.ts and README.md; src/config/themeMode.ts defaults to prefers-color-scheme when nothing stored and persists via appTheme.storageKeys.theme; src/i18n/index.ts + locales/en.json, ar.json exist; src/hooks/useDebounce.ts exists; .app-shell class in src/styles/base.css matches the 88rem/clamp(1rem,3vw,2rem) spec). None of this was exercised live in a browser, so no PASS can be reported for the acceptance criteria (routes rendering, language toggle to Arabic/RTL, theme toggle persistence and system-default-on-first-visit) — this was code inspection only, not verification. |
+| 1   | App shell + design system                       | done        | feat/app-shell-design-system | Human-verified in a browser: boots, routes render, ar → dir=rtl + Arabic copy, theme persists across reload and honours prefers-color-scheme on first visit. e2e agent was BLOCKED by a browser-MCP fault, not by the code. |
+| 1b  | Playwright e2e harness                          | not started |        |       |
+| 1c  | German (de) locale                              | not started |        |       |
 | 2   | Domain core: Article, NewsSource, aggregator    | not started |        |       |
 | 3   | Four live adapters + two stubs                  | not started |        |       |
 | 4   | nginx proxy + env wiring                        | not started |        |       |
@@ -66,6 +71,42 @@ Router, layout and the `App*` wrapper layer. Everything downstream depends on th
 - Port `src/hooks/useDebounce.ts` from the blueprint as-is.
 
 Acceptance: app boots, both routes render inside the layout, language toggle flips to Arabic and RTL, theme toggle persists across reload and honours system default on first visit.
+
+### 1b — Playwright e2e harness
+
+Every later item owes a Playwright spec, so the harness has to exist first.
+
+- `npm i -D @playwright/test` and `npx playwright install chromium`.
+- `playwright.config.ts`: `testDir: 'e2e'`, `baseURL: 'http://localhost:3100'`, `webServer` that runs
+  `npm run dev -- --port 3100 --strictPort` and reuses an already-running server locally, `reporter: 'list'`,
+  and projects for the three viewports the responsive item cares about: 375×812, 768×1024, 1280×800.
+- Script `"test:e2e": "playwright test"`. Add `playwright-report/` and `test-results/` to `.gitignore`
+  (already done).
+- `e2e/shell.spec.ts` covering item 1's acceptance criteria, since those were never verified by a
+  spec: app boots and renders the layout; switching language to Arabic sets `dir="rtl"` on `<html>`
+  and shows Arabic copy; the theme toggle flips `<html class="dark">`, writes `ina-theme`, and
+  survives a reload; on a fresh context with no stored theme the app honours `prefers-color-scheme`.
+- Do **not** put unit-test-shaped assertions here. Specs drive the UI as a user: navigate, click, type,
+  assert what is on screen.
+
+Acceptance: `npm run test:e2e` runs and passes with at least the shell spec, and fails loudly if the
+dev server is not reachable rather than reporting a green empty run.
+
+### 1c — German (de) locale
+
+innoscripta is a Munich company, so German is the third language alongside English and Arabic.
+
+- `src/i18n/locales/de.json` with **every** key present in `en.json` — no gaps, no English fallbacks
+  left in place. Translate the UI chrome properly; do not machine-translate placeholders.
+- Register `de` in `src/i18n/index.ts` resources, and add it to the `LanguageSelect` options.
+- German is LTR — make sure the RTL handling keys off `ar` specifically and not "is not English".
+  That assumption is easy to bake in when there are only two languages and breaks the moment a third
+  LTR locale exists; check `document.documentElement.dir` is `ltr` for `de`.
+- Add a `de` case to the shell spec from item 1b.
+- From here on, **every** new key goes into all three locale files in the same commit.
+
+Acceptance: switching to Deutsch translates the chrome, keeps `dir="ltr"`, and persists across
+reload; the three locale files have identical key sets.
 
 ### 2 — Domain core: Article, NewsSource, aggregator
 
