@@ -26,7 +26,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | --- | ----------------------------------------------- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | App shell + design system                       | done        | feat/app-shell-design-system | Human-verified in a browser: boots, routes render, ar → dir=rtl + Arabic copy, theme persists across reload and honours prefers-color-scheme on first visit. e2e agent was BLOCKED by a browser-MCP fault, not by the code. |
 | 1b  | Playwright e2e harness                          | not started |                              |                                                                                                                                                                                                                             |
-| 1c  | German (de) locale                              | done        | feat/german-de-locale       |                                                                                                                                                                                                                             |
+| 1c  | German (de) locale                              | done        | feat/german-de-locale        |                                                                                                                                                                                                                             |
 | 2   | Domain core: Article, NewsSource, aggregator    | not started |                              |                                                                                                                                                                                                                             |
 | 3   | Four live adapters + two stubs                  | not started |                              |                                                                                                                                                                                                                             |
 | 4   | nginx proxy + env wiring                        | not started |                              |                                                                                                                                                                                                                             |
@@ -55,6 +55,7 @@ One line per iteration, appended by the loop. Do not edit by hand.
 
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
 iteration 4 — [1c] German (de) locale — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 6 — [1c] German (de) locale — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
