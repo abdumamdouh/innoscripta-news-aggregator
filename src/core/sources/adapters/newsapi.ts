@@ -1,5 +1,12 @@
 import type { Article, ArticleQuery, NewsSource } from '@/core/sources/types'
-import { getJson, isoDate, plainText, queryString, text, url } from '@/core/sources/adapters/shared'
+import {
+  description,
+  getJson,
+  isoDate,
+  queryString,
+  text,
+  url,
+} from '@/core/sources/adapters/shared'
 
 const ID = 'newsapi'
 const LABEL = 'NewsAPI'
@@ -50,7 +57,7 @@ function normalize(raw: NewsApiRaw): Article {
     // The url is NewsAPI's only stable per-article identifier — it has no id field.
     id: `${ID}:${raw.url}`,
     title: text(raw.title) ?? '',
-    description: plainText(raw.description) ?? '',
+    description: description(raw.description),
     url: url(raw.url) ?? '',
     imageUrl: url(raw.urlToImage),
     publishedAt: isoDate(raw.publishedAt) ?? '',

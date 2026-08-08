@@ -9,6 +9,7 @@ import { newsapiSource, selectItems as selectNewsapi } from '@/core/sources/adap
 import { nytSource, selectItems as selectNyt } from '@/core/sources/adapters/nyt'
 import { newsCredSource } from '@/core/sources/adapters/newscred.unavailable'
 import { openNewsSource } from '@/core/sources/adapters/opennews.unavailable'
+import { description } from '@/core/sources/adapters/shared'
 import { SOURCES } from '@/core/sources/registry'
 import type { Article, ArticleQuery } from '@/core/sources/types'
 import bbcFixture from '@/core/sources/adapters/__fixtures__/bbc-rss.json'
@@ -480,5 +481,53 @@ describe('registry', () => {
       expect(source.available).toBe(false)
       expect(source.unavailableReason?.length).toBeGreaterThan(20)
     }
+  })
+})
+
+/**
+ * The `?? ''` that used to sit in all four adapters, now one shared function. `''` is the
+ * only empty string `Article` is allowed to carry, so this is where that is pinned down —
+ * items 5/6 render `articles.noDescription` for it rather than a blank line.
+ */
+describe('description()', () => {
+  it('returns "" — never undefined — when the provider supplied nothing usable', () => {
+    for (const absent of [undefined, null, '', '   ', '[Removed]', 'null', 'NONE', 42, {}]) {
+      expect(description(absent)).toBe('')
+    }
+    // No candidates at all is the same story, not a crash.
+    expect(description()).toBe('')
+  })
+
+  it('strips markup and collapses whitespace instead of emitting a text node of HTML', () => {
+    expect(description('<p>Two  <b>words</b></p>\n')).toBe('Two words')
+    // Markup that leaves nothing behind is absence, not an empty-looking description.
+    expect(description('<br/>')).toBe('')
+  })
+
+  it('takes the first usable candidate, skipping empty and placeholder ones', () => {
+    // NYT's real fallback order: abstract → snippet → lead_paragraph.
+    expect(description(null, '  ', 'the snippet')).toBe('the snippet')
+    expect(description('[removed]', 'the lead paragraph')).toBe('the lead paragraph')
+    expect(description('the abstract', 'the snippet')).toBe('the abstract')
+  })
+
+  it('is the single path all four adapters take, so none can drift back to its own default', () => {
+    const sources = [newsapiSource, guardianSource, nytSource, bbcNewsSource]
+    expect(sources.map((source) => source.id)).toEqual(['newsapi', 'guardian', 'nyt', 'bbc'])
+    // Descriptionless payloads through each adapter's own normalize, one shared answer.
+    const descriptionless: Record<string, unknown>[] = [
+      { title: 't', url: 'https://e.test/a', publishedAt: '2024-01-01T00:00:00Z' },
+      { webTitle: 't', webUrl: 'https://e.test/a', webPublicationDate: '2024-01-01T00:00:00Z' },
+      { headline: { main: 't' }, web_url: 'https://e.test/a', pub_date: '2024-01-01T00:00:00Z' },
+    ]
+    for (const [index, source] of [newsapiSource, guardianSource, nytSource].entries()) {
+      expect(source.normalize(descriptionless[index] as never).description).toBe('')
+    }
+    // BBC's raw is a DOM element, so its descriptionless item comes from real feed XML.
+    const [bare] = selectBbc(
+      `<rss><channel><item><title>t</title><link>https://e.test/a</link>
+        <pubDate>Sat, 08 Aug 2026 11:55:30 GMT</pubDate></item></channel></rss>`,
+    )
+    expect(bbcNewsSource.normalize(bare!).description).toBe('')
   })
 })

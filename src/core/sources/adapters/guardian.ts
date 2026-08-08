@@ -1,5 +1,12 @@
 import type { Article, NewsSource } from '@/core/sources/types'
-import { getJson, isoDate, plainText, queryString, text, url } from '@/core/sources/adapters/shared'
+import {
+  description,
+  getJson,
+  isoDate,
+  queryString,
+  text,
+  url,
+} from '@/core/sources/adapters/shared'
 
 const ID = 'guardian'
 const LABEL = 'The Guardian'
@@ -29,7 +36,7 @@ function normalize(raw: GuardianRaw): Article {
     id: `${ID}:${text(raw.id) ?? raw.webUrl}`,
     title: text(raw.webTitle) ?? '',
     // trailText is the Guardian's standfirst and carries inline markup.
-    description: plainText(raw.fields?.trailText) ?? '',
+    description: description(raw.fields?.trailText),
     url: url(raw.webUrl) ?? '',
     imageUrl: url(raw.fields?.thumbnail),
     publishedAt: isoDate(raw.webPublicationDate) ?? '',

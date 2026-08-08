@@ -107,6 +107,89 @@ test.describe('news source adapters in the browser', () => {
     })
   }
 
+  /**
+   * Same reason this file exists at all: there is no article view yet (items 5/6), so the
+   * empty-description contract is proved where it is real — through the browser fetch and
+   * normalize path, with the description stripped out of the captured responses exactly as
+   * a provider that has none would send them. `''`, never `undefined`, never a blank
+   * `null` leaking into a text node.
+   */
+  const stripDescriptions = (json: string) =>
+    JSON.parse(json, (key, value) =>
+      ['description', 'trailText', 'abstract', 'snippet', 'lead_paragraph'].includes(key)
+        ? null
+        : (value as unknown),
+    ) as unknown
+
+  for (const feed of jsonFeeds) {
+    test(`the ${feed.id} adapter yields "" for every description-less article`, async ({
+      page,
+    }) => {
+      await page.route(feed.route, (route) =>
+        route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify(stripDescriptions(readFixture(feed.file))),
+        }),
+      )
+
+      await page.goto('/')
+      await page.addScriptTag({
+        type: 'module',
+        content: `
+          import { SOURCES } from '/src/core/sources/registry.ts'
+          const source = SOURCES.find((candidate) => candidate.id === '${feed.id}')
+          const raw = await source.fetch({ page: 1, pageSize: 20, q: 'technology' })
+          window.__articles = raw.map((item) => source.normalize(item))
+        `,
+      })
+      await page.waitForFunction(() => '__articles' in globalThis)
+
+      const articles = (await page.evaluate(
+        () => (globalThis as unknown as Record<string, unknown>).__articles,
+      )) as Record<string, unknown>[]
+
+      // Stripping the summary must not drop the article — title/url/publishedAt still stand.
+      expect(articles.length).toBeGreaterThan(0)
+      for (const article of articles) {
+        expect(article.description).toBe('')
+        expect(String(article.title).length).toBeGreaterThan(0)
+        expect(String(article.url)).toMatch(/^https?:\/\//)
+      }
+    })
+  }
+
+  test('the BBC adapter yields "" when the feed carries no <description>', async ({ page }) => {
+    await page.route('**/api/bbc/**', (route) =>
+      route.fulfill({
+        contentType: 'application/rss+xml',
+        body: feedXml.replace(/<description>[\s\S]*?<\/description>/g, ''),
+      }),
+    )
+
+    await page.goto('/')
+    await page.addScriptTag({
+      type: 'module',
+      content: `
+        import { bbcNewsSource } from '/src/core/sources/adapters/bbc-rss.ts'
+        const raw = await bbcNewsSource.fetch({ page: 1, pageSize: 5 })
+        window.__articles = raw.map((item) => bbcNewsSource.normalize(item))
+      `,
+    })
+    await page.waitForFunction(() => '__articles' in globalThis)
+
+    const articles = (await page.evaluate(
+      () => (globalThis as unknown as Record<string, unknown>).__articles,
+    )) as Record<string, unknown>[]
+
+    expect(articles.length).toBeGreaterThan(10)
+    for (const article of articles) {
+      expect(article.description).toBe('')
+      expect(String(article.title).length).toBeGreaterThan(0)
+    }
+    // The shell is untouched by any of this — no blank-description crash.
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
+  })
+
   test('a dead provider surfaces as a failure, not a thrown page', async ({ page }) => {
     await page.route('**/api/bbc/**', (route) => route.fulfill({ status: 503, body: 'nope' }))
     await page.goto('/')

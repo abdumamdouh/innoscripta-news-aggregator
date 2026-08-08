@@ -1,5 +1,12 @@
 import type { Article, NewsSource } from '@/core/sources/types'
-import { getJson, isoDate, plainText, queryString, text, url } from '@/core/sources/adapters/shared'
+import {
+  description,
+  getJson,
+  isoDate,
+  queryString,
+  text,
+  url,
+} from '@/core/sources/adapters/shared'
 
 const ID = 'nyt'
 const LABEL = 'The New York Times'
@@ -57,8 +64,7 @@ function normalize(raw: NytRaw): Article {
     title: text(raw.headline?.main) ?? '',
     // `abstract` is the summary; snippet and lead paragraph are the fallbacks NYT
     // leaves populated when a doc has no abstract at all.
-    description:
-      plainText(raw.abstract) ?? plainText(raw.snippet) ?? plainText(raw.lead_paragraph) ?? '',
+    description: description(raw.abstract, raw.snippet, raw.lead_paragraph),
     url: url(raw.web_url) ?? '',
     imageUrl: image(raw.multimedia),
     publishedAt: isoDate(raw.pub_date) ?? '',

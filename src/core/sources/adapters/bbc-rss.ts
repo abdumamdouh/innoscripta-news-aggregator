@@ -1,5 +1,5 @@
 import type { Article, ArticleQuery, NewsSource } from '@/core/sources/types'
-import { getText, isoDate, plainText, text, url } from '@/core/sources/adapters/shared'
+import { description, getText, isoDate, text, url } from '@/core/sources/adapters/shared'
 
 const ID = 'bbc'
 const LABEL = 'BBC News'
@@ -65,7 +65,7 @@ function normalize(raw: BbcRaw): Article {
     // guid is stable across feed rebuilds; the link is the fallback when it is absent.
     id: `${ID}:${text(child(item, 'guid')) ?? text(child(item, 'link'))}`,
     title: text(child(item, 'title')) ?? '',
-    description: plainText(child(item, 'description')) ?? '',
+    description: description(child(item, 'description')),
     url: url(child(item, 'link')) ?? '',
     imageUrl: thumbnail(item),
     // RFC-822: "Sat, 08 Aug 2026 11:55:30 GMT".

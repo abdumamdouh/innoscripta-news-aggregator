@@ -14,9 +14,23 @@ export function text(value: unknown): string | undefined {
 }
 
 /** `text` with markup stripped — Guardian trailText and NYT abstracts carry inline HTML. */
-export function plainText(value: unknown): string | undefined {
+function plainText(value: unknown): string | undefined {
   const raw = text(value)
   return raw && text(raw.replace(/<[^>]*>/g, '').replace(/\s+/g, ' '))
+}
+
+/**
+ * `Article.description`, the one field allowed to be `''`. Everything else absent stays
+ * `undefined`; description is typed `string`, so a provider that omits it normalizes to
+ * `''` rather than half-building the Article. Candidates are tried in order — NYT falls
+ * back abstract → snippet → lead_paragraph.
+ *
+ * `''` is a legitimate value, not a defect, so it has to survive to the views intact:
+ * items 5/6 render `articles.noDescription` for it, never a blank line. Every adapter
+ * routes through here so that contract lives in exactly one place.
+ */
+export function description(...candidates: unknown[]): string {
+  return candidates.map(plainText).find(Boolean) ?? ''
 }
 
 /** An absolute http(s) URL, or undefined. Relative provider paths are resolved against `base`. */
