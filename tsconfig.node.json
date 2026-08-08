@@ -23,6 +23,7 @@
     "vite.config.ts",
     "vite.proxy.ts",
     "vite.proxy.test.ts",
+    "theme-tokens.test.ts",
     "playwright.config.ts",
     "e2e/**/*.ts"
   ]
