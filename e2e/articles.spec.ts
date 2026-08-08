@@ -305,6 +305,32 @@ test.describe('article list', () => {
     await expect(page.locator('article [data-source-id]')).toHaveCount(second.length)
   })
 
+  test('keeps every byline seen so far in the author filter after one is picked', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(cards(page)).toHaveCount(PAGE_SIZE)
+
+    const author = page.getByRole('combobox', { name: 'Author' })
+    await author.click()
+    const before = await page.getByRole('option').allInnerTexts()
+    // "All authors" plus the bylines on this page — several newsrooms' worth.
+    expect(before.length).toBeGreaterThan(2)
+
+    const picked = before[1] as string
+    const other = before[2] as string
+    await page.getByRole('option', { name: picked, exact: true }).click()
+    await page.waitForURL(/author=/)
+    await settle(page)
+
+    // The fetch has narrowed to one byline, but the vocabulary must not narrow with it:
+    // every other author stays reachable, so the filter is not a one-way door.
+    await author.click()
+    const after = await page.getByRole('option').allInnerTexts()
+    expect(after).toContain(other)
+    expect(after).toEqual(before)
+  })
+
   test('degrades to a banner naming a blocked provider, not an empty page', async ({ page }) => {
     await mockProviders(page, ['nyt'])
     await page.goto('/')
