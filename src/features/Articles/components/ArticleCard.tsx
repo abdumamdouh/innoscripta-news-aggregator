@@ -1,13 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppCard } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
+import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
 import { formatArticleDate } from '@/features/Articles/utils/formatArticleDate'
-import { cn } from '@/utils/cn'
 
 export function ArticleCard({ article }: { article: Article }) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  // The list's search, filters and page ride along, so the details page can hand them back.
+  const { search } = useLocation()
 
   return (
     <AppCard as="article" className="motion-card flex h-full flex-col gap-3">
@@ -32,25 +34,18 @@ export function ArticleCard({ article }: { article: Article }) {
 
       <h2 className="text-base font-semibold text-ink-900 dark:text-ink-100">
         <Link
-          to={`/articles/${encodeURIComponent(article.id)}`}
+          to={{ pathname: `/articles/${encodeURIComponent(article.id)}`, search }}
           className="line-clamp-3 hover:text-accent-600 hover:underline"
         >
           {article.title}
         </Link>
       </h2>
 
-      {/*
-        An empty description is a legitimate provider answer (item 3 defaults it to ''),
-        not a defect — so it gets its own words, and the box keeps its height either way.
-      */}
-      <p
-        className={cn(
-          'line-clamp-3 min-h-15 text-sm',
-          article.description ? 'text-ink-700 dark:text-ink-300' : 'italic text-ink-500',
-        )}
-      >
-        {article.description || t('articles.noDescription')}
-      </p>
+      {/* Clamped and floor-height here, so the box keeps its silhouette either way. */}
+      <ArticleDescription
+        description={article.description}
+        className="line-clamp-3 min-h-15 text-sm"
+      />
 
       {article.author ? (
         <p className="mt-auto line-clamp-1 text-xs text-ink-500">{article.author}</p>
