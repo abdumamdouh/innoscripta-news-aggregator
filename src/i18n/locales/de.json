@@ -1,0 +1,22 @@
+{
+  "app.name": "innoscripta News",
+  "app.tagline": "Vier Redaktionen, ein Feed.",
+  "nav.articles": "Artikel",
+  "nav.feed": "Mein Feed",
+  "nav.label": "Hauptnavigation",
+  "nav.menu.open": "Menü öffnen",
+  "nav.menu.close": "Menü schließen",
+  "language.label": "Sprache",
+  "language.en": "English",
+  "language.ar": "العربية",
+  "language.de": "Deutsch",
+  "theme.toLight": "Zum hellen Design wechseln",
+  "theme.toDark": "Zum dunklen Design wechseln",
+  "footer.rights": "Für die innoscripta-Challenge entwickelt.",
+  "route.notFound.title": "Seite nicht gefunden",
+  "route.notFound.body": "Diese Seite existiert nicht.",
+  "route.notFound.back": "Zurück zu den Artikeln",
+  "route.error.title": "Etwas ist schiefgelaufen",
+  "route.error.body": "Die Seite konnte nicht angezeigt werden. Bitte von vorn beginnen.",
+  "common.close": "Schließen"
+}

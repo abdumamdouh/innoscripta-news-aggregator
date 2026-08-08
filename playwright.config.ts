@@ -1,26 +1,17 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 3100
-const baseURL = `http://localhost:${PORT}`
+const baseURL = 'http://localhost:3100'
 
-// Viewports the responsive work cares about: phone, tablet, desktop.
-const viewports = {
-  mobile: { width: 375, height: 812 },
-  tablet: { width: 768, height: 1024 },
-  desktop: { width: 1280, height: 800 },
-}
-
+// ponytail: minimum harness so item 1c ships with a spec — item 1b owns the full
+// version (the three responsive viewport projects and e2e/shell.spec.ts).
 export default defineConfig({
   testDir: 'e2e',
   reporter: 'list',
   forbidOnly: !!process.env.CI,
-  use: { baseURL, trace: 'on-first-retry' },
-  projects: Object.entries(viewports).map(([name, viewport]) => ({
-    name,
-    use: { ...devices['Desktop Chrome'], viewport },
-  })),
+  use: { baseURL },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: `npm run dev -- --port ${PORT} --strictPort`,
+    command: 'npm run dev -- --port 3100 --strictPort',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
