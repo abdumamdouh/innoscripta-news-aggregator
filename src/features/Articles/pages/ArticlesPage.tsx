@@ -17,7 +17,9 @@ function PartialFailureBanner({ failures }: { failures: SourceFailure[] }) {
 
   return (
     <p
-      role="status"
+      // Assertive: a provider outage means the page in front of you is incomplete,
+      // which a reader needs to hear now, not at the next idle moment.
+      role="alert"
       className="rounded-lg border border-danger-600 bg-paper-0 p-3 text-sm text-danger-600 dark:border-danger-600 dark:bg-ink-800 dark:text-danger-600"
     >
       {t('articles.partial', {
