@@ -13,6 +13,12 @@ const fixture = fileURLToPath(
 )
 const feedXml = (JSON.parse(readFileSync(fixture, 'utf8')) as { xml: string }).xml
 
+const readFixture = (name: string) =>
+  readFileSync(
+    fileURLToPath(new URL(`../src/core/sources/adapters/__fixtures__/${name}`, import.meta.url)),
+    'utf8',
+  )
+
 test.describe('news source adapters in the browser', () => {
   test('the BBC adapter turns the proxied RSS feed into canonical articles', async ({ page }) => {
     let requestedPath = ''
@@ -49,6 +55,57 @@ test.describe('news source adapters in the browser', () => {
       expect(article.author).toBeUndefined()
     }
   })
+
+  /**
+   * The JSON providers' captured responses are real bodies, so this is the one place
+   * they are pushed through the whole browser path — proxy hop, `fetch`, `normalize` —
+   * rather than imported straight into a Node test.
+   */
+  const jsonFeeds = [
+    { id: 'newsapi', label: 'NewsAPI', route: '**/api/newsapi/**', file: 'newsapi.json' },
+    { id: 'nyt', label: 'The New York Times', route: '**/api/nyt/**', file: 'nyt.json' },
+  ]
+
+  for (const feed of jsonFeeds) {
+    test(`the ${feed.id} adapter normalizes its captured response in the browser`, async ({
+      page,
+    }) => {
+      await page.route(feed.route, (route) =>
+        route.fulfill({ contentType: 'application/json', body: readFixture(feed.file) }),
+      )
+
+      await page.goto('/')
+      await page.addScriptTag({
+        type: 'module',
+        content: `
+          import { SOURCES } from '/src/core/sources/registry.ts'
+          const source = SOURCES.find((candidate) => candidate.id === '${feed.id}')
+          const raw = await source.fetch({ page: 1, pageSize: 20, q: 'technology' })
+          window.__articles = raw.map((item) => source.normalize(item))
+        `,
+      })
+      await page.waitForFunction(() => '__articles' in globalThis)
+
+      const articles = (await page.evaluate(
+        () => (globalThis as unknown as Record<string, unknown>).__articles,
+      )) as Record<string, unknown>[]
+
+      expect(articles.length).toBeGreaterThan(0)
+      for (const article of articles) {
+        expect(String(article.title).length).toBeGreaterThan(0)
+        expect(String(article.url)).toMatch(/^https?:\/\//)
+        expect(String(article.publishedAt)).toMatch(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/)
+        expect(article.sourceId).toBe(feed.id)
+        expect(article.sourceLabel).toBe(feed.label)
+        // Either a usable URL or absent — never an empty string.
+        expect(article.imageUrl === undefined || String(article.imageUrl).startsWith('http')).toBe(
+          true,
+        )
+      }
+      // Stable, unique ids: React keys and dedupe both depend on it.
+      expect(new Set(articles.map((article) => article.id)).size).toBe(articles.length)
+    })
+  }
 
   test('a dead provider surfaces as a failure, not a thrown page', async ({ page }) => {
     await page.route('**/api/bbc/**', (route) => route.fulfill({ status: 503, body: 'nope' }))

@@ -42,11 +42,45 @@ const fromNyt = () => selectNyt(nytFixture).map((raw) => nytSource.normalize(raw
 const fromBbc = () =>
   selectBbc(bbcFixture.xml, 'general').map((raw) => bbcNewsSource.normalize(raw))
 
+/**
+ * What the provider itself put in the description slot, index-aligned with
+ * `normalizeFixture()`. Real captures contain entries the provider left null, and
+ * "non-empty description" only means anything for the ones where it did not.
+ */
 const feeds = [
-  { id: 'newsapi', label: 'NewsAPI', normalizeFixture: fromNewsapi },
-  { id: 'guardian', label: 'The Guardian', normalizeFixture: fromGuardian },
-  { id: 'nyt', label: 'The New York Times', normalizeFixture: fromNyt },
-  { id: 'bbc', label: 'BBC News', normalizeFixture: fromBbc },
+  {
+    id: 'newsapi',
+    label: 'NewsAPI',
+    normalizeFixture: fromNewsapi,
+    suppliedDescriptions: () => selectNewsapi(newsapiFixture).map((raw) => raw.description),
+    suppliedAuthors: () => selectNewsapi(newsapiFixture).map((raw) => raw.author),
+  },
+  {
+    id: 'guardian',
+    label: 'The Guardian',
+    normalizeFixture: fromGuardian,
+    suppliedDescriptions: () => selectGuardian(guardianFixture).map((raw) => raw.fields?.trailText),
+    suppliedAuthors: () => selectGuardian(guardianFixture).map((raw) => raw.fields?.byline),
+  },
+  {
+    id: 'nyt',
+    label: 'The New York Times',
+    normalizeFixture: fromNyt,
+    suppliedDescriptions: () =>
+      selectNyt(nytFixture).map((raw) => raw.abstract ?? raw.snippet ?? raw.lead_paragraph),
+    suppliedAuthors: () => selectNyt(nytFixture).map((raw) => raw.byline?.original),
+  },
+  {
+    id: 'bbc',
+    label: 'BBC News',
+    normalizeFixture: fromBbc,
+    suppliedDescriptions: () =>
+      selectBbc(bbcFixture.xml, 'general').map(
+        ({ item }) => item.getElementsByTagName('description')[0]?.textContent,
+      ),
+    // BBC RSS has no author field at all, so nothing is ever supplied.
+    suppliedAuthors: () => selectBbc(bbcFixture.xml, 'general').map(() => undefined),
+  },
 ]
 
 describe.each(feeds)('$id adapter — canonical mapping of the captured fixture', (feed) => {
@@ -56,16 +90,44 @@ describe.each(feeds)('$id adapter — canonical mapping of the captured fixture'
     expect(articles.length).toBeGreaterThan(0)
   })
 
-  it('gives every article a non-empty title, description and url with no placeholders', () => {
+  it('gives every article a non-empty title and url with no placeholders', () => {
     for (const article of articles) {
       expect(article.title).toBeTypeOf('string')
       expect(article.title.length).toBeGreaterThan(0)
-      expect(article.description.length).toBeGreaterThan(0)
       expect(article.url).toMatch(/^https?:\/\//)
       expect(`${article.title} ${article.description} ${article.url}`).not.toMatch(/\[removed\]/i)
       // Markup is stripped, not passed through to a text node.
       expect(article.description).not.toMatch(/<[a-z/]/i)
     }
+  })
+
+  it('carries a description through wherever the provider supplied one, and "" where it did not', () => {
+    const supplied = feed.suppliedDescriptions()
+    expect(supplied).toHaveLength(articles.length)
+    // A capture in which the provider described nothing would make this vacuous.
+    expect(supplied.filter((value) => value?.trim()).length).toBeGreaterThan(0)
+
+    articles.forEach((article, index) => {
+      expect(article.description).toBeTypeOf('string')
+      if (supplied[index]?.trim()) {
+        expect(article.description.length).toBeGreaterThan(0)
+      } else {
+        expect(article.description).toBe('')
+      }
+    })
+  })
+
+  it('populates author exactly where the provider supplied one, never inventing it', () => {
+    const supplied = feed.suppliedAuthors()
+    articles.forEach((article, index) => {
+      if (supplied[index]?.trim()) {
+        expect(article.author?.length).toBeGreaterThan(0)
+      } else {
+        expect(article.author).toBeUndefined()
+      }
+      // Present as a key either way, so the merged shape stays homogeneous.
+      expect(Object.hasOwn(article, 'author')).toBe(true)
+    })
   })
 
   it('emits publishedAt in one ISO-8601 shape that Date.parse accepts', () => {
@@ -102,23 +164,47 @@ describe.each(feeds)('$id adapter — canonical mapping of the captured fixture'
 describe('newsapi adapter — provider quirks', () => {
   const articles = fromNewsapi()
 
-  it('drops the [Removed] tombstone entirely rather than rendering it', () => {
-    expect(newsapiFixture.articles).toHaveLength(5)
-    expect(articles).toHaveLength(4)
-    expect(articles.map((article) => article.url)).not.toContain('https://removed.com')
+  it('maps the whole captured page — the real response carries no unusable entry', () => {
+    expect(newsapiFixture.articles).toHaveLength(100)
+    expect(articles).toHaveLength(100)
   })
 
-  it('keeps the author where NewsAPI supplies one and leaves it undefined where it is null', () => {
-    expect(articles.map((article) => article.author)).toEqual([
-      'Emma Roth',
-      'Kate Abnett',
-      undefined,
-      'Olivia Raimonde, Sam Kim',
-    ])
+  // The capture happens to hold no tombstone, so this is the hand-mutated case: a
+  // verbatim `[Removed]` entry as NewsAPI emits it, spliced into the real payload.
+  it('drops the [Removed] tombstone entirely rather than rendering it', () => {
+    const items = selectNewsapi({
+      articles: [
+        ...newsapiFixture.articles,
+        {
+          source: { id: null, name: '[Removed]' },
+          author: null,
+          title: '[Removed]',
+          description: '[Removed]',
+          url: 'https://removed.com',
+          urlToImage: null,
+          publishedAt: '1970-01-01T00:00:00Z',
+          content: '[Removed]',
+        },
+      ],
+    })
+
+    expect(items).toHaveLength(newsapiFixture.articles.length)
+    expect(items.map((raw) => raw.url)).not.toContain('https://removed.com')
+  })
+
+  it('has real entries on both sides of the author and image branches', () => {
+    // Keeps the generic per-field assertions from passing vacuously.
+    expect(newsapiFixture.articles.some((raw) => raw.author === null)).toBe(true)
+    expect(newsapiFixture.articles.some((raw) => raw.author !== null)).toBe(true)
+    expect(newsapiFixture.articles.some((raw) => raw.urlToImage === null)).toBe(true)
+    expect(newsapiFixture.articles.some((raw) => raw.description === null)).toBe(true)
   })
 
   it('turns a null urlToImage into undefined, never an empty string', () => {
-    const withoutImage = articles.find((article) => article.author === undefined) as Article
+    const index = newsapiFixture.articles.findIndex((raw) => raw.urlToImage === null)
+    const withoutImage = articles[index] as Article
+
+    expect(withoutImage.url).toBe(newsapiFixture.articles[index]?.url)
     expect(withoutImage.imageUrl).toBeUndefined()
     expect(Object.hasOwn(withoutImage, 'imageUrl')).toBe(true)
   })
@@ -180,14 +266,34 @@ describe('nyt adapter — provider quirks', () => {
   const articles = fromNyt()
 
   it('takes the headline, abstract and section out of their nested shapes', () => {
-    expect(articles[0]?.title).toBe('Nvidia Says Its Newest Chip Is Sold Out Into 2027')
-    expect(articles[0]?.description).toMatch(/^The chipmaker/)
-    expect(articles[0]?.category).toBe('Technology')
+    expect(articles[0]?.title).toBe(
+      'Journalist Quits Kenosha Paper in Protest of Its Jacob Blake Rally Coverage',
+    )
+    expect(articles[0]?.description).toMatch(/^Daniel Thompson, an editor at The Kenosha News/)
+    expect(articles[0]?.category).toBe('Business Day')
   })
 
   it('parses the +0000 pub_date form and strips the byline prefix', () => {
-    expect(articles[0]?.publishedAt).toBe('2026-08-08T15:12:04.000Z')
-    expect(articles[0]?.author).toBe('Tripp Mickle and Cade Metz')
+    expect(nytFixture.response.docs[0]?.pub_date).toBe('2020-08-31T22:13:27+0000')
+    expect(articles[0]?.publishedAt).toBe('2020-08-31T22:13:27.000Z')
+    expect(nytFixture.response.docs[0]?.byline?.original).toBe('By Marc Tracy')
+    expect(articles[0]?.author).toBe('Marc Tracy')
+  })
+
+  it('resolves the relative multimedia path in the capture against the image CDN', () => {
+    // NYT ships `multimedia[].url` without a host; a raw pass-through would 404.
+    expect(nytFixture.response.docs[0]?.multimedia[0]?.url).toMatch(/^images\//)
+    expect(articles[0]?.imageUrl).toBe(
+      `https://static01.nyt.com/${nytFixture.response.docs[0]?.multimedia[0]?.url}`,
+    )
+  })
+
+  it('leaves imageUrl undefined for the docs the capture gives no multimedia at all', () => {
+    const bare = nytFixture.response.docs.flatMap((doc, index) =>
+      doc.multimedia.length === 0 ? [index] : [],
+    )
+    expect(bare.length).toBeGreaterThan(0)
+    for (const index of bare) expect(articles[index]?.imageUrl).toBeUndefined()
   })
 
   it('resolves the legacy relative multimedia path and tolerates the object form', () => {
