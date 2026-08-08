@@ -22,24 +22,24 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 
 ## Backlog
 
-| #   | Item                                            | Status      | Branch | Notes |
-| --- | ----------------------------------------------- | ----------- | ------ | ----- |
+| #   | Item                                            | Status      | Branch                       | Notes                                                                                                                                                                                                                       |
+| --- | ----------------------------------------------- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | App shell + design system                       | done        | feat/app-shell-design-system | Human-verified in a browser: boots, routes render, ar → dir=rtl + Arabic copy, theme persists across reload and honours prefers-color-scheme on first visit. e2e agent was BLOCKED by a browser-MCP fault, not by the code. |
-| 1b  | Playwright e2e harness                          | not started |        |       |
-| 1c  | German (de) locale                              | not started |        |       |
-| 2   | Domain core: Article, NewsSource, aggregator    | not started |        |       |
-| 3   | Four live adapters + two stubs                  | not started |        |       |
-| 4   | nginx proxy + env wiring                        | not started |        |       |
-| 5   | Article list: search, filters, sort, pagination | not started |        |       |
-| 6   | Article details page                            | not started |        |       |
-| 7   | Preferences (sources / categories / authors)    | not started |        |       |
-| 8   | Personalized feed                               | not started |        |       |
-| 9   | Bookmarks + reading lists (CRUD)                | not started |        |       |
-| 10  | Saved search presets (CRUD)                     | not started |        |       |
-| 11  | UI states + offline cache                       | not started |        |       |
-| 12  | Responsive pass                                 | not started |        |       |
-| 13  | Docker + CI                                     | not started |        |       |
-| 14  | README + SETUP                                  | not started |        |       |
+| 1b  | Playwright e2e harness                          | not started |                              |                                                                                                                                                                                                                             |
+| 1c  | German (de) locale                              | done        | feat/german-de-locale       |                                                                                                                                                                                                                             |
+| 2   | Domain core: Article, NewsSource, aggregator    | not started |                              |                                                                                                                                                                                                                             |
+| 3   | Four live adapters + two stubs                  | not started |                              |                                                                                                                                                                                                                             |
+| 4   | nginx proxy + env wiring                        | not started |                              |                                                                                                                                                                                                                             |
+| 5   | Article list: search, filters, sort, pagination | not started |                              |                                                                                                                                                                                                                             |
+| 6   | Article details page                            | not started |                              |                                                                                                                                                                                                                             |
+| 7   | Preferences (sources / categories / authors)    | not started |                              |                                                                                                                                                                                                                             |
+| 8   | Personalized feed                               | not started |                              |                                                                                                                                                                                                                             |
+| 9   | Bookmarks + reading lists (CRUD)                | not started |                              |                                                                                                                                                                                                                             |
+| 10  | Saved search presets (CRUD)                     | not started |                              |                                                                                                                                                                                                                             |
+| 11  | UI states + offline cache                       | not started |                              |                                                                                                                                                                                                                             |
+| 12  | Responsive pass                                 | not started |                              |                                                                                                                                                                                                                             |
+| 13  | Docker + CI                                     | not started |                              |                                                                                                                                                                                                                             |
+| 14  | README + SETUP                                  | not started |                              |                                                                                                                                                                                                                             |
 
 ## Carry-forward
 
@@ -54,6 +54,7 @@ backlog rows. Appended by the loop; safe to add to by hand.
 One line per iteration, appended by the loop. Do not edit by hand.
 
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
+iteration 4 — [1c] German (de) locale — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

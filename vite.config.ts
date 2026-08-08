@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -42,6 +42,8 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.ts',
     css: true,
+    // e2e/ is Playwright's; vitest would otherwise glob its *.spec.ts and fail.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     // Real suites land with backlog item 3 (aggregator). Until then an empty run is
     // a pass, not a failure — otherwise the loop's test gate is red from iteration 1.
     passWithNoTests: true,
