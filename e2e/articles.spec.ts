@@ -335,7 +335,11 @@ test.describe('article list', () => {
     await mockProviders(page, ['nyt'])
     await page.goto('/')
 
-    await expect(page.getByText('Some sources did not answer: The New York Times')).toBeVisible()
+    // Announced assertively: the banner is the only sign the page is short a newsroom,
+    // so a screen reader must interrupt rather than wait for the next idle moment.
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Some sources did not answer' }),
+    ).toHaveText('Some sources did not answer: The New York Times')
     await expect(cards(page)).toHaveCount(PAGE_SIZE)
     // The other three carried the page.
     await expect(page.locator('article [data-source-id="nyt"]')).toHaveCount(0)
