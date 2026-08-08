@@ -16,6 +16,7 @@ const IMAGE_BASE = 'https://static01.nyt.com/'
 
 interface NytImage {
   url?: string | null
+  width?: number | null
 }
 
 // Nullable throughout: this is a wire shape, not a shape we control.
@@ -46,10 +47,16 @@ const compactDate = (value: string | undefined) =>
 
 function image(multimedia: NytRaw['multimedia']): string | undefined {
   if (!multimedia) return undefined
-  const candidate = Array.isArray(multimedia)
-    ? multimedia[0]?.url
-    : (multimedia.default?.url ?? multimedia.thumbnail?.url)
-  return url(candidate, IMAGE_BASE)
+  if (!Array.isArray(multimedia)) {
+    return url(multimedia.default?.url ?? multimedia.thumbnail?.url, IMAGE_BASE)
+  }
+  // Legacy crops are ordered by crop name, not size, so index 0 is an arbitrary size —
+  // take the widest one that has a url, the same way the BBC adapter picks a thumbnail.
+  const widest = multimedia.reduce<NytImage | undefined>((best, crop) => {
+    if (!crop?.url) return best
+    return !best || (crop.width ?? 0) > (best.width ?? 0) ? crop : best
+  }, undefined)
+  return url(widest?.url, IMAGE_BASE)
 }
 
 export function selectItems(payload: NytPayload): NytRaw[] {

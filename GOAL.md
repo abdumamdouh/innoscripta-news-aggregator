@@ -66,8 +66,19 @@ backlog rows. Appended by the loop; safe to add to by hand.
       fields stripped and assert `''` through the real browser fetch + normalize path. Both
       were mutation-checked: relaxing the `?? ''` fails 8 unit tests and 3 e2e specs.
       Status: done. Branch: `feat/newsapi-guardian-nyt-bbc-descriptions-ca`.
-- [ ] (minor) NYT image() always takes the first multimedia crop, not the largest: image() for the legacy array multimedia form takes multimedia[0]?.url unconditionally. NYT's legacy multimedia arrays are ordered by crop name, not size, so index 0 isn't guaranteed to be the largest/best usable image (contrast bbc-rss.ts's thumbnail(), which explicitly picks the widest crop by width attribute). Low impact — still resolves to a usable URL — but it's an inconsistency in how the two adapters pick 'the best' image. Note: this applies only to the legacy array-shaped `multimedia`; the newer object shape already prefers `default` over `thumbnail`. (Raised twice, deduped to this bullet.) — found in 3
-- [ ] (minor) GOAL.md Carry-forward: two NYT image()-crop duplicate bullets already deduped in this diff: This diff (line ~77 of GOAL.md) already collapsed the two near-duplicate 'NYT image() picks multimedia[0]' bullets into one unchecked entry, even though that finding is out of scope for carry-forward-1. It's a reasonable drive-by cleanup but wasn't asked for by this item; worth confirming in a follow-up pass that the underlying image()-crop behavior itself (still unfixed, still `- [ ]`) gets addressed separately from the documentation dedup. — found in carry-forward-1
+- [x] (minor) NYT image() always takes the first multimedia crop, not the largest: image() for the legacy array multimedia form takes multimedia[0]?.url unconditionally. NYT's legacy multimedia arrays are ordered by crop name, not size, so index 0 isn't guaranteed to be the largest/best usable image (contrast bbc-rss.ts's thumbnail(), which explicitly picks the widest crop by width attribute). Low impact — still resolves to a usable URL — but it's an inconsistency in how the two adapters pick 'the best' image. Note: this applies only to the legacy array-shaped `multimedia`; the newer object shape already prefers `default` over `thumbnail`. (Raised twice, deduped to this bullet.) — found in 3
+      **Resolved in `src/core/sources/adapters/nyt.ts`.** `image()`'s legacy-array branch now
+      reduces over the crops picking the widest one that actually carries a `url` — the same
+      shape as `bbc-rss.ts`'s `thumbnail()` — instead of `multimedia[0]?.url`. `NytImage` gained
+      an optional `width`. The object-shaped branch (`default` → `thumbnail`) is untouched. On
+      the captured fixture this moves doc 0 from `articleLarge` (600px) to
+      `horizontalMediumAt2X` (2316px); ties keep the earlier crop, so the choice is stable.
+      Covered by: two new cases in `src/core/sources/adapters/adapters.test.ts` (crops out of
+      size order → widest wins; a wider crop with a null url is skipped), the existing
+      CDN-resolution test now asserting against the widest crop, and
+      `e2e/sources.spec.ts` "picks the widest legacy crop through the proxy hop", which replays
+      the real capture through the browser and asserts the result is not index 0's URL.
+      Status: done. Branch: `feat/nyt-image-always-takes-the-first-multime`.
 
 ## Loop log
 
@@ -80,6 +91,7 @@ iteration 1 — [3] Four live adapters + two stubs — needs human review — st
 iteration 3 — [3] Four live adapters + two stubs — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 2 — [carry-forward-2] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — needs human review — static:pass review:pass e2e:blocked acceptance:pass — requeued for another pass
 iteration 4 — [carry-forward-1] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 5 — [carry-forward] NYT image() always takes the first multimedia crop, not the largest — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

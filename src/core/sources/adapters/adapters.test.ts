@@ -283,9 +283,55 @@ describe('nyt adapter — provider quirks', () => {
 
   it('resolves the relative multimedia path in the capture against the image CDN', () => {
     // NYT ships `multimedia[].url` without a host; a raw pass-through would 404.
-    expect(nytFixture.response.docs[0]?.multimedia[0]?.url).toMatch(/^images\//)
-    expect(articles[0]?.imageUrl).toBe(
-      `https://static01.nyt.com/${nytFixture.response.docs[0]?.multimedia[0]?.url}`,
+    const crops = nytFixture.response.docs[0]?.multimedia ?? []
+    const widest = crops.reduce((best, crop) => (crop.width > best.width ? crop : best), crops[0]!)
+    expect(widest.url).toMatch(/^images\//)
+    expect(articles[0]?.imageUrl).toBe(`https://static01.nyt.com/${widest.url}`)
+  })
+
+  it('picks the widest legacy crop, not whichever one the array happens to start with', () => {
+    const [real] = nytFixture.response.docs
+    const [article] = selectNyt({
+      response: {
+        docs: [
+          {
+            ...real,
+            _id: 'crops',
+            // Real NYT ordering: by crop name, so the first entry is an arbitrary size.
+            multimedia: [
+              { url: 'images/a-articleLarge.jpg', width: 600 },
+              { url: 'images/a-superJumbo.jpg', width: 2048 },
+              { url: 'images/a-thumbStandard.jpg', width: 75 },
+            ],
+          },
+        ],
+      },
+    })
+
+    expect(nytSource.normalize(article!).imageUrl).toBe(
+      'https://static01.nyt.com/images/a-superJumbo.jpg',
+    )
+  })
+
+  it('ignores a wider crop that carries no url at all', () => {
+    const [real] = nytFixture.response.docs
+    const [article] = selectNyt({
+      response: {
+        docs: [
+          {
+            ...real,
+            _id: 'urlless',
+            multimedia: [
+              { url: 'images/a-jumbo.jpg', width: 1024 },
+              { url: null, width: 4000 },
+            ],
+          },
+        ],
+      },
+    })
+
+    expect(nytSource.normalize(article!).imageUrl).toBe(
+      'https://static01.nyt.com/images/a-jumbo.jpg',
     )
   })
 
