@@ -19,6 +19,11 @@ const readFixture = (name: string) =>
     'utf8',
   )
 
+interface Crop {
+  url: string
+  width: number
+}
+
 test.describe('news source adapters in the browser', () => {
   test('the BBC adapter turns the proxied RSS feed into canonical articles', async ({ page }) => {
     let requestedPath = ''
@@ -106,6 +111,38 @@ test.describe('news source adapters in the browser', () => {
       expect(new Set(articles.map((article) => article.id)).size).toBe(articles.length)
     })
   }
+
+  test('the nyt adapter picks the widest legacy crop through the proxy hop', async ({ page }) => {
+    const body = readFixture('nyt.json')
+    await page.route('**/api/nyt/**', (route) =>
+      route.fulfill({ contentType: 'application/json', body }),
+    )
+
+    await page.goto('/')
+    await page.addScriptTag({
+      type: 'module',
+      content: `
+        import { nytSource } from '/src/core/sources/adapters/nyt.ts'
+        const raw = await nytSource.fetch({ page: 1, pageSize: 20, q: 'technology' })
+        window.__articles = raw.map((item) => nytSource.normalize(item))
+      `,
+    })
+    await page.waitForFunction(() => '__articles' in globalThis)
+
+    const imageUrl = await page.evaluate(
+      () =>
+        (
+          (globalThis as unknown as Record<string, unknown>).__articles as Record<string, string>[]
+        )[0]?.imageUrl,
+    )
+
+    const crops = (JSON.parse(body) as { response: { docs: { multimedia: Crop[] }[] } }).response
+      .docs[0]!.multimedia
+    const widest = crops.reduce((best, crop) => (crop.width > best.width ? crop : best), crops[0]!)
+    expect(imageUrl).toBe(`https://static01.nyt.com/${widest.url}`)
+    // The capture's first crop is a small one — proving index 0 is not what got picked.
+    expect(imageUrl).not.toBe(`https://static01.nyt.com/${crops[0]!.url}`)
+  })
 
   /**
    * Same reason this file exists at all: there is no article view yet (items 5/6), so the
