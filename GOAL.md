@@ -131,9 +131,38 @@ Acceptance: tests pass; no provider field name appears anywhere in this folder e
 - `nyt.ts` — `/api/nyt/articlesearch.json`. `docs[]` is the least similar shape of the four — budget the most effort here. Slow (~1–2s).
 - `bbc-rss.ts` — `/api/bbc/news/rss.xml` and the per-category feeds. **XML**, parse with `DOMParser`. Declares `{query:false, dateRange:false, category:true, author:false, pagination:false}`; category is served by picking the right feed URL. Fields available: title, description, link, guid, pubDate, media:thumbnail. No author.
 - `opennews.unavailable.ts` and `newscred.unavailable.ts` — registered with `available:false` and a `unavailableReason` explaining why (OpenNews is a journalism-tech nonprofit with no article API; NewsCred is now Optimizely CMP, enterprise-only). They must appear in the UI as disabled options, not be hidden.
-- Per-adapter normalize tests against a checked-in fixture of each provider's real response shape. Fixtures, not live calls — free tiers are rate-limited.
+**Mapping correctness is the whole point of this item — test it properly.**
 
-Acceptance: `registry.ts` lists six sources, four `available:true`; each adapter's normalize test passes against its fixture; adding a hypothetical seventh would touch exactly two files.
+Capture one **real** response per provider (a single live call, saved verbatim) into
+`src/core/sources/adapters/__fixtures__/<source>.json`. Fixtures, not live calls, in the test run —
+free tiers are rate-limited and a test that hits the network is flaky by construction.
+
+For each of the four live adapters, a test that asserts **every canonical field**:
+
+- `title`, `description`, `url` are non-empty strings for every article in the fixture — no `undefined`
+  leaking through where the provider clearly supplied a value, and no `"[Removed]"` placeholders
+  (NewsAPI emits those) surviving into the feed.
+- `publishedAt` is a valid ISO-8601 string for every article. Each provider formats dates
+  differently — NYT `pub_date`, Guardian `webPublicationDate`, NewsAPI `publishedAt`, BBC RSS
+  `pubDate` in RFC-822. All four must come out identical in shape and parse with `Date.parse`.
+- `sourceId` and `sourceLabel` are set on every article and match the adapter that produced it.
+- `imageUrl` is either a usable URL or `undefined` — never an empty string, never a placeholder path.
+- `author` is populated where the provider supplies it (Guardian `byline`, NYT `byline.original`,
+  NewsAPI `author`) and `undefined` for BBC, which has no author field. Assert both cases.
+- `id` is stable and unique across a fixture — re-normalizing the same fixture twice yields the
+  same ids, otherwise React keys and dedupe both break.
+- A malformed/partial entry (missing `webUrl`, null `description`, absent thumbnail) is dropped or
+  defaulted deliberately, not allowed to produce a half-built `Article`. Add a hand-mutated fixture
+  case for this per adapter.
+
+**The single-interface guarantee**: one test asserts that normalizing all four fixtures and merging
+them yields a homogeneous array — every element has exactly the canonical `Article` keys, so nothing
+downstream can tell which provider an article came from except by reading `sourceId`. That is the
+property the whole adapter layer exists to provide, so it gets its own explicit test.
+
+Acceptance: `registry.ts` lists six sources, four `available:true`; every adapter's mapping test
+passes against a real captured fixture; the homogeneity test passes; adding a hypothetical seventh
+source would touch exactly two files.
 
 ### 4 — nginx proxy + env wiring
 
@@ -152,11 +181,40 @@ Acceptance: `npm run build && grep -rE 'VITE_|NEWSAPI_KEY|GUARDIAN_KEY|NYT_KEY' 
 - Four-layer hook stack, ported from the blueprint: `useArticlesDirectory` composes TanStack Query + `useArticlesState` (URL/localStorage query state) + `useArticleList` (pure derive) + `useArticleActions`.
 - `useArticlesState`: resolution order **URL params → localStorage snapshot → defaults**; writes back to both on change with `{replace:true}`; **omits defaults from the URL** (no `page=1`, no empty `q`); allow-list validates every param against known values so junk is dropped, not trusted. Debounced search at `appTheme.debounceDelay` (300ms) — raw term drives the input, debounced term drives the query.
 - Filters: keyword, date range (from/to), category, source, author. Sort: newest / oldest / relevance. Page size `appTheme.pageSize` (9) → 3-up desktop, 2-up tablet, 1-up mobile.
-- Components: `ArticleCard` (with a source badge coloured from the `--color-source-*` tokens), `ArticleGrid`, `ArticlesToolbar`, `ArticlesFilters`, `SortSelect`, `FilterChips`.
+- Components: `ArticleCard`, `ArticleGrid`, `ArticlesToolbar`, `ArticlesFilters`, `SortSelect`, `FilterChips`.
+- **The source label on the card is required, not decorative.** Every `ArticleCard` shows which
+  provider the article came from — the readable `sourceLabel` ("The Guardian", "BBC News"), not the
+  id — as a badge tinted with that source's `--color-source-*` token. With four newsrooms merged
+  into one grid this is the only way a reader can tell origin at a glance, and it is the visible
+  proof that the aggregation is real rather than a single feed. It must survive every filter, sort
+  and page change, and be present in the a11y tree as text, not colour alone.
 - Port `Pagination.tsx` from the blueprint near-verbatim — it already has the `1 … 4 5 6 … 20` window, RTL-aware carets and full a11y.
 - Partial-failure banner naming any source that failed this query.
 
-Acceptance: search+filter+sort+page all reflected in a shareable URL; reload restores state; a blocked provider degrades to a banner, not an empty page.
+**Filtering must be tested, not assumed.** Unit tests over a fixed multi-source article set:
+
+- keyword matches title AND description, is case- and diacritic-insensitive, and returns nothing for
+  a term present in neither;
+- date range is inclusive of both bounds, and `from` later than `to` yields empty rather than throwing;
+- source filter returns only the selected providers — assert with a mixed set that a deselected
+  source genuinely disappears;
+- category and author behave the same way;
+- combined filters AND together, and clearing one restores exactly the articles it had removed;
+- a source that declares `capabilities.query === false` still gets keyword-filtered client-side —
+  this is the BBC case and the reason the capability system exists, so it needs its own test.
+
+**Playwright spec** (`e2e/articles.spec.ts`), driving the real UI:
+
+- type a keyword → the grid narrows and every visible card matches it;
+- deselect a source → no card from that source remains anywhere in the grid;
+- apply a filter, copy the URL, open it in a fresh context → the same filtered result renders;
+- sort newest→oldest → the first card's date is not older than the last's;
+- paginate → page 2 shows different articles, and the source badges are still rendered;
+- block one provider's requests → the other three still render plus a banner naming the blocked one.
+
+Acceptance: search+filter+sort+page all reflected in a shareable URL; reload restores state; every
+card carries its source label; a blocked provider degrades to a banner, not an empty page; the unit
+tests and the Playwright spec above both pass.
 
 ### 6 — Article details page
 
