@@ -65,7 +65,9 @@ backlog rows. Appended by the loop; safe to add to by hand.
       `e2e/sources.spec.ts` that replay the captured NewsAPI/NYT/BBC responses with the summary
       fields stripped and assert `''` through the real browser fetch + normalize path. Both
       were mutation-checked: relaxing the `?? ''` fails 8 unit tests and 3 e2e specs.
+      Status: done. Branch: `feat/newsapi-guardian-nyt-bbc-descriptions-ca`.
 - [ ] (minor) NYT image() always takes the first multimedia crop, not the largest: image() for the legacy array multimedia form takes multimedia[0]?.url unconditionally. NYT's legacy multimedia arrays are ordered by crop name, not size, so index 0 isn't guaranteed to be the largest/best usable image (contrast bbc-rss.ts's thumbnail(), which explicitly picks the widest crop by width attribute). Low impact — still resolves to a usable URL — but it's an inconsistency in how the two adapters pick 'the best' image. Note: this applies only to the legacy array-shaped `multimedia`; the newer object shape already prefers `default` over `thumbnail`. (Raised twice, deduped to this bullet.) — found in 3
+- [ ] (minor) GOAL.md Carry-forward: two NYT image()-crop duplicate bullets already deduped in this diff: This diff (line ~77 of GOAL.md) already collapsed the two near-duplicate 'NYT image() picks multimedia[0]' bullets into one unchecked entry, even though that finding is out of scope for carry-forward-1. It's a reasonable drive-by cleanup but wasn't asked for by this item; worth confirming in a follow-up pass that the underlying image()-crop behavior itself (still unfixed, still `- [ ]`) gets addressed separately from the documentation dedup. — found in carry-forward-1
 
 ## Loop log
 
@@ -77,6 +79,7 @@ iteration 1 — [2] Domain core: Article, NewsSource, aggregator — done — st
 iteration 1 — [3] Four live adapters + two stubs — needs human review — static:pass review:pass e2e:pass acceptance:fail — requeued for another pass
 iteration 3 — [3] Four live adapters + two stubs — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 2 — [carry-forward-2] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — needs human review — static:pass review:pass e2e:blocked acceptance:pass — requeued for another pass
+iteration 4 — [carry-forward-1] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
