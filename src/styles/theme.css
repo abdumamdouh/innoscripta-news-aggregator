@@ -1,0 +1,31 @@
+/* Design tokens. No external design system — the UAE task's @aegov package is
+   deliberately not used here. Layout metrics below are ported from it, the palette
+   is our own: editorial blue rather than gov green. */
+@theme {
+  --color-ink-900: #10151c;
+  --color-ink-800: #1f2733;
+  --color-ink-700: #39424f;
+  --color-ink-500: #6b7688;
+  --color-ink-300: #b9c1cc;
+  --color-ink-100: #e4e8ee;
+
+  --color-paper-50: #f8f9fb;
+  --color-paper-0: #ffffff;
+
+  --color-accent-700: #1544c4;
+  --color-accent-600: #1c5cff;
+  --color-accent-100: #d6e2ff;
+  --color-accent-50: #eaf0ff;
+
+  /* Per-source badge colours. These do real work: with four providers merged into
+     one grid, colour is how you tell an aggregated result's origin at a glance. */
+  --color-source-guardian: #052962;
+  --color-source-nyt: #1a1a1a;
+  --color-source-bbc: #bb1919;
+  --color-source-newsapi: #0a7d63;
+
+  --shadow-soft: 0 14px 38px color-mix(in oklab, var(--color-ink-900) 7%, transparent);
+
+  /* Ported verbatim from the blueprint's base.css. */
+  --container-shell: 88rem;
+}

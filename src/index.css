@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+@import './styles/theme.css';
+@import './styles/base.css';
+@import './styles/animations.css';
+
+/* Dark mode is opt-in via a `dark` class on <html>, set by the theme effect.
+   The blueprint used 423 lines of [data-theme] + !important descendant overrides;
+   this is the same behaviour in one line plus `dark:` variants at the point of use. */
+@custom-variant dark (&:where(.dark, .dark *));
