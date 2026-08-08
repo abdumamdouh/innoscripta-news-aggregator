@@ -38,17 +38,15 @@ export default defineConfig({
   },
   server: { port: 3000, proxy },
   test: {
-    // e2e/ belongs to Playwright, not vitest.
-    include: ['src/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
-    // e2e/ is Playwright's (npm run test:e2e); vitest's default include would
-    // otherwise try to run those specs and blow up on test.use().
+    // e2e/ belongs to Playwright (npm run test:e2e). Vitest's default glob would pick up
+    // those specs and blow up on test.use(); scoping include to src/ and excluding e2e/
+    // are belt and braces, but the exclude is what stops a stray src-adjacent spec too.
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    css: true,
-    // e2e/ is Playwright's; vitest would otherwise glob its *.spec.ts and fail.
     exclude: [...configDefaults.exclude, 'e2e/**'],
+    css: true,
     // Real suites land with backlog item 3 (aggregator). Until then an empty run is
     // a pass, not a failure — otherwise the loop's test gate is red from iteration 1.
     passWithNoTests: true,

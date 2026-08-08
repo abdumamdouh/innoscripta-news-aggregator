@@ -27,14 +27,14 @@ export function AppInput({ label, error, className, id, ...props }: AppInputProp
         className={cn(
           'min-h-11 w-full rounded-lg border bg-paper-0 px-3 text-base text-ink-800 transition-colors',
           'placeholder:text-ink-500 dark:bg-ink-800 dark:text-ink-100',
-          error ? 'border-red-600' : 'border-ink-300 dark:border-ink-700',
+          error ? 'border-danger-600 dark:border-danger-300' : 'border-ink-300 dark:border-ink-700',
           appFocusRing,
           className,
         )}
         {...props}
       />
       {error ? (
-        <p id={errorId} className="text-sm text-red-600">
+        <p id={errorId} className="text-sm text-danger-600 dark:text-danger-300">
           {error}
         </p>
       ) : null}
