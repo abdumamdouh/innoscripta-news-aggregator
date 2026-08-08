@@ -1,0 +1,21 @@
+{
+  "app.name": "innoscripta News",
+  "app.tagline": "Four newsrooms, one feed.",
+  "nav.articles": "Articles",
+  "nav.feed": "My feed",
+  "nav.label": "Primary",
+  "nav.menu.open": "Open menu",
+  "nav.menu.close": "Close menu",
+  "language.label": "Language",
+  "language.en": "English",
+  "language.ar": "العربية",
+  "theme.toLight": "Switch to light theme",
+  "theme.toDark": "Switch to dark theme",
+  "footer.rights": "Built for the innoscripta challenge.",
+  "route.notFound.title": "Page not found",
+  "route.notFound.body": "That page does not exist.",
+  "route.notFound.back": "Back to articles",
+  "route.error.title": "Something went wrong",
+  "route.error.body": "The page could not be displayed. Try again from the start.",
+  "common.close": "Close"
+}

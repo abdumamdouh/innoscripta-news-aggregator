@@ -10,6 +10,7 @@ Verify behaviour in the browser. No edits, ever.
 **Setup.** Dev server is `npm run dev` on `http://localhost:3000`. Prefer accessibility snapshots over screenshots. Artifacts to `.playwright-mcp/`.
 
 **Method**
+
 - Verify the item's happy path AND the edge cases it names.
 - **Take a FRESH snapshot after any redirect or client-side navigation** before concluding pass/fail — an immediate state read after a redirect is not trustworthy.
 - This app aggregates four providers with free-tier rate limits (NewsAPI 100/day, NYT 500/day). A `429` or an empty result is **not automatically a FAIL** — check the network response before blaming the code, and report a rate-limit as BLOCKED rather than a bug.

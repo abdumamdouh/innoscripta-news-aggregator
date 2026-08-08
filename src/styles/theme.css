@@ -17,6 +17,9 @@
   --color-accent-100: #d6e2ff;
   --color-accent-50: #eaf0ff;
 
+  --color-danger-700: #a41b1b;
+  --color-danger-600: #c62828;
+
   /* Per-source badge colours. These do real work: with four providers merged into
      one grid, colour is how you tell an aggregated result's origin at a glance. */
   --color-source-guardian: #052962;
