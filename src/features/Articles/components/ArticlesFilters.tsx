@@ -61,8 +61,8 @@ export function ArticlesFilters({ state, authors, onChange }: ArticlesFiltersPro
           onValueChange={(value) => onChange({ author: value === ALL ? '' : value })}
           options={[
             { value: ALL, label: t('articles.filters.anyAuthor') },
-            // Bylines are whatever the providers filed today, so the list is a facet of
-            // the current results rather than a fixed vocabulary.
+            // Bylines are whatever the providers filed today: no fixed vocabulary, so the
+            // list is everything seen across this session's results (see `useAuthorFacet`).
             ...authors.map((author) => ({ value: author, label: author })),
           ]}
         />

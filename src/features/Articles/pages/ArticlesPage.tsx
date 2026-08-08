@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppButton, AppCard } from '@/components/common/design-system'
 import type { SourceFailure } from '@/core/sources/aggregator'
@@ -9,6 +8,7 @@ import { FilterChips } from '@/features/Articles/components/FilterChips'
 import { Pagination } from '@/features/Articles/components/Pagination'
 import { SOURCE_LABELS } from '@/features/Articles/constants'
 import { useArticlesDirectory } from '@/features/Articles/hooks/useArticlesDirectory'
+import { useAuthorFacet } from '@/features/Articles/hooks/useAuthorFacet'
 
 /** Names what is missing. A provider that fell over is information, not a blank page. */
 function PartialFailureBanner({ failures }: { failures: SourceFailure[] }) {
@@ -34,16 +34,8 @@ export function ArticlesPage() {
   const { state, term, setTerm, update, reset, list, actions, isLoading, isFetching, isError } =
     useArticlesDirectory()
 
-  // The bylines actually on offer, plus whichever one is already selected so it can be
-  // seen (and cleared) even when this page happens to contain none of its articles.
-  const authors = useMemo(() => {
-    const found = list.articles
-      .map((article) => article.author)
-      .filter((name): name is string => Boolean(name))
-    return [...new Set(state.author ? [state.author, ...found] : found)].sort((a, b) =>
-      a.localeCompare(b),
-    )
-  }, [list.articles, state.author])
+  // Every byline seen so far, not just this page's — see `useAuthorFacet`.
+  const authors = useAuthorFacet(list.articles, state.author)
 
   return (
     <section className="flex flex-col gap-6" aria-busy={isFetching}>
