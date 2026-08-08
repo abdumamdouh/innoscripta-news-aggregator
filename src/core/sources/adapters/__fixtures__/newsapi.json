@@ -1,0 +1,56 @@
+{
+  "status": "ok",
+  "totalResults": 4218,
+  "articles": [
+    {
+      "source": { "id": "the-verge", "name": "The Verge" },
+      "author": "Emma Roth",
+      "title": "Nvidia's next AI chip is already sold out through 2027",
+      "description": "Nvidia says demand for its newest data center accelerator has outstripped supply, with the entire 2027 allocation spoken for before the first units ship.",
+      "url": "https://www.theverge.com/2026/8/8/nvidia-next-ai-chip-sold-out",
+      "urlToImage": "https://cdn.vox-cdn.com/thumbor/9Qh1/nvidia-chip.jpg",
+      "publishedAt": "2026-08-08T16:42:11Z",
+      "content": "Nvidia said on Friday that its next-generation accelerator is fully allocated through 2027… [+2311 chars]"
+    },
+    {
+      "source": { "id": "reuters", "name": "Reuters" },
+      "author": "Kate Abnett",
+      "title": "EU agrees 2040 climate target after all-night talks",
+      "description": "European Union environment ministers struck a deal on a 2040 emissions target, ending a stalemate that had run for two days in Brussels.",
+      "url": "https://www.reuters.com/sustainability/eu-agrees-2040-climate-target-2026-08-08/",
+      "urlToImage": "https://www.reuters.com/resizer/eu-climate-2040.jpg",
+      "publishedAt": "2026-08-08T14:05:00Z",
+      "content": "BRUSSELS, Aug 8 (Reuters) - European Union environment ministers agreed on Friday… [+4102 chars]"
+    },
+    {
+      "source": { "id": null, "name": "Ars Technica" },
+      "author": null,
+      "title": "A new telescope image shows the Milky Way's core in unprecedented detail",
+      "description": "The observation stitches together 12 hours of exposure and resolves structures a few light-days across.",
+      "url": "https://arstechnica.com/science/2026/08/milky-way-core-image/",
+      "urlToImage": null,
+      "publishedAt": "2026-08-08T11:30:45Z",
+      "content": "Astronomers released an image of the galactic center on Friday… [+1877 chars]"
+    },
+    {
+      "source": { "id": "removed", "name": "[Removed]" },
+      "author": null,
+      "title": "[Removed]",
+      "description": "[Removed]",
+      "url": "https://removed.com",
+      "urlToImage": null,
+      "publishedAt": "1970-01-01T00:00:00Z",
+      "content": "[Removed]"
+    },
+    {
+      "source": { "id": "bloomberg", "name": "Bloomberg" },
+      "author": "Olivia Raimonde, Sam Kim",
+      "title": "Container rates slide as Red Sea transits resume",
+      "description": "Spot rates on Asia-Europe routes fell for a fifth straight week as carriers moved capacity back through Suez.",
+      "url": "https://www.bloomberg.com/news/articles/2026-08-08/container-rates-slide-red-sea",
+      "urlToImage": "https://assets.bwbx.io/images/container-ship.jpg",
+      "publishedAt": "2026-08-08T09:12:33Z",
+      "content": "Container shipping rates extended their decline… [+2044 chars]"
+    }
+  ]
+}

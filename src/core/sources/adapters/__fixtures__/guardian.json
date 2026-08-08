@@ -1,0 +1,194 @@
+{
+  "response": {
+    "status": "ok",
+    "userTier": "developer",
+    "total": 2684247,
+    "startIndex": 1,
+    "pageSize": 10,
+    "currentPage": 1,
+    "pages": 268425,
+    "orderBy": "newest",
+    "results": [
+      {
+        "id": "sport/live/2026/aug/08/cycling-tour-de-france-femmes-stage-eight-sisteron-to-nice-live",
+        "type": "liveblog",
+        "sectionId": "sport",
+        "sectionName": "Sport",
+        "webPublicationDate": "2026-08-08T17:27:04Z",
+        "webTitle": "Tour de France Femmes 2026: Vollering wins stage eight after dramatic late break – as it happened",
+        "webUrl": "https://www.theguardian.com/sport/live/2026/aug/08/cycling-tour-de-france-femmes-stage-eight-sisteron-to-nice-live",
+        "apiUrl": "https://content.guardianapis.com/sport/live/2026/aug/08/cycling-tour-de-france-femmes-stage-eight-sisteron-to-nice-live",
+        "fields": {
+          "trailText": "Demi Vollering took the yellow jersey on the Tour’s penultimate stage via a dramatic finish in Nice",
+          "byline": "Tom Bassam",
+          "thumbnail": "https://media.guim.co.uk/3f857cf51fecb8a3a0f92517ae9a940102bf2ca0/612_198_5360_4291/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/sport",
+        "pillarName": "Sport"
+      },
+      {
+        "id": "thefilter-us/2026/aug/08/screen-free-activities-kids",
+        "type": "article",
+        "sectionId": "thefilter-us",
+        "sectionName": "The Filter US",
+        "webPublicationDate": "2026-08-08T17:15:02Z",
+        "webTitle": "Pool noodles and DIY escape rooms: the best screen-free kids’ activities, recommended by teachers",
+        "webUrl": "https://www.theguardian.com/thefilter-us/2026/aug/08/screen-free-activities-kids",
+        "apiUrl": "https://content.guardianapis.com/thefilter-us/2026/aug/08/screen-free-activities-kids",
+        "fields": {
+          "trailText": "Five elementary school teachers spill the beans on how to keep kids engaged in creative play and away from screens",
+          "byline": "Lauren Gould",
+          "thumbnail": "https://media.guim.co.uk/b06089c63de3a57acb3289a34abc20b3b0b42331/161_0_2500_2000/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/lifestyle",
+        "pillarName": "Lifestyle"
+      },
+      {
+        "id": "sport/2026/aug/08/tour-de-france-femmes-demi-vollering-takes-eight-second-lead-into-final-stage",
+        "type": "article",
+        "sectionId": "sport",
+        "sectionName": "Sport",
+        "webPublicationDate": "2026-08-08T17:09:14Z",
+        "webTitle": "Tour de France Femmes: Vollering’s late escape for yellow leaves Niewiadoma fuming",
+        "webUrl": "https://www.theguardian.com/sport/2026/aug/08/tour-de-france-femmes-demi-vollering-takes-eight-second-lead-into-final-stage",
+        "apiUrl": "https://content.guardianapis.com/sport/2026/aug/08/tour-de-france-femmes-demi-vollering-takes-eight-second-lead-into-final-stage",
+        "fields": {
+          "trailText": "Demi Vollering will take an eight-second lead into the final stage of the Tour de France Femmes after winning the penultimate stage in Nice",
+          "byline": "Jeremy Whittle in Nice",
+          "thumbnail": "https://media.guim.co.uk/08d5506aca26513290efd7e4f42c683616083ec0/0_0_6523_5219/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/sport",
+        "pillarName": "Sport"
+      },
+      {
+        "id": "us-news/live/2026/aug/08/todd-blanche-attorney-general-senate-vote-republicans-save-voting-bill-latest-news-updates",
+        "type": "liveblog",
+        "sectionId": "us-news",
+        "sectionName": "US news",
+        "webPublicationDate": "2026-08-08T17:05:58Z",
+        "webTitle": "Blanche confirmation allows Trump to continue ‘pervasive, breathtaking corruption’, says Schumer – US politics live",
+        "webUrl": "https://www.theguardian.com/us-news/live/2026/aug/08/todd-blanche-attorney-general-senate-vote-republicans-save-voting-bill-latest-news-updates",
+        "apiUrl": "https://content.guardianapis.com/us-news/live/2026/aug/08/todd-blanche-attorney-general-senate-vote-republicans-save-voting-bill-latest-news-updates",
+        "fields": {
+          "trailText": "Senate minority leader condemns Republicans after Donald Trump’s former defense lawyer confirmed by 50 votes to 49 early on Saturday morning",
+          "byline": "Victoria Bekiempis (now); Yohannes Lowe, Emily Mackay (earlier)",
+          "thumbnail": "https://media.guim.co.uk/9929feb6f224df63c95a1032463f390dd8b086fb/680_0_7920_6336/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      },
+      {
+        "id": "technology/2026/aug/08/openai-astra-security-concerns",
+        "type": "article",
+        "sectionId": "technology",
+        "sectionName": "Technology",
+        "webPublicationDate": "2026-08-08T17:00:41Z",
+        "webTitle": "OpenAI to pause some work on AI model Astra due to security concerns",
+        "webUrl": "https://www.theguardian.com/technology/2026/aug/08/openai-astra-security-concerns",
+        "apiUrl": "https://content.guardianapis.com/technology/2026/aug/08/openai-astra-security-concerns",
+        "fields": {
+          "trailText": "Agent found to be able to find and exploit vulnerabilities without human intervention, and to carry out cyber-attacks",
+          "byline": "Eric Berger",
+          "thumbnail": "https://media.guim.co.uk/75370b7d2e86da8743ca26266a8659d6b1b70393/667_0_3333_2667/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      },
+      {
+        "id": "football/live/2026/aug/08/west-ham-v-portsmouth-burnley-v-notts-county-carabao-cup-first-round-live",
+        "type": "liveblog",
+        "sectionId": "football",
+        "sectionName": "Football",
+        "webPublicationDate": "2026-08-08T16:48:06Z",
+        "webTitle": "Carabao Cup first round: wins for West Ham, Burnley and Millwall – as it happened",
+        "webUrl": "https://www.theguardian.com/football/live/2026/aug/08/west-ham-v-portsmouth-burnley-v-notts-county-carabao-cup-first-round-live",
+        "apiUrl": "https://content.guardianapis.com/football/live/2026/aug/08/west-ham-v-portsmouth-burnley-v-notts-county-carabao-cup-first-round-live",
+        "fields": {
+          "trailText": "Success for the Hammers, Clarets and Lions in a busy afternoon in the EFL Cup. Scott Murray was watching",
+          "byline": "Scott Murray",
+          "thumbnail": "https://media.guim.co.uk/44a852559cf7236d83247d2395f40c9cc6d4d30b/273_0_4054_3245/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/sport",
+        "pillarName": "Sport"
+      },
+      {
+        "id": "football/2026/aug/08/west-ham-portsmouth-carabao-cup-first-round-match-report",
+        "type": "article",
+        "sectionId": "football",
+        "sectionName": "Football",
+        "webPublicationDate": "2026-08-08T16:38:20Z",
+        "webTitle": "West Ham sink Pompey in Carabao Cup as Sullivan ignores advice to stay away",
+        "webUrl": "https://www.theguardian.com/football/2026/aug/08/west-ham-portsmouth-carabao-cup-first-round-match-report",
+        "apiUrl": "https://content.guardianapis.com/football/2026/aug/08/west-ham-portsmouth-carabao-cup-first-round-match-report",
+        "fields": {
+          "trailText": "West Ham began the season with a 3-1 win over Portsmouth in the Carabao Cup as their former co-chair David Sullivan watched from the stand",
+          "byline": "John Brewin at the London Stadium",
+          "thumbnail": "https://media.guim.co.uk/5cc914b492998069a71797c9955f7953a416f443/1_355_3123_2498/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/sport",
+        "pillarName": "Sport"
+      },
+      {
+        "id": "stage/2026/aug/08/supposing-review-traverse-theatre-edinburgh",
+        "type": "article",
+        "sectionId": "stage",
+        "sectionName": "Stage",
+        "webPublicationDate": "2026-08-08T16:09:44Z",
+        "webTitle": "Supposing: review – only ancient Greek rage will suffice in our exasperating times",
+        "webUrl": "https://www.theguardian.com/stage/2026/aug/08/supposing-review-traverse-theatre-edinburgh",
+        "apiUrl": "https://content.guardianapis.com/stage/2026/aug/08/supposing-review-traverse-theatre-edinburgh",
+        "fields": {
+          "trailText": "A modern, secular woman is transformed into a Hellenic heroine as she sees visions of the future in Zinnie Harris’s minimalist drama",
+          "byline": "Mark Fisher",
+          "thumbnail": "https://media.guim.co.uk/99c28e2fa371d188887d22d7f9aa52b741df2523/1001_579_2936_2350/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/arts",
+        "pillarName": "Arts"
+      },
+      {
+        "id": "science/ng-interactive/2026/aug/09/one-of-uks-best-fossil-collections-sold-overseas-in-loss-to-the-nation",
+        "type": "interactive",
+        "sectionId": "science",
+        "sectionName": "Science",
+        "webPublicationDate": "2026-08-08T16:00:02Z",
+        "webTitle": "One of UK’s best fossil collections sold overseas in ‘loss to the nation’",
+        "webUrl": "https://www.theguardian.com/science/ng-interactive/2026/aug/09/one-of-uks-best-fossil-collections-sold-overseas-in-loss-to-the-nation",
+        "apiUrl": "https://content.guardianapis.com/science/ng-interactive/2026/aug/09/one-of-uks-best-fossil-collections-sold-overseas-in-loss-to-the-nation",
+        "fields": {
+          "trailText": "Exclusive: Lack of funds left British museums unable pay eight-figure sum for collection, which went to Abu Dhabi institution",
+          "byline": "Nicola Davis Science correspondent",
+          "thumbnail": "https://media.guim.co.uk/c8dc76fa6d9188b10098600f39f54f5660cdff8c/1_0_4998_4000/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      },
+      {
+        "id": "science/2026/aug/09/britain-jurassic-fossil-hunters-dorset-beaches",
+        "type": "article",
+        "sectionId": "science",
+        "sectionName": "Science",
+        "webPublicationDate": "2026-08-08T16:00:01Z",
+        "webTitle": "Britain’s Jurassic gold rush: the fossil hunters chasing fortunes on Dorset’s beaches",
+        "webUrl": "https://www.theguardian.com/science/2026/aug/09/britain-jurassic-fossil-hunters-dorset-beaches",
+        "apiUrl": "https://content.guardianapis.com/science/2026/aug/09/britain-jurassic-fossil-hunters-dorset-beaches",
+        "fields": {
+          "trailText": "Social media and soaring prices are fuelling a fossil-hunting boom, with rare discoveries worth thousands of pounds",
+          "byline": "Nicola Davis Science correspondent",
+          "thumbnail": "https://media.guim.co.uk/d6ad1fedb84ab72dbeab52721601bb1128e6d93f/982_0_4005_3204/500.jpg"
+        },
+        "isHosted": false,
+        "pillarId": "pillar/news",
+        "pillarName": "News"
+      }
+    ]
+  }
+}

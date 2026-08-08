@@ -1,0 +1,193 @@
+{
+  "status": "OK",
+  "copyright": "Copyright (c) 2026 The New York Times Company. All Rights Reserved.",
+  "response": {
+    "docs": [
+      {
+        "abstract": "The chipmaker's latest accelerator is spoken for well into 2027, a sign that the buildout of data centers has not slowed.",
+        "web_url": "https://www.nytimes.com/2026/08/08/technology/nvidia-chip-demand.html",
+        "snippet": "The chipmaker's latest accelerator is spoken for well into 2027.",
+        "lead_paragraph": "SAN FRANCISCO — Nvidia told investors on Friday that every unit of its next accelerator has been allocated.",
+        "print_section": "B",
+        "print_page": "1",
+        "source": "The New York Times",
+        "multimedia": {
+          "caption": "Nvidia's campus in Santa Clara, Calif.",
+          "credit": "Jason Henry for The New York Times",
+          "default": {
+            "url": "https://static01.nyt.com/images/2026/08/08/multimedia/08nvidia/08nvidia-articleLarge.jpg",
+            "height": 400,
+            "width": 600
+          },
+          "thumbnail": {
+            "url": "https://static01.nyt.com/images/2026/08/08/multimedia/08nvidia/08nvidia-thumbStandard.jpg",
+            "height": 75,
+            "width": 75
+          }
+        },
+        "headline": {
+          "main": "Nvidia Says Its Newest Chip Is Sold Out Into 2027",
+          "kicker": null,
+          "content_kicker": null,
+          "print_headline": "Chipmaker Says Newest Product Is Sold Out",
+          "name": null,
+          "seo": null,
+          "sub": null
+        },
+        "keywords": [
+          { "name": "subject", "value": "Semiconductors", "rank": 1, "major": "N" },
+          { "name": "organizations", "value": "Nvidia Corporation", "rank": 2, "major": "N" }
+        ],
+        "pub_date": "2026-08-08T15:12:04+0000",
+        "document_type": "article",
+        "news_desk": "Business",
+        "section_name": "Technology",
+        "byline": {
+          "original": "By Tripp Mickle and Cade Metz",
+          "person": [
+            {
+              "firstname": "Tripp",
+              "middlename": null,
+              "lastname": "Mickle",
+              "qualifier": null,
+              "title": null,
+              "role": "reported",
+              "organization": "",
+              "rank": 1
+            }
+          ],
+          "organization": null
+        },
+        "type_of_material": "News",
+        "_id": "nyt://article/8b1c9f42-1d2a-5f7e-9a10-6f4c2b0d7e31",
+        "word_count": 1184,
+        "uri": "nyt://article/8b1c9f42-1d2a-5f7e-9a10-6f4c2b0d7e31"
+      },
+      {
+        "abstract": "Ministers reached a deal in Brussels after two days of deadlock over how fast the bloc should cut emissions.",
+        "web_url": "https://www.nytimes.com/2026/08/08/climate/eu-2040-emissions-target.html",
+        "snippet": "Ministers reached a deal in Brussels after two days of deadlock.",
+        "lead_paragraph": "BRUSSELS — European Union environment ministers agreed on Friday to a 2040 emissions target.",
+        "print_section": "A",
+        "print_page": "6",
+        "source": "The New York Times",
+        "multimedia": {
+          "caption": "The Berlaymont building in Brussels.",
+          "credit": "Yves Herman/Reuters",
+          "default": {
+            "url": "https://static01.nyt.com/images/2026/08/08/multimedia/08eu-climate/08eu-climate-articleLarge.jpg",
+            "height": 400,
+            "width": 600
+          },
+          "thumbnail": {
+            "url": "https://static01.nyt.com/images/2026/08/08/multimedia/08eu-climate/08eu-climate-thumbStandard.jpg",
+            "height": 75,
+            "width": 75
+          }
+        },
+        "headline": {
+          "main": "E.U. Agrees on a 2040 Climate Target",
+          "kicker": null,
+          "content_kicker": null,
+          "print_headline": "E.U. Agrees on Climate Target for 2040",
+          "name": null,
+          "seo": null,
+          "sub": null
+        },
+        "keywords": [
+          {
+            "name": "subject",
+            "value": "Greenhouse Gas Emissions",
+            "rank": 1,
+            "major": "N"
+          }
+        ],
+        "pub_date": "2026-08-08T12:40:19+0000",
+        "document_type": "article",
+        "news_desk": "Climate",
+        "section_name": "Climate",
+        "byline": {
+          "original": "By Somini Sengupta",
+          "person": [
+            {
+              "firstname": "Somini",
+              "middlename": null,
+              "lastname": "Sengupta",
+              "qualifier": null,
+              "title": null,
+              "role": "reported",
+              "organization": "",
+              "rank": 1
+            }
+          ],
+          "organization": null
+        },
+        "type_of_material": "News",
+        "_id": "nyt://article/1f3d7c88-4b62-52a1-8c0d-9e7a35b21c44",
+        "word_count": 903,
+        "uri": "nyt://article/1f3d7c88-4b62-52a1-8c0d-9e7a35b21c44"
+      },
+      {
+        "abstract": "A 12-hour exposure resolves structures near Sagittarius A* that were previously a smear.",
+        "web_url": "https://www.nytimes.com/2026/08/07/science/milky-way-core-telescope.html",
+        "snippet": "A 12-hour exposure resolves structures near Sagittarius A*.",
+        "lead_paragraph": "Astronomers on Thursday released the sharpest image yet of the center of our galaxy.",
+        "print_section": "D",
+        "print_page": "3",
+        "source": "The New York Times",
+        "multimedia": {
+          "caption": "The galactic center.",
+          "credit": "European Southern Observatory",
+          "default": {
+            "url": "https://static01.nyt.com/images/2026/08/07/multimedia/07galaxy/07galaxy-articleLarge.jpg",
+            "height": 400,
+            "width": 600
+          },
+          "thumbnail": {
+            "url": "https://static01.nyt.com/images/2026/08/07/multimedia/07galaxy/07galaxy-thumbStandard.jpg",
+            "height": 75,
+            "width": 75
+          }
+        },
+        "headline": {
+          "main": "The Milky Way's Heart, in Unprecedented Detail",
+          "kicker": "Out There",
+          "content_kicker": null,
+          "print_headline": "Our Galaxy's Heart, in Detail",
+          "name": null,
+          "seo": null,
+          "sub": null
+        },
+        "keywords": [
+          { "name": "subject", "value": "Space and Astronomy", "rank": 1, "major": "N" }
+        ],
+        "pub_date": "2026-08-07T21:05:00+0000",
+        "document_type": "article",
+        "news_desk": "Science",
+        "section_name": "Science",
+        "byline": {
+          "original": "By Katrina Miller",
+          "person": [
+            {
+              "firstname": "Katrina",
+              "middlename": null,
+              "lastname": "Miller",
+              "qualifier": null,
+              "title": null,
+              "role": "reported",
+              "organization": "",
+              "rank": 1
+            }
+          ],
+          "organization": null
+        },
+        "type_of_material": "News",
+        "_id": "nyt://article/c47a0e19-6d55-5b3f-b8e2-01a9f6d4772b",
+        "word_count": 1420,
+        "uri": "nyt://article/c47a0e19-6d55-5b3f-b8e2-01a9f6d4772b"
+      }
+    ],
+    "metadata": { "hits": 8842, "offset": 0, "time": 1173 },
+    "facets": {}
+  }
+}

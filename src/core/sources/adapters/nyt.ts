@@ -1,0 +1,92 @@
+import type { Article, NewsSource } from '@/core/sources/types'
+import { getJson, isoDate, plainText, queryString, text, url } from '@/core/sources/adapters/shared'
+
+const ID = 'nyt'
+const LABEL = 'The New York Times'
+
+/** Legacy `multimedia[].url` values are relative to the image CDN, not to nytimes.com. */
+const IMAGE_BASE = 'https://static01.nyt.com/'
+
+interface NytImage {
+  url?: string | null
+}
+
+// Nullable throughout: this is a wire shape, not a shape we control.
+interface NytRaw {
+  _id?: string | null
+  uri?: string | null
+  web_url?: string | null
+  abstract?: string | null
+  snippet?: string | null
+  lead_paragraph?: string | null
+  pub_date?: string | null
+  news_desk?: string | null
+  section_name?: string | null
+  headline?: { main?: string | null } | null
+  byline?: { original?: string | null } | null
+  // Article Search moved from an array of crops to a single object in late 2024.
+  // Both shapes are still in the wild, so both are read here.
+  multimedia?: NytImage[] | { default?: NytImage | null; thumbnail?: NytImage | null } | null
+}
+
+interface NytPayload {
+  response?: { docs?: NytRaw[] }
+}
+
+/** `YYYYMMDD` — the only date format Article Search accepts. */
+const compactDate = (value: string | undefined) =>
+  value ? isoDate(value)?.slice(0, 10).replace(/-/g, '') : undefined
+
+function image(multimedia: NytRaw['multimedia']): string | undefined {
+  if (!multimedia) return undefined
+  const candidate = Array.isArray(multimedia)
+    ? multimedia[0]?.url
+    : (multimedia.default?.url ?? multimedia.thumbnail?.url)
+  return url(candidate, IMAGE_BASE)
+}
+
+export function selectItems(payload: NytPayload): NytRaw[] {
+  return (payload.response?.docs ?? []).filter(
+    (raw) => text(raw.headline?.main) && url(raw.web_url) && isoDate(raw.pub_date),
+  )
+}
+
+function normalize(raw: NytRaw): Article {
+  return {
+    id: `${ID}:${text(raw._id) ?? text(raw.uri) ?? raw.web_url}`,
+    title: text(raw.headline?.main) ?? '',
+    // `abstract` is the summary; snippet and lead paragraph are the fallbacks NYT
+    // leaves populated when a doc has no abstract at all.
+    description:
+      plainText(raw.abstract) ?? plainText(raw.snippet) ?? plainText(raw.lead_paragraph) ?? '',
+    url: url(raw.web_url) ?? '',
+    imageUrl: image(raw.multimedia),
+    publishedAt: isoDate(raw.pub_date) ?? '',
+    sourceId: ID,
+    sourceLabel: LABEL,
+    // "By Tripp Mickle and Cade Metz" — the prefix is presentation, not a name.
+    author: text(raw.byline?.original?.replace(/^by\s+/i, '')),
+    category: text(raw.section_name) ?? text(raw.news_desk),
+  }
+}
+
+export const nytSource: NewsSource<NytRaw> = {
+  id: ID,
+  label: LABEL,
+  capabilities: { query: true, dateRange: true, category: true, author: false, pagination: true },
+  available: true,
+  async fetch(query, signal) {
+    const sections = query.categories?.map((c) => `"${c}"`).join(' ')
+    const search = queryString({
+      q: query.q,
+      begin_date: compactDate(query.from),
+      end_date: compactDate(query.to),
+      fq: sections ? `section_name:(${sections})` : undefined,
+      // Article Search pages are a fixed 10 docs; `page` is a page index, not an offset.
+      page: query.page - 1,
+      sort: 'newest',
+    })
+    return selectItems(await getJson<NytPayload>(`/api/nyt/articlesearch.json?${search}`, signal))
+  },
+  normalize,
+}
