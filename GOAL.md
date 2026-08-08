@@ -29,7 +29,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | 1c  | German (de) locale                              | done        | feat/german-de-locale                         | Merged. en/ar/de all 17 keys, de stays ltr.                                                                                                                                                                                 |
 | 2   | Domain core: Article, NewsSource, aggregator    | done        | feat/domain-core-article-newssource-aggregato |                                                                                                                                                                                                                             |
 | 3   | Four live adapters + two stubs                  | done        | feat/four-live-adapters-two-stubs             |                                                                                                                                                                                                                             |
-| 4   | nginx proxy + env wiring                        | not started |                                               |                                                                                                                                                                                                                             |
+| 4   | nginx proxy + env wiring                        | done        | feat/nginx-proxy-env-wiring                   |                                                                                                                                                                                                                             |
 | 5   | Article list: search, filters, sort, pagination | not started |                                               |                                                                                                                                                                                                                             |
 | 6   | Article details page                            | not started |                                               |                                                                                                                                                                                                                             |
 | 7   | Preferences (sources / categories / authors)    | not started |                                               |                                                                                                                                                                                                                             |
@@ -92,6 +92,7 @@ iteration 3 — [3] Four live adapters + two stubs — done — static:pass revi
 iteration 2 — [carry-forward-2] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — needs human review — static:pass review:pass e2e:blocked acceptance:pass — requeued for another pass
 iteration 4 — [carry-forward-1] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 5 — [carry-forward] NYT image() always takes the first multimedia crop, not the largest — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 6 — [4] nginx proxy + env wiring — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
@@ -208,6 +209,12 @@ Keys must never reach the bundle, in dev or in the container.
 - `docker/nginx.conf.template` with a `location` block per source, `proxy_pass` upstream, key injected from env via `envsubst` at container start. Mirrors the dev proxies already in `vite.config.ts` so adapters call identical `/api/*` paths in both environments.
 - `docker/entrypoint.sh` running `envsubst` then `nginx -g 'daemon off;'`.
 - Document required vars in `.env.example` (already present).
+
+This item ships the nginx config and the rendering script, not a runnable container: the
+`Dockerfile` that copies `dist/` into an nginx image and wires `entrypoint.sh` as its `ENTRYPOINT`
+belongs to item 13, which consumes these two files. Until item 13 lands, "in the container" is a
+contract these files satisfy rather than an image you can run — `entrypoint.sh render-only` is what
+exercises them here.
 
 Acceptance: `npm run build && grep -rE 'VITE_|NEWSAPI_KEY|GUARDIAN_KEY|NYT_KEY' dist/` returns nothing.
 

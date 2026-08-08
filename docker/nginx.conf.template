@@ -1,0 +1,69 @@
+# Rendered at container start by docker/entrypoint.sh.
+#
+# envsubst is given an explicit variable list, so it replaces ONLY ${NEWSAPI_KEY},
+# ${GUARDIAN_KEY} and ${NYT_KEY} — nginx's own $args / $uri / $1 survive untouched. Without
+# that list envsubst would eat every one of them.
+#
+# One location per source, mirroring the dev proxies in vite.proxy.ts: same /api/* prefixes,
+# same per-provider query parameter. The adapters therefore call identical paths in dev and
+# in the container, and the key is attached here, server-side, in both.
+#
+# The keys arrive already percent-encoded — entrypoint.sh escapes them exactly the way
+# vite.proxy.ts's withKey() does — so a key containing & + = or # cannot break the query string
+# here while working fine in dev.
+#
+# The key lands in the *upstream* request only. nginx's access log records the incoming
+# client request, which never carries it.
+
+server {
+  listen 80;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # proxy_pass with variables in it needs an explicit resolver, and needs SNI turned on or
+  # the TLS handshake to these CDNs fails. 127.0.0.11 is Docker's embedded DNS.
+  resolver 127.0.0.11 1.1.1.1 valid=30s ipv6=off;
+  resolver_timeout 5s;
+
+  location ~ ^/api/newsapi/(?<upstream_path>.*)$ {
+    set $upstream_args "apiKey=${NEWSAPI_KEY}&$args";
+    proxy_pass https://newsapi.org/v2/$upstream_path?$upstream_args;
+    proxy_ssl_server_name on;
+    proxy_set_header Host newsapi.org;
+  }
+
+  location ~ ^/api/guardian/(?<upstream_path>.*)$ {
+    set $upstream_args "api-key=${GUARDIAN_KEY}&$args";
+    proxy_pass https://content.guardianapis.com/$upstream_path?$upstream_args;
+    proxy_ssl_server_name on;
+    proxy_set_header Host content.guardianapis.com;
+  }
+
+  location ~ ^/api/nyt/(?<upstream_path>.*)$ {
+    set $upstream_args "api-key=${NYT_KEY}&$args";
+    proxy_pass https://api.nytimes.com/svc/search/v2/$upstream_path?$upstream_args;
+    proxy_ssl_server_name on;
+    proxy_set_header Host api.nytimes.com;
+  }
+
+  # No key exists for BBC — it is open RSS. The proxy is here purely for CORS.
+  location ~ ^/api/bbc/(?<upstream_path>.*)$ {
+    proxy_pass https://feeds.bbci.co.uk/$upstream_path$is_args$args;
+    proxy_ssl_server_name on;
+    proxy_set_header Host feeds.bbci.co.uk;
+  }
+
+  # Built assets are content-hashed, so they can be cached forever.
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+
+  # react-router owns the client routes: anything that is not a real file is index.html.
+  # index.html itself must never be cached or a deploy stays invisible.
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache";
+  }
+}
