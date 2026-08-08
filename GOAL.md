@@ -83,7 +83,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/author-filter-facet-is-limited-to-the-cu`.
 - [x] (minor) Partial-failure banner uses role="status" (polite) rather than role="alert": src/features/Articles/pages/ArticlesPage.tsx PartialFailureBanner: a provider outage is arguably assertive/important information and could use role="alert" so screen reader users are interrupted rather than only informed on next idle. Current choice is defensible (it is not blocking the page) but inconsistent with how urgently the message reads; flag for a future a11y pass, not a defect in this item. — found in 5
       Status: done. Branch: `feat/partial-failure-banner-uses-role-status-`.
-- [ ] (minor) AppInput's dark-mode error tokens (danger-300) are undefined in theme.css: src/components/common/design-system/AppInput.tsx references dark:border-danger-300 and dark:text-danger-300, but src/styles/theme.css only defines --color-danger-700 and --color-danger-600 (no danger-300). This is pre-existing (AppInput.tsx is untouched by this diff) so it is out of scope for item 5, but the date-range AppInput fields added here (ArticlesFilters.tsx) would inherit an unstyled/undefined error state in dark mode if ever given an error prop. Carry-forward for whoever touches AppInput or theme.css next. — found in 5
+- [x] (minor) AppInput's dark-mode error tokens (danger-300) are undefined in theme.css: src/components/common/design-system/AppInput.tsx references dark:border-danger-300 and dark:text-danger-300, but src/styles/theme.css only defines --color-danger-700 and --color-danger-600 (no danger-300). This is pre-existing (AppInput.tsx is untouched by this diff) so it is out of scope for item 5, but the date-range AppInput fields added here (ArticlesFilters.tsx) would inherit an unstyled/undefined error state in dark mode if ever given an error prop. Carry-forward for whoever touches AppInput or theme.css next. — found in 5
+  Status: done. Branch: `feat/appinput-s-dark-mode-error-tokens-danger`.
 
 ## Loop log
 
@@ -101,6 +102,7 @@ iteration 6 — [4] nginx proxy + env wiring — done — static:pass review:pas
 iteration 7 — [5] Article list: search, filters, sort, pagination — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 8 — [carry-forward-3] Author filter facet is limited to the current page's 9 articles — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 1 — [carry-forward-4] Partial-failure banner uses role="status" (polite) rather than role="alert" — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 2 — [carry-forward-5] AppInput's dark-mode error tokens (danger-300) are undefined in theme.css — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

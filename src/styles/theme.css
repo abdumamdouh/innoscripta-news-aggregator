@@ -19,6 +19,9 @@
 
   --color-danger-700: #a41b1b;
   --color-danger-600: #c62828;
+  /* Dark-surface twin of danger-600: 600 is unreadable on ink-800, this tint carries the
+     same error state on dark. Referenced by AppInput's `dark:` error classes. */
+  --color-danger-300: #ef9a9a;
 
   /* Per-source badge colours. These do real work: with four providers merged into
      one grid, colour is how you tell an aggregated result's origin at a glance. */
