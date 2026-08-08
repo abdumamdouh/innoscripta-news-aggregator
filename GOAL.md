@@ -27,7 +27,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | 1   | App shell + design system                       | done        | feat/app-shell-design-system                  | Human-verified in a browser: boots, routes render, ar → dir=rtl + Arabic copy, theme persists across reload and honours prefers-color-scheme on first visit. e2e agent was BLOCKED by a browser-MCP fault, not by the code. |
 | 1b  | Playwright e2e harness                          | done        | feat/playwright-e2e-harness                   | Merged. 9 specs green: shell, language, navigation.                                                                                                                                                                         |
 | 1c  | German (de) locale                              | done        | feat/german-de-locale                         | Merged. en/ar/de all 17 keys, de stays ltr.                                                                                                                                                                                 |
-| 2   | Domain core: Article, NewsSource, aggregator    | done        | feat/domain-core-article-newssource-aggregato |                                                                                                                                                                                                                              |
+| 2   | Domain core: Article, NewsSource, aggregator    | done        | feat/domain-core-article-newssource-aggregato |                                                                                                                                                                                                                             |
 | 3   | Four live adapters + two stubs                  | not started |                                               |                                                                                                                                                                                                                             |
 | 4   | nginx proxy + env wiring                        | not started |                                               |                                                                                                                                                                                                                             |
 | 5   | Article list: search, filters, sort, pagination | not started |                                               |                                                                                                                                                                                                                             |
@@ -46,8 +46,11 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 Findings raised by verifiers on problems outside the item being built. Drained **before** new
 backlog rows. Appended by the loop; safe to add to by hand.
 
-_(empty — both findings from item 1 were fixed and merged: the unused nav locale keys were removed,
-and AppInput's error state now uses the dark-mode-aware danger token.)_
+- [x] (minor) NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream: When a provider supplies title/url/publishedAt but no description (null trailText, null abstract/snippet/lead_paragraph, no RSS `<description>`), normalize() defaults description to ''. This is deliberate per the spec ("defaulted... not allowed to produce a half-built Article") and is tested, but nothing downstream (item 5/6 list and detail views) has been reviewed yet for how it renders an empty description — worth confirming those views show an explicit empty state rather than a blank line once they're built. — found in 3
+      **Resolved as spec, not code.** There is nothing to fix today: the only consumer of `Article.description` in the tree is `aggregator.ts` search-text folding, where `''` is harmless, and items 5/6 have zero implementation, so no rendering path exists to review. Writing a placeholder helper now would be dead code with a vacuous test. The requirement is instead written into the item 5 and item 6 specs above (`articles.noDescription` placeholder, all three locales, covered by the unit tests and `e2e/articles.spec.ts`), so it is binding on those items when they are built rather than a note that ages out.
+      Status: needs human review
+      Branch: feat/newsapi-guardian-nyt-bbc-descriptions-ca
+      Notes: e2e: BLOCKED: carry-forward-2 asks to confirm the article list/detail views show an explicit empty state for empty descriptions, but those views do not exist yet in this codebase. src/routes/router.tsx (lines 17-20) has an explicit comment: 'Backlog items 5 and 6 replace these two with `...articlesRoutes`' — both the index route (`/`) and `articles/:articleId` currently render `<PlaceholderPage>` only. No src/features/Articles (or any article list/detail component) exists in src/ (only src/components/{common,layout}, src/routes with NotFoundPage/PlaceholderPage/RouteErrorPage/router.tsx). Live browser check at http://localhost:3100/ and http://localhost:3100/articles/123 (fresh accessibility snapshots after navigation) both show only the placeholder heading 'Articles' and tagline/route-param text — no article card, list item, or detail body rendering a description field at all. | e2e: npm run test:e2e passed 9/9 specs (shell/navigation/language/theme), but none of them exercise article rendering or descriptions — there is no e2e coverage for this item because the feature under test doesn't exist yet. This is consistent with the item text itself: 'worth confirming those views show an explicit empty state ... once they're built' — they are not built. | e2e: The normalize()/degrade() logic that defaults description to '' does exist and is exercised in src/core/sources/aggregator.ts and its tests (src/core/sources/aggregator.test.ts), confirming the upstream (item 3) behavior is real and unit-tested — only the downstream rendering (items 5/6) is missing, matching exactly what the backlog item flags as unverified.
 
 ## Loop log
 
@@ -56,6 +59,7 @@ One line per iteration, appended by the loop. Do not edit by hand.
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
 iteration 1 — [carry-forward-1] Unused nav locale keys (nav.feed / nav.menu.open / nav.menu.close) — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 1 — [2] Domain core: Article, NewsSource, aggregator — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 2 — [carry-forward-2] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — needs human review — static:pass review:pass e2e:blocked acceptance:pass — requeued for another pass
 
 ---
 
@@ -189,6 +193,12 @@ Acceptance: `npm run build && grep -rE 'VITE_|NEWSAPI_KEY|GUARDIAN_KEY|NYT_KEY' 
   into one grid this is the only way a reader can tell origin at a glance, and it is the visible
   proof that the aggregation is real rather than a single feed. It must survive every filter, sort
   and page change, and be present in the a11y tree as text, not colour alone.
+- **An empty `description` is a real case, not a defect.** All four adapters deliberately default a
+  missing provider description to `''` (item 3: null Guardian `trailText`, null NYT
+  `abstract`/`snippet`/`lead_paragraph`, absent BBC RSS `<description>`). `ArticleCard` must not
+  render that as a blank gap — show a translated placeholder (`articles.noDescription`, in all three
+  locales) in muted text, and keep the card's height stable so the grid does not go ragged. Same
+  rule on the details page (item 6). Cover it in the unit tests and in `e2e/articles.spec.ts`.
 - Port `Pagination.tsx` from the blueprint near-verbatim — it already has the `1 … 4 5 6 … 20` window, RTL-aware carets and full a11y.
 - Partial-failure banner naming any source that failed this query.
 
@@ -222,6 +232,8 @@ tests and the Playwright spec above both pass.
 `/articles/:articleId`. Full text where the provider gives it, image, source badge, author, published date, link out to the original, bookmark toggle, back to the list **preserving the list's query state**.
 
 Note the blueprint's mistake to avoid: its details page refetched the entire collection and re-flashed a skeleton. Read from the TanStack Query cache first, fetch only on a cold load.
+
+An empty `description` renders as the `articles.noDescription` placeholder here too, same as the card in item 5 — never a blank line under the headline. See the item 5 bullet for why `''` is a legitimate value.
 
 ### 7 — Preferences (sources / categories / authors)
 
