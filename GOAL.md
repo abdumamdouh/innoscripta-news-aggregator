@@ -22,24 +22,24 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 
 ## Backlog
 
-| #   | Item                                            | Status      | Branch | Notes |
-| --- | ----------------------------------------------- | ----------- | ------ | ----- |
+| #   | Item                                            | Status      | Branch                       | Notes                                                                                                                                                                                                                       |
+| --- | ----------------------------------------------- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | App shell + design system                       | done        | feat/app-shell-design-system | Human-verified in a browser: boots, routes render, ar → dir=rtl + Arabic copy, theme persists across reload and honours prefers-color-scheme on first visit. e2e agent was BLOCKED by a browser-MCP fault, not by the code. |
-| 1b  | Playwright e2e harness                          | not started |        |       |
-| 1c  | German (de) locale                              | not started |        |       |
-| 2   | Domain core: Article, NewsSource, aggregator    | not started |        |       |
-| 3   | Four live adapters + two stubs                  | not started |        |       |
-| 4   | nginx proxy + env wiring                        | not started |        |       |
-| 5   | Article list: search, filters, sort, pagination | not started |        |       |
-| 6   | Article details page                            | not started |        |       |
-| 7   | Preferences (sources / categories / authors)    | not started |        |       |
-| 8   | Personalized feed                               | not started |        |       |
-| 9   | Bookmarks + reading lists (CRUD)                | not started |        |       |
-| 10  | Saved search presets (CRUD)                     | not started |        |       |
-| 11  | UI states + offline cache                       | not started |        |       |
-| 12  | Responsive pass                                 | not started |        |       |
-| 13  | Docker + CI                                     | not started |        |       |
-| 14  | README + SETUP                                  | not started |        |       |
+| 1b  | Playwright e2e harness                          | done        | feat/playwright-e2e-harness  |                                                                                                                                                                                                                             |
+| 1c  | German (de) locale                              | not started |                              |                                                                                                                                                                                                                             |
+| 2   | Domain core: Article, NewsSource, aggregator    | not started |                              |                                                                                                                                                                                                                             |
+| 3   | Four live adapters + two stubs                  | not started |                              |                                                                                                                                                                                                                             |
+| 4   | nginx proxy + env wiring                        | not started |                              |                                                                                                                                                                                                                             |
+| 5   | Article list: search, filters, sort, pagination | not started |                              |                                                                                                                                                                                                                             |
+| 6   | Article details page                            | not started |                              |                                                                                                                                                                                                                             |
+| 7   | Preferences (sources / categories / authors)    | not started |                              |                                                                                                                                                                                                                             |
+| 8   | Personalized feed                               | not started |                              |                                                                                                                                                                                                                             |
+| 9   | Bookmarks + reading lists (CRUD)                | not started |                              |                                                                                                                                                                                                                             |
+| 10  | Saved search presets (CRUD)                     | not started |                              |                                                                                                                                                                                                                             |
+| 11  | UI states + offline cache                       | not started |                              |                                                                                                                                                                                                                             |
+| 12  | Responsive pass                                 | not started |                              |                                                                                                                                                                                                                             |
+| 13  | Docker + CI                                     | not started |                              |                                                                                                                                                                                                                             |
+| 14  | README + SETUP                                  | not started |                              |                                                                                                                                                                                                                             |
 
 ## Carry-forward
 
@@ -48,12 +48,17 @@ backlog rows. Appended by the loop; safe to add to by hand.
 
 - (minor) nav.feed / nav.menu.open / nav.menu.close locale keys are unused: src/i18n/locales/{en,ar}.json define nav.feed, nav.menu.open, nav.menu.close but nothing in the current tree (Navigation.tsx has only one NAV_ITEMS entry, no mobile menu component exists yet) references them. Harmless now but is speculative content added ahead of the feature that needs it (personalized feed item 8, responsive nav item 12) — revisit when those land so keys don't rot if the wording changes. (found in 1)
 - (minor) AppInput error state has no dark-mode variant and uses a different red than the app's danger token: src/components/common/design-system/AppInput.tsx uses `border-red-600`/`text-red-600` for its error state while theme.css defines `--color-danger-600`/`--color-danger-700` and AppButton already consumes them for its `danger` variant. Every other primitive in the folder pairs light/dark classes; AppInput's error styling doesn't. Worth a follow-up pass across the design-system folder once a form that actually surfaces validation errors exists, to unify on the danger tokens and add the missing dark: variant. (found in 1)
+- (minor) Viewport projects all use desktop Chrome device profile: playwright.config.ts defines three projects (mobile 375x812, tablet 768x1024, desktop 1280x800) but every project spreads `devices['Desktop Chrome']` — none get touch input, mobile UA, or `isMobile`/`hasTouch` from Playwright's actual mobile device presets. This is only pixel-dimension emulation, not real mobile/tablet emulation. Not a problem for the shell spec (no touch interactions asserted), but item 12 (responsive pass) will likely need real touch/viewport emulation and may have to rework these project definitions. (found in 1b)
+- [ ] (minor) Playwright viewport projects use Desktop Chrome device profile for mobile/tablet: All three projects (mobile/tablet/desktop) spread devices['Desktop Chrome'] and only override width/height, so mobile and tablet projects get no touch input, mobile UA, or isMobile/hasTouch — pixel-dimension emulation only. Already noted as carry-forward in GOAL.md (found in 1b); flagging again since the responsive-pass item (12) will likely need real device emulation and a rework of these project definitions. (found in 1b)
 
 ## Loop log
 
 One line per iteration, appended by the loop. Do not edit by hand.
 
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
+iteration 3 — [1b] Playwright e2e harness — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 5 — [1b] Playwright e2e harness — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 9 — [1b] Playwright e2e harness — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

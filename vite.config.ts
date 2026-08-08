@@ -41,6 +41,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // e2e/ is Playwright's (npm run test:e2e); vitest's default include would
+    // otherwise try to run those specs and blow up on test.use().
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     css: true,
     // Real suites land with backlog item 3 (aggregator). Until then an empty run is
     // a pass, not a failure — otherwise the loop's test gate is red from iteration 1.
