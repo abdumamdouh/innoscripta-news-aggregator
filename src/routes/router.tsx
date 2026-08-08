@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { articlesRoutes } from '@/features/Articles'
 import { NotFoundPage } from '@/routes/NotFoundPage'
-import { PlaceholderPage } from '@/routes/PlaceholderPage'
 import { RouteErrorPage } from '@/routes/RouteErrorPage'
 
 export const router = createBrowserRouter([
@@ -14,12 +13,7 @@ export const router = createBrowserRouter([
       {
         // Pathless boundary: page errors replace only the Outlet, keeping Header/Footer.
         errorElement: <RouteErrorPage />,
-        children: [
-          ...articlesRoutes,
-          // Backlog item 6 replaces this last placeholder with the details page.
-          { path: 'articles/:articleId', element: <PlaceholderPage titleKey="nav.articles" /> },
-          { path: '*', element: <NotFoundPage /> },
-        ],
+        children: [...articlesRoutes, { path: '*', element: <NotFoundPage /> }],
       },
     ],
   },
