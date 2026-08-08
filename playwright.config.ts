@@ -13,5 +13,13 @@ export default defineConfig({
     command: `npm run dev -- --port ${port} --strictPort`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
+    // Recognisable stand-in keys, so "no key reached the browser" is a real assertion and
+    // not one that passes because nothing was configured. Real keys are never needed for
+    // e2e: every provider response is served from a fixture.
+    env: {
+      NEWSAPI_KEY: 'e2e-newsapi-key',
+      GUARDIAN_KEY: 'e2e-guardian-key',
+      NYT_KEY: 'e2e-nyt-key',
+    },
   },
 })
