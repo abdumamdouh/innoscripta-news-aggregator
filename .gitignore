@@ -13,6 +13,8 @@ dist-ssr
 *.local
 coverage
 .playwright-mcp
+playwright-report
+test-results
 
 # Secrets. .env.example is the only env file that belongs in the repo.
 .env

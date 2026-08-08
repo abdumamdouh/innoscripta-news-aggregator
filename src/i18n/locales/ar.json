@@ -1,0 +1,21 @@
+{
+  "app.name": "إنوسكريبتا نيوز",
+  "app.tagline": "أربع غرف أخبار في خلاصة واحدة.",
+  "nav.articles": "المقالات",
+  "nav.feed": "خلاصتي",
+  "nav.label": "التنقل الرئيسي",
+  "nav.menu.open": "فتح القائمة",
+  "nav.menu.close": "إغلاق القائمة",
+  "language.label": "اللغة",
+  "language.en": "English",
+  "language.ar": "العربية",
+  "theme.toLight": "التبديل إلى الوضع الفاتح",
+  "theme.toDark": "التبديل إلى الوضع الداكن",
+  "footer.rights": "مبني لتحدي إنوسكريبتا.",
+  "route.notFound.title": "الصفحة غير موجودة",
+  "route.notFound.body": "هذه الصفحة غير موجودة.",
+  "route.notFound.back": "العودة إلى المقالات",
+  "route.error.title": "حدث خطأ ما",
+  "route.error.body": "تعذّر عرض الصفحة. حاول من البداية.",
+  "common.close": "إغلاق"
+}

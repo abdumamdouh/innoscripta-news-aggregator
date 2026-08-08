@@ -17,15 +17,15 @@ primitives · i18next (EN/AR + RTL) · Yup · Vitest + Testing Library · Docker
 The challenge lists seven sources and asks for at least three. Four are actually reachable
 today; the other three are handled honestly rather than quietly dropped:
 
-| Source | Status |
-| ------ | ------ |
-| NewsAPI.org | Live. Free tier is localhost-only, so requests go through a proxy. |
-| The Guardian | Live, via the Open Platform Content API. |
-| New York Times | Live, via the Article Search API. |
-| BBC News | Live, via public RSS — the BBC has no public JSON news API. |
-| NewsAPI | Duplicate of NewsAPI.org in the brief; one adapter serves both entries. |
-| OpenNews | Unavailable. opennews.org is a journalism-tech nonprofit, not an article API. |
-| NewsCred | Unavailable. Now Optimizely CMP — enterprise-only, no public signup. |
+| Source         | Status                                                                        |
+| -------------- | ----------------------------------------------------------------------------- |
+| NewsAPI.org    | Live. Free tier is localhost-only, so requests go through a proxy.            |
+| The Guardian   | Live, via the Open Platform Content API.                                      |
+| New York Times | Live, via the Article Search API.                                             |
+| BBC News       | Live, via public RSS — the BBC has no public JSON news API.                   |
+| NewsAPI        | Duplicate of NewsAPI.org in the brief; one adapter serves both entries.       |
+| OpenNews       | Unavailable. opennews.org is a journalism-tech nonprofit, not an article API. |
+| NewsCred       | Unavailable. Now Optimizely CMP — enterprise-only, no public signup.          |
 
 The two unavailable sources are registered in the source registry with `available: false` and a
 reason, and surface in the UI as disabled options rather than being hidden.
@@ -48,15 +48,15 @@ cp .env.example .env.local   # then add your API keys
 npm run dev
 ```
 
-| Script | Does |
-| ------ | ---- |
-| `npm run dev` | Vite dev server on :3000, with proxies for all four sources |
-| `npm run build` | Type-check then production build |
-| `npm run typecheck` | `tsc -b --noEmit` |
-| `npm run lint` | oxlint |
-| `npm run test` | Vitest |
-| `npm run test:coverage` | Vitest with V8 coverage |
-| `npm run format` | Prettier |
+| Script                  | Does                                                        |
+| ----------------------- | ----------------------------------------------------------- |
+| `npm run dev`           | Vite dev server on :3000, with proxies for all four sources |
+| `npm run build`         | Type-check then production build                            |
+| `npm run typecheck`     | `tsc -b --noEmit`                                           |
+| `npm run lint`          | oxlint                                                      |
+| `npm run test`          | Vitest                                                      |
+| `npm run test:coverage` | Vitest with V8 coverage                                     |
+| `npm run format`        | Prettier                                                    |
 
 API keys are never bundled: in development Vite's proxy attaches them, and in the container nginx
 does. `grep -r VITE_ dist/` returns nothing.

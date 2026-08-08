@@ -12,12 +12,14 @@ Run `git diff main...HEAD` and `git diff HEAD` to get the real diff, then read t
 Flag, in three buckets:
 
 **Correctness**
+
 - Bugs; missing loading / empty / error states; unhandled rejected promises.
 - `Promise.all` where `allSettled` is required — one dead provider must never blank the feed.
 - Dedupe or merge-sort that drops articles, or that mutates its input array.
 - Missing `AbortSignal` plumbing on a fetch that a filter change can re-trigger.
 
 **Conventions** (each is a finding on its own)
+
 - Radix used directly in a feature instead of an `App*` wrapper; raw hex instead of a theme token.
 - A provider's field names appearing outside `src/core/sources/adapters/`.
 - A `VITE_*` API key reachable from client code — **always a blocker**.
@@ -26,6 +28,7 @@ Flag, in three buckets:
 - A `tailwind.config.js` reappearing — it is dead in v4 and misleads.
 
 **DRY / KISS / SOLID** — this challenge is explicitly graded on it, so hold the bar in both directions
+
 - Duplicated logic across adapters that wants one shared helper.
 - A module depending on a concrete adapter instead of the `NewsSource` interface.
 - A `switch` over source ids where a registry entry belongs.
