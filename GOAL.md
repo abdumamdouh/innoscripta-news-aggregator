@@ -56,6 +56,7 @@ One line per iteration, appended by the loop. Do not edit by hand.
 
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
 iteration 3 — [1b] Playwright e2e harness — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 5 — [1b] Playwright e2e harness — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
