@@ -28,7 +28,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | 1b  | Playwright e2e harness                          | done        | feat/playwright-e2e-harness                   | Merged. 9 specs green: shell, language, navigation.                                                                                                                                                                         |
 | 1c  | German (de) locale                              | done        | feat/german-de-locale                         | Merged. en/ar/de all 17 keys, de stays ltr.                                                                                                                                                                                 |
 | 2   | Domain core: Article, NewsSource, aggregator    | done        | feat/domain-core-article-newssource-aggregato |                                                                                                                                                                                                                             |
-| 3   | Four live adapters + two stubs                  | not started |                                               |                                                                                                                                                                                                                             |
+| 3   | Four live adapters + two stubs                  | done        | feat/four-live-adapters-two-stubs             |                                                                                                                                                                                                                             |
 | 4   | nginx proxy + env wiring                        | not started |                                               |                                                                                                                                                                                                                             |
 | 5   | Article list: search, filters, sort, pagination | not started |                                               |                                                                                                                                                                                                                             |
 | 6   | Article details page                            | not started |                                               |                                                                                                                                                                                                                             |
@@ -47,10 +47,25 @@ Findings raised by verifiers on problems outside the item being built. Drained *
 backlog rows. Appended by the loop; safe to add to by hand.
 
 - [x] (minor) NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream: When a provider supplies title/url/publishedAt but no description (null trailText, null abstract/snippet/lead_paragraph, no RSS `<description>`), normalize() defaults description to ''. This is deliberate per the spec ("defaulted... not allowed to produce a half-built Article") and is tested, but nothing downstream (item 5/6 list and detail views) has been reviewed yet for how it renders an empty description — worth confirming those views show an explicit empty state rather than a blank line once they're built. — found in 3
-      **Resolved as spec, not code.** There is nothing to fix today: the only consumer of `Article.description` in the tree is `aggregator.ts` search-text folding, where `''` is harmless, and items 5/6 have zero implementation, so no rendering path exists to review. Writing a placeholder helper now would be dead code with a vacuous test. The requirement is instead written into the item 5 and item 6 specs above (`articles.noDescription` placeholder, all three locales, covered by the unit tests and `e2e/articles.spec.ts`), so it is binding on those items when they are built rather than a note that ages out.
-      Status: needs human review
-      Branch: feat/newsapi-guardian-nyt-bbc-descriptions-ca
-      Notes: e2e: BLOCKED: carry-forward-2 asks to confirm the article list/detail views show an explicit empty state for empty descriptions, but those views do not exist yet in this codebase. src/routes/router.tsx (lines 17-20) has an explicit comment: 'Backlog items 5 and 6 replace these two with `...articlesRoutes`' — both the index route (`/`) and `articles/:articleId` currently render `<PlaceholderPage>` only. No src/features/Articles (or any article list/detail component) exists in src/ (only src/components/{common,layout}, src/routes with NotFoundPage/PlaceholderPage/RouteErrorPage/router.tsx). Live browser check at http://localhost:3100/ and http://localhost:3100/articles/123 (fresh accessibility snapshots after navigation) both show only the placeholder heading 'Articles' and tagline/route-param text — no article card, list item, or detail body rendering a description field at all. | e2e: npm run test:e2e passed 9/9 specs (shell/navigation/language/theme), but none of them exercise article rendering or descriptions — there is no e2e coverage for this item because the feature under test doesn't exist yet. This is consistent with the item text itself: 'worth confirming those views show an explicit empty state ... once they're built' — they are not built. | e2e: The normalize()/degrade() logic that defaults description to '' does exist and is exercised in src/core/sources/aggregator.ts and its tests (src/core/sources/aggregator.test.ts), confirming the upstream (item 3) behavior is real and unit-tested — only the downstream rendering (items 5/6) is missing, matching exactly what the backlog item flags as unverified.
+      (Three near-identical bullets were raised for this one finding; folded into this entry.)
+      **Resolved in `shared.ts`, plus a binding line in the item 5/6 specs.** The finding is real
+      and the `''` is correct, but the `?? ''` that produced it was copy-pasted into all four
+      adapters, so the contract lived in four places and nowhere. It is now one function,
+      `description(...candidates)` in `src/core/sources/adapters/shared.ts`, which every adapter
+      calls — including NYT's abstract → snippet → lead_paragraph fallback, which used to be a
+      hand-rolled `??` chain. `plainText` is no longer exported: `description()` is the only way
+      a provider summary reaches an `Article`, so no fifth adapter can quietly invent its own
+      default. The downstream half of the ask cannot be code today — items 5/6 have zero
+      implementation — so it is written into their specs above (`articles.noDescription`
+      placeholder, all three locales, `e2e/articles.spec.ts`), binding on those items rather
+      than a note that ages out.
+      Covered by: `describe('description()')` in `src/core/sources/adapters/adapters.test.ts`
+      (absence, placeholders, markup that strips to nothing, candidate order, and all four
+      adapters' own `normalize` on a description-less payload), and three specs in
+      `e2e/sources.spec.ts` that replay the captured NewsAPI/NYT/BBC responses with the summary
+      fields stripped and assert `''` through the real browser fetch + normalize path. Both
+      were mutation-checked: relaxing the `?? ''` fails 8 unit tests and 3 e2e specs.
+- [ ] (minor) NYT image() always takes the first multimedia crop, not the largest: image() for the legacy array multimedia form takes multimedia[0]?.url unconditionally. NYT's legacy multimedia arrays are ordered by crop name, not size, so index 0 isn't guaranteed to be the largest/best usable image (contrast bbc-rss.ts's thumbnail(), which explicitly picks the widest crop by width attribute). Low impact — still resolves to a usable URL — but it's an inconsistency in how the two adapters pick 'the best' image. Note: this applies only to the legacy array-shaped `multimedia`; the newer object shape already prefers `default` over `thumbnail`. (Raised twice, deduped to this bullet.) — found in 3
 
 ## Loop log
 
@@ -59,6 +74,8 @@ One line per iteration, appended by the loop. Do not edit by hand.
 iteration 1 — [1] App shell + design system — needs human review — static:pass review:pass e2e:blocked acceptance:pass
 iteration 1 — [carry-forward-1] Unused nav locale keys (nav.feed / nav.menu.open / nav.menu.close) — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 1 — [2] Domain core: Article, NewsSource, aggregator — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 1 — [3] Four live adapters + two stubs — needs human review — static:pass review:pass e2e:pass acceptance:fail — requeued for another pass
+iteration 3 — [3] Four live adapters + two stubs — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 2 — [carry-forward-2] NewsAPI/Guardian/NYT/BBC descriptions can legitimately render as empty strings downstream — needs human review — static:pass review:pass e2e:blocked acceptance:pass — requeued for another pass
 
 ---

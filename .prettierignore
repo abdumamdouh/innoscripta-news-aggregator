@@ -3,3 +3,6 @@ coverage
 node_modules
 package-lock.json
 src/i18n/locales
+
+# Captured provider responses. Reformatting them would make them no longer verbatim.
+src/core/sources/adapters/__fixtures__/*.json
