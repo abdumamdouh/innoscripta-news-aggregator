@@ -111,7 +111,28 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/no-literal-toast-component-for-bookmark-`.
 - [x] (minor) BookmarksPage has zero unit test coverage: src/features/Articles/pages/BookmarksPage.tsx has no corresponding BookmarksPage.test.tsx anywhere in the repo (FeedPage, ArticlesPage and ArticleDetailsPage all have one). This predates the toast migration but means none of the list CRUD or toast-triggering logic in this file has component-level coverage. Worth a dedicated backlog item to add BookmarksPage.test.tsx. — found in carry-forward (found in 9) — No literal toast component for bookmark/list mutations
       Status: done. Branch: `feat/bookmarkspage-has-zero-unit-test-coverag`.
-- [ ] (completeness-critic) Two completed carry-forward items left unchecked in the backlog file: the completeness critic flagged that this run's carry-forward log/backlog bookkeeping has two items that were actually completed (code merged, `Status: done` note present) but whose checklist state in this section was not updated to reflect that. Next run: re-audit every `- [ ]`/`- [x]` entry above against its `Status:` line and the branch's actual merge state in `git log`, and flip any that are done but still unchecked — don't take the checkbox glyph as ground truth over the prose status line underneath it.
+- [x] (completeness-critic) Two completed carry-forward items left unchecked in the backlog file: the completeness critic flagged that this run's carry-forward log/backlog bookkeeping has two items that were actually completed (code merged, `Status: done` note present) but whose checklist state in this section was not updated to reflect that. Next run: re-audit every `- [ ]`/`- [x]` entry above against its `Status:` line and the branch's actual merge state in `git log`, and flip any that are done but still unchecked — don't take the checkbox glyph as ground truth over the prose status line underneath it.
+      **No discrepancy found — closed as refuted, no edit to any other entry.** Audited the 18
+      carry-forward entries above this one against both their `Status:` line and the real merge
+      state on `main`. Every one of those 18 is already `- [x]`, every one says `Status: done`,
+      and every branch named in those 18 status lines has a merge commit on `main`. There were
+      zero done-but-unchecked entries to flip, and zero checked-but-unmerged ones either — the
+      two directions the critic's premise could have been wrong in.
+      This entry itself is the one exception, and deliberately so: like every other item, it is
+      checked and marked `Status: done` in the same commit that closes it, on its own branch,
+      _before_ that branch is merged. So while you are reading this on
+      `feat/two-completed-carry-forward-items-left-u`, this line claims done and has no merge
+      commit on `main` — that is the loop's normal in-flight state, not a bookkeeping miss. The
+      audit rule therefore applies to entries from earlier iterations, never to the entry the
+      current branch is closing.
+      Re-run the audit with, from the repo root:
+      ``grep -oE '^ *Status: done\. Branch: `feat/[^`]+`' GOAL.md | grep -oE 'feat/[^`]+' | grep -vx "$(git branch --show-current)" | while read b; do git log --oneline main --grep="$b" -1 | grep -q . || echo "UNMERGED $b"; done``
+      — it anchors on the `Status: done.` prose (so it does not match branch names quoted inside
+      an entry's own body) and excludes the current branch. Any `UNMERGED` line it prints, or any
+      `- [ ]` entry whose prose reads `Status: done`, is a real discrepancy; silence is clean. No
+      unit test or e2e spec: this item added no parsing, no pure logic and no user-visible
+      behaviour — it is a one-off audit of a markdown file, and the one-liner above is its check.
+      Status: done. Branch: `feat/two-completed-carry-forward-items-left-u`.
 
 ## Loop log
 
