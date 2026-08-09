@@ -42,6 +42,7 @@
   "articles.filters.anyAuthor": "Alle Autoren",
   "articles.filters.sources": "Quellen",
   "articles.filters.clear": "Filter zurücksetzen",
+  "articles.filters.apply": "Ergebnisse anzeigen",
   "articles.filters.remove": "Filter entfernen: {{label}}",
   "articles.sort.label": "Sortierung",
   "articles.sort.newest": "Neueste zuerst",

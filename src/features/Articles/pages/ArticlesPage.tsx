@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SlidersHorizontal } from 'lucide-react'
+import { AppButton, AppModal } from '@/components/common/design-system'
 import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { ArticlesFilters } from '@/features/Articles/components/ArticlesFilters'
@@ -13,6 +16,7 @@ import { useAuthorFacet } from '@/features/Articles/hooks/useAuthorFacet'
 
 export function ArticlesPage() {
   const { t } = useTranslation()
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const {
     state,
     term,
@@ -40,7 +44,33 @@ export function ArticlesPage() {
         sort={state.sort}
         onSortChange={(sort) => update({ sort })}
       />
-      <ArticlesFilters state={state} authors={authors} onChange={update} />
+      {/*
+        One filter panel, two homes: the card the desktop layout has room for, and a drawer
+        below `lg` where it would otherwise push the stories off the first screen. The card
+        is `display:none` on a phone, so only one copy is ever in the accessibility tree.
+      */}
+      <div className="hidden lg:block">
+        <ArticlesFilters state={state} authors={authors} onChange={update} />
+      </div>
+      <AppButton
+        variant="secondary"
+        className="self-start lg:hidden"
+        onClick={() => setFiltersOpen(true)}
+      >
+        <SlidersHorizontal className="size-4" aria-hidden />
+        {t('articles.filters.title')}
+      </AppButton>
+      <AppModal
+        variant="drawer"
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        title={t('articles.filters.title')}
+        footer={
+          <AppButton onClick={() => setFiltersOpen(false)}>{t('articles.filters.apply')}</AppButton>
+        }
+      >
+        <ArticlesFilters state={state} authors={authors} onChange={update} embedded />
+      </AppModal>
       <FilterChips state={state} onChange={update} onClear={reset} />
       <SavedSearches state={state} onApply={update} />
 

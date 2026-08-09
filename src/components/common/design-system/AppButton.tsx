@@ -14,8 +14,10 @@ const VARIANTS: Record<AppButtonVariant, string> = {
   danger: 'bg-danger-600 text-paper-0 hover:bg-danger-700',
 }
 
+// Below `lg` the pointer is a thumb, so the small size grows to the 44px touch target and
+// only the desktop layout keeps the compact one.
 const SIZES: Record<AppButtonSize, string> = {
-  sm: 'min-h-9 px-3 text-sm',
+  sm: 'min-h-11 px-3 text-sm lg:min-h-9',
   md: 'min-h-11 px-4 text-base',
 }
 
