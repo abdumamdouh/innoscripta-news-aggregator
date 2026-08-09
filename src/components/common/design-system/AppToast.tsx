@@ -18,7 +18,7 @@ interface Toast {
  * One toast at a time, in one live region for the whole app. A mutation says what it did and
  * the line clears itself; the newest message wins rather than stacking.
  *
- * ponytail: latest-wins, no queue — every call site here fires one message per user action.
+ * Latest-wins, no queue — every call site here fires one message per user action.
  * Add a queue when a single action starts producing several.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -47,7 +47,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         role="status"
         className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4"
       >
-        {toast ? (
+        {toast && (
           <div
             // A fresh node per message: same text twice in a row is still a DOM change, so a
             // screen reader announces the second one instead of sitting on the first.
@@ -63,7 +63,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <X className="size-4" aria-hidden />
             </AppIconButton>
           </div>
-        ) : null}
+        )}
       </div>
     </toastContext.Provider>
   )

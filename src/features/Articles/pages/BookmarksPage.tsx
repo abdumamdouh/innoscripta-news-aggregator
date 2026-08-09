@@ -111,7 +111,7 @@ export function BookmarksPage() {
           {filter(null, t('bookmarks.all'))}
           {lists.map((list) => filter(list.id, list.name))}
         </ul>
-        {activeList ? (
+        {activeList && (
           <div className="flex items-center gap-1">
             <AppIconButton
               label={t('bookmarks.list.rename')}
@@ -123,7 +123,7 @@ export function BookmarksPage() {
               <Trash2 className="size-5" aria-hidden />
             </AppIconButton>
           </div>
-        ) : null}
+        )}
       </div>
 
       {articles.length ? (

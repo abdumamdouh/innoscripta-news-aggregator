@@ -14,9 +14,9 @@ export function RouteErrorPage() {
         {t('route.error.title')}
       </h1>
       <p className="mt-2 text-ink-500">{t('route.error.body')}</p>
-      {import.meta.env.DEV && error instanceof Error ? (
+      {import.meta.env.DEV && error instanceof Error && (
         <pre className="mt-4 overflow-x-auto text-start text-sm text-ink-500">{error.message}</pre>
-      ) : null}
+      )}
       <AppButton className="mt-6" onClick={() => void navigate('/')}>
         {t('route.notFound.back')}
       </AppButton>

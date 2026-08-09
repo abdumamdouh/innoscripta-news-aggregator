@@ -22,7 +22,7 @@ export function relevanceScore(article: Article, term: string): number {
 }
 
 /**
- * ponytail: orders the page the providers returned, not the whole result set — none of
+ * Orders the page the providers returned, not the whole result set — none of
  * the four reports a total or accepts "oldest first", so an earlier page cannot be known
  * without walking every page of every provider. Upgrade path: read each provider's
  * `totalResults` in its adapter and fan out properly.

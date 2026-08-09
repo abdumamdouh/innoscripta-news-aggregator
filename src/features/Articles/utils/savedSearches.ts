@@ -42,7 +42,7 @@ export function parseSavedSearches(raw: string | null): SavedSearch[] {
   }
 }
 
-// ponytail: same local id scheme as reading lists — presets never leave this device.
+// Same local id scheme as reading lists — presets never leave this device.
 const newId = () => `search-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 /** Appended, so saving a preset does not reshuffle the ones already in the bar. */

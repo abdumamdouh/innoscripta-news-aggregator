@@ -30,7 +30,7 @@ export function AppEmptyState({ title, body, headingLevel = 2, action }: AppEmpt
         {title}
       </Heading>
       <p className="mt-2 text-ink-500">{body}</p>
-      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+      {action && <div className="mt-4 flex justify-center">{action}</div>}
     </AppCard>
   )
 }

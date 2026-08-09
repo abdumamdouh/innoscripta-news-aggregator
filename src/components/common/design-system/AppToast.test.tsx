@@ -28,7 +28,7 @@ describe('ToastProvider', () => {
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => vi.useRealTimers())
 
-  // ponytail: fireEvent, not userEvent — userEvent's own timers fight the fake clock this
+  // FireEvent, not userEvent — userEvent's own timers fight the fake clock this
   // suite needs, and a toast has nothing to type into.
   const click = (element: HTMLElement) => fireEvent.click(element)
 

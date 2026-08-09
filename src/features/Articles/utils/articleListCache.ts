@@ -6,7 +6,7 @@ import { createLocalStorageStore } from '@/utils/localStorageStore'
  * The last article list that actually loaded, kept so a cold start with no network shows
  * the reader yesterday's stories under a clear notice instead of an empty page.
  *
- * ponytail: one slot per screen, each stamped with the query key it was fetched under — a
+ * One slot per screen, each stamped with the query key it was fetched under — a
  * reader who changes preferences or filters and then loses the network gets no notice
  * rather than the old set's stories under one. Keep N slots per screen the day a list
  * grows tabs worth switching between.

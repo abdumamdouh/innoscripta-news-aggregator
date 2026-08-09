@@ -26,7 +26,7 @@ function applyLanguage(language: string) {
   localStorage.setItem(appTheme.storageKeys.language, lang)
 }
 
-// ponytail: flat keys, no namespaces — one resource bundle per language is the whole need.
+// Flat keys, no namespaces — one resource bundle per language is the whole need.
 void i18n.use(initReactI18next).init({
   resources: { en: { translation: en }, ar: { translation: ar }, de: { translation: de } },
   lng: readStoredLanguage(),

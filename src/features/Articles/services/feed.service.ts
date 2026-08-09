@@ -11,7 +11,7 @@ import type { Preferences } from '@/features/Preferences'
  * reader may prefer several of each. Every dimension the reader left empty stays absent —
  * "no preference there" widens the feed, it never blanks it (see `preferences.types.ts`).
  *
- * ponytail: page 1 only. The feed is a "what is new for me" glance, not a second
+ * Page 1 only. The feed is a "what is new for me" glance, not a second
  * directory — add paging the day someone asks to scroll past nine stories.
  */
 export function toFeedQuery(preferences: Preferences): ArticleQuery {

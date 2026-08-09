@@ -134,13 +134,13 @@ export function ArticleDetailsPage() {
       <BackLink search={search} />
 
       <AppCard as="article" className="flex flex-col gap-4">
-        {article.imageUrl ? (
+        {article.imageUrl && (
           <img
             src={article.imageUrl}
             alt=""
             className="aspect-video w-full rounded-lg bg-paper-50 object-cover dark:bg-ink-700"
           />
-        ) : null}
+        )}
 
         <div className="flex flex-wrap items-center gap-2">
           <SourceBadge sourceId={article.sourceId} sourceLabel={article.sourceLabel} />
@@ -154,7 +154,7 @@ export function ArticleDetailsPage() {
 
         <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">{article.title}</h1>
 
-        {article.author ? <p className="text-sm text-ink-500">{article.author}</p> : null}
+        {article.author && <p className="text-sm text-ink-500">{article.author}</p>}
 
         {/*
           The Guardian is the only provider that serves a body; the other three give a summary

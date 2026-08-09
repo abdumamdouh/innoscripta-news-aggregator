@@ -46,7 +46,7 @@ const ENTITIES: Record<string, string> = {
  * `Article.content` — a provider's full article HTML flattened to text: block ends become
  * paragraph breaks, every tag goes, entities are decoded. Text, not markup, so no sanitizer
  * and no `dangerouslySetInnerHTML` anywhere downstream.
- * ponytail: drops images, links and emphasis with the tags. Render real markup only if the
+ * Drops images, links and emphasis with the tags. Render real markup only if the
  * details page is ever asked to look like the original article.
  */
 export function bodyText(value: unknown): string | undefined {

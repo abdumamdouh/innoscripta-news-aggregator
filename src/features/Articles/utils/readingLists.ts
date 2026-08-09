@@ -36,7 +36,7 @@ export function parseReadingLists(raw: string | null): ReadingList[] {
   }
 }
 
-// ponytail: timestamp + random suffix, not `crypto.randomUUID` — ids never leave this device
+// Timestamp + random suffix, not `crypto.randomUUID` — ids never leave this device
 // and never index anything. Swap in a uuid if lists ever sync between devices.
 const newId = () => `list-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 

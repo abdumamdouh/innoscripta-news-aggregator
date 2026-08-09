@@ -15,11 +15,11 @@ export function AppInput({ label, error, className, id, ...props }: AppInputProp
 
   return (
     <div className="flex flex-col gap-1">
-      {label ? (
+      {label && (
         <label htmlFor={inputId} className="text-sm font-medium text-ink-700 dark:text-ink-100">
           {label}
         </label>
-      ) : null}
+      )}
       <input
         id={inputId}
         aria-invalid={error ? true : undefined}
@@ -33,11 +33,11 @@ export function AppInput({ label, error, className, id, ...props }: AppInputProp
         )}
         {...props}
       />
-      {error ? (
+      {error && (
         <p id={errorId} className="text-sm text-danger-600 dark:text-danger-300">
           {error}
         </p>
-      ) : null}
+      )}
     </div>
   )
 }

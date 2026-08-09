@@ -28,7 +28,7 @@ export function unsaveArticle(id: string) {
 }
 
 /**
- * ponytail: one article's saved flag, read through the shared `useBookmarks` snapshot rather
+ * One article's saved flag, read through the shared `useBookmarks` snapshot rather
  * than a private copy of the list — this hook writes, and every other reader on the page sees
  * it. Item 9 (reading lists) is where a fuller store earns its keep.
  *

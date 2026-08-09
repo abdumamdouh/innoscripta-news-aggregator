@@ -6,7 +6,7 @@ import type { Article } from '@/core/sources/types'
  * fetch narrows to that author, so a facet built from the current page alone collapses to
  * a single entry and no other byline is ever reachable again.
  *
- * ponytail: a running set of what the reader has actually loaded, not a full index — no
+ * A running set of what the reader has actually loaded, not a full index — no
  * provider offers an authors endpoint. Upgrade path: a dedicated bylines fetch if one
  * ever exists.
  */

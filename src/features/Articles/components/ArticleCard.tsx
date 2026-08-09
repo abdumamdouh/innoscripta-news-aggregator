@@ -37,7 +37,7 @@ export function ArticleCard({ article, actions }: ArticleCardProps) {
         <time dateTime={article.publishedAt} className="text-xs text-ink-500">
           {formatArticleDate(article.publishedAt, i18n.language)}
         </time>
-        {actions ? <div className="ms-auto flex items-center gap-1">{actions}</div> : null}
+        {actions && <div className="ms-auto flex items-center gap-1">{actions}</div>}
       </div>
 
       <h2 className="text-base font-semibold text-ink-900 dark:text-ink-100">
@@ -56,9 +56,9 @@ export function ArticleCard({ article, actions }: ArticleCardProps) {
         className="line-clamp-3 min-h-15 text-sm"
       />
 
-      {article.author ? (
+      {article.author && (
         <p className="mt-auto line-clamp-1 text-xs text-ink-500">{article.author}</p>
-      ) : null}
+      )}
     </AppCard>
   )
 }

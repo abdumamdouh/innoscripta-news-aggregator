@@ -33,8 +33,6 @@ export default defineConfig(({ mode }) => ({
     include: ['src/**/*.{test,spec}.{ts,tsx}', 'e2e/**/*.test.ts', '*.{test,spec}.ts'],
     exclude: [...configDefaults.exclude, 'e2e/**/*.spec.ts'],
     css: true,
-    // Real suites land with backlog item 3 (aggregator). Until then an empty run is
-    // a pass, not a failure — otherwise the loop's test gate is red from iteration 1.
     passWithNoTests: true,
     coverage: {
       provider: 'v8',

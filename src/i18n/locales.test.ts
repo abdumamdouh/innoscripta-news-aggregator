@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import en from '@/i18n/locales/en.json'
 import ar from '@/i18n/locales/ar.json'
 
-// ponytail: literal substring scan, not an AST pass. Keys are flat string literals
+// Literal substring scan, not an AST pass. Keys are flat string literals
 // everywhere today; upgrade to a parser only if someone builds keys dynamically.
 const modules = import.meta.glob<string>('../**/*.{ts,tsx}', {
   query: '?raw',

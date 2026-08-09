@@ -58,11 +58,11 @@ export function AppModal({
               <Dialog.Title className="text-lg font-semibold text-ink-900 dark:text-ink-100">
                 {title}
               </Dialog.Title>
-              {description ? (
+              {description && (
                 <Dialog.Description className="mt-1 text-sm text-ink-500">
                   {description}
                 </Dialog.Description>
-              ) : null}
+              )}
             </div>
             <Dialog.Close asChild>
               {/* A long title must never squeeze the way out below a thumb's width. */}
@@ -76,7 +76,7 @@ export function AppModal({
             which a full-height drawer on a short viewport does the moment the fields outgrow it.
           */}
           <div className="mt-4 min-h-0 flex-1 overflow-auto">{children}</div>
-          {footer ? <div className="mt-6 flex shrink-0 justify-end gap-2">{footer}</div> : null}
+          {footer && <div className="mt-6 flex shrink-0 justify-end gap-2">{footer}</div>}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

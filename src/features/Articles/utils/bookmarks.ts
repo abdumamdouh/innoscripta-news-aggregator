@@ -7,10 +7,6 @@ import { createLocalStorageStore } from '@/utils/localStorageStore'
  * article by id (see `findCachedArticle`), so an id alone stops resolving the moment the
  * story falls off the page the reader saved it from — the snapshot is what makes a
  * bookmark's permalink survive that.
- *
- * A deliberately small precursor to the bookmarks feature (backlog item 9), under the
- * storage key that was already reserved for it. Item 9 extends this shape rather than
- * migrating away from it.
  */
 export interface Bookmark {
   id: string
@@ -34,7 +30,7 @@ const asArticle = (value: unknown, id: string): Article | undefined => {
   const candidate = value as Record<string, unknown>
   if (candidate.id !== id) return undefined
   if (requiredArticleFields.some((field) => typeof candidate[field] !== 'string')) return undefined
-  // ponytail: shape check only; a bad date string still renders as-is, tighten if that shows up.
+  // Shape check only; a bad date string still renders as-is, tighten if that shows up.
   return value as Article
 }
 
@@ -90,8 +86,7 @@ const sameArticle = (a: Article, b: Article) =>
  * A snapshot only refreshes while a fresher copy is on screen, which means a cache hit
  * (see `useArticleDetails`) — no adapter can fetch one article by id to check on it, so a
  * bookmark nobody opens from a warm list keeps the copy it has. That is the permalink
- * surviving, which is the point of the snapshot; item 9 (reading lists) is where a real
- * store can afford to re-resolve saved stories in bulk.
+ * surviving, which is the point of the snapshot.
  */
 export function refreshBookmark(bookmarks: Bookmark[], article: Article): Bookmark[] {
   const existing = bookmarks.find((bookmark) => bookmark.id === article.id)

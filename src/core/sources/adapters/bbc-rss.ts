@@ -104,7 +104,7 @@ export const bbcNewsSource: NewsSource<BbcRaw> = {
   available: true,
   async fetch(query, signal) {
     const categories = resolveCategories(query)
-    // ponytail: no feed for any asked-for category means BBC genuinely has nothing to
+    // No feed for any asked-for category means BBC genuinely has nothing to
     // contribute — returning the front page instead would smuggle in unfiltered stories.
     if (!categories.length) return []
     const feeds = await Promise.all(
