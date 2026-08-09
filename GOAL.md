@@ -109,7 +109,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/no-toast-announcement-for-bookmark-toggl`.
 - [x] (minor) No literal toast component for bookmark/list mutations: Both pages use a local aria-live status paragraph instead of a real toast, deliberately deferred (per in-code ponytail comments) until backlog item 11 ships a ToastProvider. When item 11 lands, wire these two mutation-feedback sites into the real toast system instead of leaving the aria-live paragraphs as a permanent parallel mechanism. — found in 9
       Status: done. Branch: `feat/no-literal-toast-component-for-bookmark-`.
-- [ ] (minor) BookmarksPage has zero unit test coverage: src/features/Articles/pages/BookmarksPage.tsx has no corresponding BookmarksPage.test.tsx anywhere in the repo (FeedPage, ArticlesPage and ArticleDetailsPage all have one). This predates the toast migration but means none of the list CRUD or toast-triggering logic in this file has component-level coverage. Worth a dedicated backlog item to add BookmarksPage.test.tsx. — found in carry-forward (found in 9) — No literal toast component for bookmark/list mutations
+- [x] (minor) BookmarksPage has zero unit test coverage: src/features/Articles/pages/BookmarksPage.tsx has no corresponding BookmarksPage.test.tsx anywhere in the repo (FeedPage, ArticlesPage and ArticleDetailsPage all have one). This predates the toast migration but means none of the list CRUD or toast-triggering logic in this file has component-level coverage. Worth a dedicated backlog item to add BookmarksPage.test.tsx. — found in carry-forward (found in 9) — No literal toast component for bookmark/list mutations
+      Status: done. Branch: `feat/bookmarkspage-has-zero-unit-test-coverag`.
 
 ## Loop log
 
@@ -144,6 +145,7 @@ iteration 16 — [carry-forward-13] Shrunk touch target on saved-page card actio
 iteration 17 — [carry-forward-14] Stale ponytail comment in useBookmarks.ts — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 18 — [carry-forward (found in 9) — No toast/announcement for bookmark toggle outside the Bookmarks page] No toast/announcement for bookmark toggle outside the Bookmarks page — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 19 — [carry-forward (found in 9) — No literal toast component for bookmark/list mutations] No literal toast component for bookmark/list mutations — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 20 — [carry-forward (found in 9) — BookmarksPage has zero unit test coverage] BookmarksPage has zero unit test coverage — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
