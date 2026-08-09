@@ -139,7 +139,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/articlespage-directory-has-no-offline-ca`.
 - [x] (minor) Old (pre-fix) feed cache entries are silently dropped on upgrade: parseFeedCache now rejects any stored entry without a `key` field (src/features/Articles/utils/feedCache.ts:56). Any cache written by a previous build (before this change shipped) has no `key`, so on first load after the upgrade it is treated as "no cache" and the reader loses their offline fallback once, with no migration path. Acceptable given it's a soft cache, but not called out anywhere (no changelog/comment noting the one-time loss). — found in carry-forward-feed-cache-single-slot
       Status: done. Branch: `feat/old-pre-fix-feed-cache-entries-are-silen`.
-- [ ] (minor) feed.cached.notice translation key/component name is feed-specific but now shared with the directory: CachedFeedNotice is now rendered from both FeedPage and ArticlesPage, but the translation key is still `feed.cached.notice` and the component/file are still named for the feed. Current copy is generic enough not to leak on screen, but the naming misleads future editors. Consider renaming to something list-agnostic now that there's a second caller. — found in carry-forward-articlespage-no-offline-cache
+- [x] (minor) feed.cached.notice translation key/component name is feed-specific but now shared with the directory: CachedFeedNotice is now rendered from both FeedPage and ArticlesPage, but the translation key is still `feed.cached.notice` and the component/file are still named for the feed. Current copy is generic enough not to leak on screen, but the naming misleads future editors. Consider renaming to something list-agnostic now that there's a second caller. — found in carry-forward-articlespage-no-offline-cache
+      Status: done. Branch: `feat/feed-cached-notice-translation-key-compo`.
 
 ## Loop log
 
@@ -181,6 +182,7 @@ iteration 3 — [11] UI states + offline cache — done — static:pass review:p
 iteration 4 — [carry-forward-feed-cache-single-slot] Feed cache is a single global slot, not keyed by preferences — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 5 — [carry-forward-articlespage-no-offline-cache] ArticlesPage (directory) has no offline-cache fallback, only FeedPage does — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 6 — [carry-forward-feed-cache-key-migration] Old (pre-fix) feed cache entries are silently dropped on upgrade — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 7 — [carry-forward-articlespage-no-offline-cache-notice-name] feed.cached.notice translation key/component name is feed-specific but now shared with the directory — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
