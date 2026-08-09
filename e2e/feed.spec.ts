@@ -69,7 +69,8 @@ test.describe('personalized feed', () => {
     await settle(page)
     await expect(cards(page)).toHaveCount(9)
     expect(await sourceLabels(page)).toEqual(new Set(['The Guardian']))
-    await expect(page.getByRole('status')).toHaveText('9 articles on this page')
+    // The feed has no pager, so the count must not claim there are other pages.
+    await expect(page.getByRole('status')).toHaveText('9 articles in your feed')
   })
 
   test('narrows to a preferred author within the preferred source', async ({ page }) => {

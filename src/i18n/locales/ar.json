@@ -75,6 +75,7 @@
   "articles.category.sport": "الرياضة",
   "feed.empty.title": "لا توجد تفضيلات بعد",
   "feed.empty.body": "اختر مصادرك وفئاتك ومؤلفيك، وستمتلئ هذه الخلاصة بها.",
+  "feed.results": "{{total}} مقالات في خلاصتك",
   "pagination.label": "ترقيم الصفحات",
   "pagination.previous": "الصفحة السابقة",
   "pagination.next": "الصفحة التالية",

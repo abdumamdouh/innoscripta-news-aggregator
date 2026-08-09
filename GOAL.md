@@ -99,7 +99,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/articlespage-s-own-iserror-branch-has-no`.
 - [x] (minor) Preferences feature index.ts deviates from the stated feature-folder contract: patterns.md says "the feature's index.ts exports its routes and nothing else"; src/features/Preferences/index.ts exports PreferencesButton and usePreferences instead, since the feature has no route. This is the first non-route feature in the codebase, so the rule as literally written doesn't fit it, but nothing documents the exception at the rule level (only in the feature's own comment). Worth a one-line addendum to patterns.md once item 8 (which will import usePreferences) lands, so the exception isn't just tribal knowledge in one file. — found in 7
       Status: done. Branch: `feat/preferences-feature-index-ts-deviates-fr`.
-- [ ] (minor) Feed reuses "articles on this page" copy though the feed has no pagination UI: src/features/Articles/pages/FeedPage.tsx:52-54 reuses the articles.results i18n key ('{{total}} articles on this page') for the result count, but feed.service.ts's toFeedQuery is hard-capped to page 1 with no Pagination component rendered on this page. 'on this page' implies other pages exist to page through, which isn't true here — minor copy mismatch, not a blocker for this item. — found in 8
+- [x] (minor) Feed reuses "articles on this page" copy though the feed has no pagination UI: src/features/Articles/pages/FeedPage.tsx:52-54 reuses the articles.results i18n key ('{{total}} articles on this page') for the result count, but feed.service.ts's toFeedQuery is hard-capped to page 1 with no Pagination component rendered on this page. 'on this page' implies other pages exist to page through, which isn't true here — minor copy mismatch, not a blocker for this item. — found in 8
+      Status: done. Branch: `feat/feed-reuses-articles-on-this-page-copy-t`. FeedPage now uses a new `feed.results` key ("{{total}} articles in your feed", added to en/ar/de next to the existing `feed.empty.*` keys) instead of the paginated `articles.results` copy, which ArticlesPage keeps since that page has a real pager. Covered by a FeedPage unit test asserting the count reads "in your feed" and never "on this page", and by e2e/feed.spec.ts's updated status-line assertion.
 
 ## Loop log
 
@@ -128,6 +129,7 @@ iteration 10 — [carry-forward-9] Two independent localStorage reads of bookmar
 iteration 11 — [7] Preferences (sources / categories / authors) — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 12 — [carry-forward-11] Preferences feature index.ts deviates from the stated feature-folder contract — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 13 — [8] Personalized feed — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 14 — [carry-forward-12] Feed reuses "articles on this page" copy though the feed has no pagination UI — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

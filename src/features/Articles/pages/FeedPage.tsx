@@ -50,7 +50,7 @@ export function FeedPage() {
         <>
           <PartialFailureBanner failures={failures} />
           <p role="status" className="text-sm text-ink-500">
-            {t('articles.results', { total: articles.length })}
+            {t('feed.results', { total: articles.length })}
           </p>
           <ArticleGrid articles={articles} isLoading={isLoading} />
         </>
