@@ -151,6 +151,26 @@ test.describe('article details', () => {
     )
   })
 
+  test('announces every save and unsave, not just the icon changing state', async ({ page }) => {
+    await page.goto('/')
+    await openFirstArticle(page)
+
+    // sr-only, so assert the text rather than visibility: what a screen reader gets is the
+    // whole point, and there is nothing on screen to look at.
+    const announcement = page.locator('[aria-live="polite"]')
+    await expect(announcement).toBeEmpty()
+
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(announcement).toHaveText('Article saved.')
+
+    await page.getByRole('button', { name: 'Remove saved article' }).click()
+    await expect(announcement).toHaveText('Article removed from saved.')
+
+    // Saving again has to re-announce, not sit on the stale "removed" line.
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(announcement).toHaveText('Article saved.')
+  })
+
   test('still reads as saved when the story is reopened without a reload', async ({ page }) => {
     await page.goto('/')
     const title = await openFirstArticle(page)
