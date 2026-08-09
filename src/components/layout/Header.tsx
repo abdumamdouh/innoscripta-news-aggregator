@@ -1,11 +1,15 @@
-import { useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
 import { AppIconButton } from '@/components/common/design-system'
 import { Navigation } from '@/components/layout/Navigation'
 import { LanguageSelect } from '@/components/layout/LanguageSelect'
-import { ProjectDrawer } from '@/components/layout/ProjectDrawer'
+// The markdown renderer and the README are a third of the bundle, for a panel most readers
+// never open. Split out so the feed does not pay for it on first load.
+const ProjectDrawer = lazy(() =>
+  import('@/components/layout/ProjectDrawer').then((m) => ({ default: m.ProjectDrawer })),
+)
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { PreferencesButton } from '@/features/Preferences'
 
@@ -47,11 +51,16 @@ export function Header() {
           <ThemeToggle />
         </div>
       </div>
-      <ProjectDrawer
-        open={projectOpen}
-        onOpenChange={setProjectOpen}
-        onCloseAutoFocus={restoreFocus}
-      />
+      {/* Only mounted once opened, so the split chunk is fetched on demand. */}
+      {projectOpen && (
+        <Suspense fallback={null}>
+          <ProjectDrawer
+            open={projectOpen}
+            onOpenChange={setProjectOpen}
+            onCloseAutoFocus={restoreFocus}
+          />
+        </Suspense>
+      )}
     </header>
   )
 }
