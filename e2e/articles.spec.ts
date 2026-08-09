@@ -2,7 +2,14 @@ import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { PAGE_SIZE, mockProviders } from './providerMocks.ts'
 
-/** The article list, driven as a reader drives it. Feeds and provider mocks are shared. */
+/**
+ * The article list, driven as a reader drives it. Feeds and provider mocks are shared.
+ *
+ * The page's failed-load error card has no case here on purpose: `aggregate` is `allSettled`,
+ * so 500-ing or aborting every provider route still resolves the query and renders the
+ * partial-failure banner below, not the error card. That branch is covered where it can
+ * actually be provoked — src/features/Articles/pages/ArticlesPage.test.tsx.
+ */
 
 const cards = (page: Page) => page.getByRole('article')
 
