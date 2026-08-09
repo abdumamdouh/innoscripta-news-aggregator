@@ -6,10 +6,16 @@ import { createLocalStorageStore } from '@/utils/localStorageStore'
  * The last feed that actually loaded, kept so a cold start with no network shows the
  * reader yesterday's stories under a clear notice instead of an empty page.
  *
- * ponytail: one slot, not keyed by preferences — the feed is a single "what is new for me"
- * list, so there is only ever one to fall back to. Key it the day the feed grows tabs.
+ * ponytail: still one slot, but stamped with the query key it was fetched under — a reader
+ * who changes preferences and then loses the network gets no notice rather than the old
+ * set's stories under one. Keep N slots the day the feed grows tabs worth switching between.
  */
 export interface FeedCache {
+  /**
+   * Identity of the fetch that produced it — the caller's query key, hashed. Anything but
+   * an exact match is another reader's feed as far as the notice is concerned.
+   */
+  key: string
   /** ISO timestamp of the fetch, which is what the notice puts in front of the reader. */
   savedAt: string
   articles: Article[]
@@ -41,11 +47,17 @@ export function parseFeedCache(raw: string | null): FeedCache | null {
   try {
     const parsed: unknown = JSON.parse(raw ?? 'null')
     if (!parsed || typeof parsed !== 'object') return null
-    const { savedAt, articles } = parsed as { savedAt?: unknown; articles?: unknown }
+    const { key, savedAt, articles } = parsed as {
+      key?: unknown
+      savedAt?: unknown
+      articles?: unknown
+    }
+    // Unstamped means written before the feed was keyed — it belongs to no known selection.
+    if (typeof key !== 'string' || !key) return null
     if (typeof savedAt !== 'string' || Number.isNaN(Date.parse(savedAt))) return null
     // An empty cache is nothing to fall back to — it would read as "your feed is empty".
     if (!Array.isArray(articles) || !articles.length || !articles.every(isArticle)) return null
-    return { savedAt, articles }
+    return { key, savedAt, articles }
   } catch {
     return null
   }
@@ -53,5 +65,10 @@ export function parseFeedCache(raw: string | null): FeedCache | null {
 
 const store = createLocalStorageStore(appTheme.storageKeys.feedCache, parseFeedCache)
 
-export const readFeedCache = store.read
+/** The cache only for the key that wrote it — a stamp from another selection reads as none. */
+export const readFeedCache = (key: string): FeedCache | null => {
+  const cache = store.read()
+  return cache?.key === key ? cache : null
+}
+
 export const writeFeedCache = store.write

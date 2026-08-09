@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { hashKey, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -120,6 +120,8 @@ describe('FeedPage — a feed that could not load', () => {
 
 describe('FeedPage — the offline fallback', () => {
   const cached: Article = { ...article, id: 'guardian:2', title: 'Yesterday from storage' }
+  /** What `useFeed` stamps a write with: the query key of the preferences seeded below. */
+  const key = hashKey(['feed', { sources: ['guardian'], categories: [], authors: [] }])
 
   beforeEach(() => {
     localStorage.clear()
@@ -138,14 +140,14 @@ describe('FeedPage — the offline fallback', () => {
     await waitFor(() =>
       expect(
         JSON.parse(localStorage.getItem(appTheme.storageKeys.feedCache) ?? 'null'),
-      ).toMatchObject({ articles: [article] }),
+      ).toMatchObject({ key, articles: [article] }),
     )
   })
 
   it('renders the cached feed under a dated notice instead of an error page', async () => {
     localStorage.setItem(
       appTheme.storageKeys.feedCache,
-      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+      JSON.stringify({ key, savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
     )
     fetchFeedMock.mockRejectedValue(new Error('network down'))
     renderFeed()
@@ -162,7 +164,7 @@ describe('FeedPage — the offline fallback', () => {
     // stories and one failure per source rather than throwing.
     localStorage.setItem(
       appTheme.storageKeys.feedCache,
-      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+      JSON.stringify({ key, savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
     )
     fetchFeedMock.mockResolvedValue(
       resolved({ articles: [], failures: [{ sourceId: 'guardian', reason: 'HTTP 503' }] }),
@@ -179,7 +181,7 @@ describe('FeedPage — the offline fallback', () => {
   it('does not reach for the cache when stories did arrive, however few', async () => {
     localStorage.setItem(
       appTheme.storageKeys.feedCache,
-      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+      JSON.stringify({ key, savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
     )
     fetchFeedMock.mockResolvedValue(
       resolved({ failures: [{ sourceId: 'nyt', reason: 'HTTP 503' }] }),
@@ -194,7 +196,7 @@ describe('FeedPage — the offline fallback', () => {
   it('drops the notice once a retry brings the live feed back', async () => {
     localStorage.setItem(
       appTheme.storageKeys.feedCache,
-      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+      JSON.stringify({ key, savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
     )
     fetchFeedMock.mockRejectedValueOnce(new Error('network down'))
     fetchFeedMock.mockResolvedValue(resolved())
@@ -206,6 +208,24 @@ describe('FeedPage — the offline fallback', () => {
     await waitFor(() =>
       expect(screen.getByRole('link', { name: article.title })).toBeInTheDocument(),
     )
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('ignores a cache from another preference set rather than mislabelling it', async () => {
+    // Written while the reader was on NYT; they are on The Guardian now (see beforeEach).
+    localStorage.setItem(
+      appTheme.storageKeys.feedCache,
+      JSON.stringify({
+        key: hashKey(['feed', { sources: ['nyt'], categories: [], authors: [] }]),
+        savedAt: '2026-06-01T09:30:00.000Z',
+        articles: [cached],
+      }),
+    )
+    fetchFeedMock.mockRejectedValue(new Error('network down'))
+    renderFeed()
+
+    await screen.findByRole('heading', { name: en['articles.error.title'] })
+    expect(screen.queryByRole('link', { name: cached.title })).not.toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 

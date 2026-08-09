@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { hashKey, useQuery } from '@tanstack/react-query'
 import { fetchFeed, hasPreferences } from '@/features/Articles/services/feed.service'
 import { useArticleActions } from '@/features/Articles/hooks/useArticleActions'
 import { readFeedCache, writeFeedCache } from '@/features/Articles/utils/feedCache'
@@ -14,9 +14,13 @@ import type { Preferences } from '@/features/Preferences'
 export function useFeed(preferences: Preferences) {
   const ready = hasPreferences(preferences)
 
+  // The preferences object is the whole query — a save re-fetches, nothing else does. The
+  // same key stamps the cache, so the fallback is only ever the current selection's own feed.
+  const queryKey = ['feed', preferences]
+  const cacheKey = hashKey(queryKey)
+
   const query = useQuery({
-    // The preferences object is the whole query — a save re-fetches, nothing else does.
-    queryKey: ['feed', preferences],
+    queryKey,
     queryFn: ({ signal }) => fetchFeed(preferences, signal),
     enabled: ready,
   })
@@ -26,8 +30,9 @@ export function useFeed(preferences: Preferences) {
   const articles = query.data?.articles
   useEffect(() => {
     // Only a feed with something in it is worth falling back to.
-    if (articles?.length) writeFeedCache({ savedAt: new Date().toISOString(), articles })
-  }, [articles])
+    if (articles?.length)
+      writeFeedCache({ key: cacheKey, savedAt: new Date().toISOString(), articles })
+  }, [articles, cacheKey])
 
   /**
    * "The load failed" is two different shapes here. `aggregate` is `allSettled`, so the
@@ -39,7 +44,7 @@ export function useFeed(preferences: Preferences) {
   const emptyAfterFailures = Boolean(
     query.data && !query.data.articles.length && query.data.failures.length,
   )
-  const cached = query.isError || emptyAfterFailures ? readFeedCache() : null
+  const cached = query.isError || emptyAfterFailures ? readFeedCache(cacheKey) : null
 
   return {
     ready,

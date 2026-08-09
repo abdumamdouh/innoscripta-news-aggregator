@@ -70,6 +70,26 @@ test.describe('offline feed cache', () => {
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
   })
 
+  test('offers no cached feed after the preferences that produced it changed', async ({ page }) => {
+    await mockProviders(page)
+    await loadTheFeedOnce(page)
+
+    // Network dies, then the reader switches newsroom: the stored feed is The Guardian's,
+    // so showing it under "cached results" would read as the new selection's stories.
+    await killTheNetwork(page)
+    // The feed has loaded, so the trigger is the header's rather than the empty card's.
+    await page.getByRole('button', { name: 'Preferences' }).click()
+    await dialog(page).getByRole('checkbox', { name: 'The Guardian' }).click()
+    await dialog(page).getByRole('checkbox', { name: 'The New York Times' }).click()
+    await dialog(page).getByRole('button', { name: 'Save preferences' }).click()
+    await expect(dialog(page)).toBeHidden()
+    await settle(page)
+
+    await expect(cards(page)).toHaveCount(0)
+    await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
+    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+  })
+
   test('retry from the notice puts the live feed back and drops the notice', async ({ page }) => {
     await mockProviders(page)
     await loadTheFeedOnce(page)

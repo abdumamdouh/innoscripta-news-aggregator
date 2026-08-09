@@ -133,8 +133,10 @@ backlog rows. Appended by the loop; safe to add to by hand.
       unit test or e2e spec: this item added no parsing, no pure logic and no user-visible
       behaviour — it is a one-off audit of a markdown file, and the one-liner above is its check.
       Status: done. Branch: `feat/two-completed-carry-forward-items-left-u`.
-- [ ] (minor) Feed cache is a single global slot, not keyed by preferences: src/features/Articles/utils/feedCache.ts stores one cache slot regardless of the reader's current preferences (acknowledged in-code with a `ponytail:` comment). If a reader changes preferences and the next load fails/returns nothing (failures present), useFeed.ts will show the previous preference set's cached articles under the 'showing cached results' notice, which could read as matching the new preferences when it does not. Not covered by any test/e2e case (all cache tests use the same preference set throughout). Consider keying the cache by preferences, or at least noting this in the notice text, if this scenario matters for item 12/beyond. — found in 11
+- [x] (minor) Feed cache is a single global slot, not keyed by preferences: src/features/Articles/utils/feedCache.ts stores one cache slot regardless of the reader's current preferences (acknowledged in-code with a `ponytail:` comment). If a reader changes preferences and the next load fails/returns nothing (failures present), useFeed.ts will show the previous preference set's cached articles under the 'showing cached results' notice, which could read as matching the new preferences when it does not. Not covered by any test/e2e case (all cache tests use the same preference set throughout). Consider keying the cache by preferences, or at least noting this in the notice text, if this scenario matters for item 12/beyond. — found in 11
+      Status: done. Branch: `feat/feed-cache-is-a-single-global-slot-not-k`.
 - [ ] (minor) ArticlesPage (directory) has no offline-cache fallback, only FeedPage does: src/features/Articles/pages/ArticlesPage.tsx still shows ArticlesErrorState with no cached-results fallback on a failed load; only the personalized feed (useFeed.ts/FeedPage.tsx) reads/writes the localStorage cache. The item spec text says 'the last successful feed', which is ambiguous between 'the Feed page' and 'the last successful load of any article list'. If the latter was intended, the general articles directory listing at '/' still has no offline fallback and continues to show a bare error card on a failed cold load. — found in 11
+- [ ] (minor) Old (pre-fix) feed cache entries are silently dropped on upgrade: parseFeedCache now rejects any stored entry without a `key` field (src/features/Articles/utils/feedCache.ts:56). Any cache written by a previous build (before this change shipped) has no `key`, so on first load after the upgrade it is treated as "no cache" and the reader loses their offline fallback once, with no migration path. Acceptable given it's a soft cache, but not called out anywhere (no changelog/comment noting the one-time loss). — found in carry-forward-feed-cache-single-slot
 
 ## Loop log
 
@@ -173,6 +175,7 @@ iteration 20 — [carry-forward (found in 9) — BookmarksPage has zero unit tes
 iteration 1 — [carry-forward-completeness-critic] Two completed carry-forward items left unchecked in the backlog file — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 2 — [10] Saved search presets (CRUD) — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 3 — [11] UI states + offline cache — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 4 — [carry-forward-feed-cache-single-slot] Feed cache is a single global slot, not keyed by preferences — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
