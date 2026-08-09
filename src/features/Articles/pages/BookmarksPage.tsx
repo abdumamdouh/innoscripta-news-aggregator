@@ -148,18 +148,10 @@ export function BookmarksPage() {
           isLoading={false}
           renderActions={(article) => (
             <>
-              <AppIconButton
-                label={t('bookmarks.addTo.label')}
-                onClick={() => setAdding(article)}
-                className="size-9"
-              >
+              <AppIconButton label={t('bookmarks.addTo.label')} onClick={() => setAdding(article)}>
                 <ListPlus className="size-5" aria-hidden />
               </AppIconButton>
-              <AppIconButton
-                label={t('bookmarks.remove')}
-                onClick={() => setRemoving(article)}
-                className="size-9"
-              >
+              <AppIconButton label={t('bookmarks.remove')} onClick={() => setRemoving(article)}>
                 <BookmarkX className="size-5" aria-hidden />
               </AppIconButton>
             </>
