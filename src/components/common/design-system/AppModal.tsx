@@ -48,12 +48,12 @@ export function AppModal({
         <Dialog.Overlay className="motion-modal-backdrop fixed inset-0 z-40 bg-ink-900/50" />
         <Dialog.Content
           className={cn(
-            'fixed z-50 overflow-auto bg-paper-0 p-6 shadow-soft dark:bg-ink-800',
+            'fixed z-50 flex flex-col bg-paper-0 p-6 shadow-soft dark:bg-ink-800',
             VARIANTS[variant],
             className,
           )}
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex shrink-0 items-start justify-between gap-4">
             <div>
               <Dialog.Title className="text-lg font-semibold text-ink-900 dark:text-ink-100">
                 {title}
@@ -71,8 +71,12 @@ export function AppModal({
               </AppIconButton>
             </Dialog.Close>
           </div>
-          <div className="mt-4">{children}</div>
-          {footer ? <div className="mt-6 flex justify-end gap-2">{footer}</div> : null}
+          {/*
+            Only the body scrolls: a tall form must never push the footer's action past the fold,
+            which a full-height drawer on a short viewport does the moment the fields outgrow it.
+          */}
+          <div className="mt-4 min-h-0 flex-1 overflow-auto">{children}</div>
+          {footer ? <div className="mt-6 flex shrink-0 justify-end gap-2">{footer}</div> : null}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
