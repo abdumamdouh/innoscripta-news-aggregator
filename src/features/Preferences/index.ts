@@ -4,3 +4,4 @@
  */
 export { PreferencesButton } from '@/features/Preferences/components/PreferencesButton'
 export { usePreferences } from '@/features/Preferences/hooks/usePreferences'
+export type { Preferences } from '@/features/Preferences/types/preferences.types'
