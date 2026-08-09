@@ -1,4 +1,5 @@
 import type { Article, NewsSource } from '@/core/sources/types'
+import { NYT_SECTIONS, isArticleCategory } from '@/core/sources/categories'
 import {
   description,
   getJson,
@@ -95,7 +96,14 @@ export const nytSource: NewsSource<NytRaw> = {
   capabilities: { query: true, dateRange: true, category: true, author: false, pagination: true },
   available: true,
   async fetch(query, signal) {
-    const sections = query.categories?.map((c) => `"${c}"`).join(' ')
+    // `section_name` holds display names — "Business Day", "Sports" — not our slugs, so
+    // sending `business` matched nothing while the capability claimed it had filtered.
+    const sections = query.categories
+      ?.filter(isArticleCategory)
+      .map((category) => NYT_SECTIONS[category])
+      .filter((section): section is string => Boolean(section))
+      .map((section) => `"${section}"`)
+      .join(' ')
     const search = queryString({
       q: query.q,
       begin_date: compactDate(query.from),

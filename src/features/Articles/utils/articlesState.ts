@@ -1,4 +1,4 @@
-import { ARTICLE_CATEGORIES } from '@/core/sources/registry'
+import { ARTICLE_CATEGORIES } from '@/core/sources/categories'
 import { DEFAULT_ARTICLES_STATE, SELECTABLE_SOURCES } from '@/features/Articles/constants'
 import { ARTICLE_SORTS } from '@/features/Articles/types/articles.types'
 import type { ArticleSort, ArticlesState } from '@/features/Articles/types/articles.types'

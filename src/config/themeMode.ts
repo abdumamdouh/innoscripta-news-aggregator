@@ -1,9 +1,10 @@
 import { appTheme } from '@/config/theme'
+import { readStored, writeStored } from '@/utils/safeStorage'
 
 export type ThemeMode = 'light' | 'dark'
 
 export function readThemeMode(): ThemeMode {
-  const stored = localStorage.getItem(appTheme.storageKeys.theme)
+  const stored = readStored(appTheme.storageKeys.theme)
   if (stored === 'light' || stored === 'dark') return stored
   // Nothing stored yet: follow the OS.
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -13,7 +14,7 @@ export function readThemeMode(): ThemeMode {
  *  the theme counterpart of applyLanguage() in src/i18n/index.ts. */
 export function setThemeMode(mode: ThemeMode) {
   // Only a deliberate change writes storage — until then the OS preference stays live.
-  localStorage.setItem(appTheme.storageKeys.theme, mode)
+  writeStored(appTheme.storageKeys.theme, mode)
   document.documentElement.classList.toggle('dark', mode === 'dark')
 }
 

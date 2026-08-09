@@ -8,7 +8,8 @@ import {
   AppModal,
   AppTooltip,
 } from '@/components/common/design-system'
-import { ARTICLE_CATEGORIES, SOURCES } from '@/core/sources/registry'
+import { ARTICLE_CATEGORIES } from '@/core/sources/categories'
+import { SOURCES } from '@/core/sources/registry'
 import { usePreferences } from '@/features/Preferences/hooks/usePreferences'
 import { validatePreferences } from '@/features/Preferences/preferences.schema'
 import type { PreferencesErrors } from '@/features/Preferences/types/preferences.types'

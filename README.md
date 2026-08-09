@@ -78,10 +78,21 @@ and paging are applied after the fetch.
 ## Architecture
 
 Every provider implements `NewsSource` — its capabilities, plus a `fetch` that maps the provider's
-shape onto one canonical `Article`. `SOURCES` in `src/core/sources/registry.ts` is the only file that changes when a
-source is added: one import, one entry. The aggregator fans out with `Promise.allSettled` (never
-`all`, so one dead provider degrades the feed instead of blanking it), applies whatever the source
-couldn't, dedupes by canonical URL, and merge-sorts.
+shape onto one canonical `Article`. Adding a source is a new adapter plus one entry in `SOURCES`
+(`src/core/sources/registry.ts`); no page, hook, filter or component changes, because nothing
+downstream knows a provider exists. If it needs an API key it also needs a proxy route — one entry
+in `vite.proxy.ts`, which the nginx template and the Vercel function both build from, plus the
+variable in `.env.example`. Application code: two files. Deployment wiring: two more.
+
+The aggregator fans out with `Promise.allSettled` (never `all`, so one dead provider degrades the
+feed instead of blanking it), applies whatever the source couldn't, dedupes by canonical URL, and
+merge-sorts.
+
+Capabilities are a contract, and the aggregator only skips a filter the source genuinely performs.
+NewsAPI's `/everything` has no taxonomy and no author field, so it declares `category: false` and
+`author: false` and gets checked client-side — the alternative was claiming a filter that a bare
+search term does not deliver. The keyword is re-checked for *every* source regardless: the Guardian
+and NYT search full article bodies, so a match can be real and still invisible on a card.
 
 ```
 src/
@@ -108,7 +119,7 @@ src/
 
 | Suite                                       | Files | Tests | Command            |
 | ------------------------------------------- | ----- | ----- | ------------------ |
-| Unit / component (Vitest + Testing Library) | 36    | 428   | `npm test`         |
+| Unit / component (Vitest + Testing Library) | 37    | 436   | `npm test`         |
 | End-to-end (Playwright, Chromium)           | 16    | 133   | `npm run test:e2e` |
 
 E2E needs no real keys: every provider response is served from a fixture, and the stand-in keys the

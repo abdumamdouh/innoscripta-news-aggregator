@@ -115,12 +115,24 @@ export const bbcNewsSource: NewsSource<BbcRaw> = {
     // No feed for any asked-for category means BBC genuinely has nothing to
     // contribute — returning the front page instead would smuggle in unfiltered stories.
     if (!categories.length) return []
-    const feeds = await Promise.all(
+
+    // allSettled, not all: a multi-category query fans out to one feed each, and `all` would
+    // let a single 404 reject the whole source — losing the categories that answered fine.
+    // The aggregator already reports a source that returns nothing; silently dropping the
+    // ones that worked is the failure worth avoiding.
+    const feeds = await Promise.allSettled(
       categories.map(async (category) =>
         selectItems(await getText(FEEDS[category] as string, signal), category),
       ),
     )
-    return feeds.flat()
+
+    const items = feeds.flatMap((feed) => (feed.status === 'fulfilled' ? feed.value : []))
+    // Every feed failing is a real failure, not an empty result — say so.
+    if (!items.length && feeds.every((feed) => feed.status === 'rejected')) {
+      throw new Error(`bbc: every requested feed failed (${categories.join(', ')})`)
+    }
+
+    return items
   },
   normalize,
 }

@@ -94,8 +94,14 @@ function degrade(
   }
 
   if (!capabilities.author && query.authors?.length) {
-    const wanted = new Set(query.authors.map(normalizeSearchText))
-    out = out.filter((a) => wanted.has(normalizeSearchText(a.author)))
+    // Containment, not equality: a byline is often several people — the NYT writes
+    // "Tripp Mickle and Cade Metz", the Guardian "Andrew Roth in Washington" — so matching
+    // the whole string found nothing for either of them individually.
+    const wanted = query.authors.map(normalizeSearchText).filter(Boolean)
+    out = out.filter((a) => {
+      const byline = normalizeSearchText(a.author)
+      return byline ? wanted.some((name) => byline.includes(name)) : false
+    })
   }
 
   if (!capabilities.pagination) {

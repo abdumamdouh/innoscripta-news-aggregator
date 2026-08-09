@@ -1,6 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { appTheme } from '@/config/theme'
+import { readStored, writeStored } from '@/utils/safeStorage'
 import en from '@/i18n/locales/en.json'
 import ar from '@/i18n/locales/ar.json'
 import de from '@/i18n/locales/de.json'
@@ -13,7 +14,7 @@ function isSupported(value: string | null): value is AppLanguage {
 }
 
 function readStoredLanguage(): AppLanguage {
-  const stored = localStorage.getItem(appTheme.storageKeys.language)
+  const stored = readStored(appTheme.storageKeys.language)
   return isSupported(stored) ? stored : appTheme.defaultLanguage
 }
 
@@ -23,7 +24,7 @@ function applyLanguage(language: string) {
   document.documentElement.lang = lang
   // Gate on 'ar' itself, never on "not English" — German is a third, LTR locale.
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
-  localStorage.setItem(appTheme.storageKeys.language, lang)
+  writeStored(appTheme.storageKeys.language, lang)
 }
 
 // Flat keys, no namespaces — one resource bundle per language is the whole need.

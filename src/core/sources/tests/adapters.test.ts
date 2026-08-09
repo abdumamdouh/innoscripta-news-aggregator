@@ -55,8 +55,9 @@ const feeds = [
     id: 'newsapi',
     label: 'NewsAPI',
     normalizeFixture: fromNewsapi,
-    suppliedDescriptions: () => selectNewsapi(newsapiFixture).map((raw) => raw.description),
-    suppliedAuthors: () => selectNewsapi(newsapiFixture).map((raw) => raw.author),
+    suppliedDescriptions: () =>
+      selectNewsapi(newsapiFixture).map(({ article }) => article.description),
+    suppliedAuthors: () => selectNewsapi(newsapiFixture).map(({ article }) => article.author),
   },
   {
     id: 'guardian',
@@ -192,7 +193,7 @@ describe('newsapi adapter — provider quirks', () => {
     })
 
     expect(items).toHaveLength(newsapiFixture.articles.length)
-    expect(items.map((raw) => raw.url)).not.toContain('https://removed.com')
+    expect(items.map(({ article }) => article.url)).not.toContain('https://removed.com')
   })
 
   it('has real entries on both sides of the author and image branches', () => {
@@ -223,7 +224,7 @@ describe('newsapi adapter — provider quirks', () => {
     })
 
     expect(items).toHaveLength(1)
-    expect(items[0]?.description).toBeNull()
+    expect(items[0]?.article.description).toBeNull()
     expect(newsapiSource.normalize(items[0]!).description).toBe('')
   })
 })
@@ -593,7 +594,8 @@ describe('description()', () => {
     expect(sources.map((source) => source.id)).toEqual(['newsapi', 'guardian', 'nyt', 'bbc'])
     // Descriptionless payloads through each adapter's own normalize, one shared answer.
     const descriptionless: Record<string, unknown>[] = [
-      { title: 't', url: 'https://e.test/a', publishedAt: '2024-01-01T00:00:00Z' },
+      // NewsAPI's raw is the wire item wrapped with the category the search asked for.
+      { article: { title: 't', url: 'https://e.test/a', publishedAt: '2024-01-01T00:00:00Z' } },
       { webTitle: 't', webUrl: 'https://e.test/a', webPublicationDate: '2024-01-01T00:00:00Z' },
       { headline: { main: 't' }, web_url: 'https://e.test/a', pub_date: '2024-01-01T00:00:00Z' },
     ]

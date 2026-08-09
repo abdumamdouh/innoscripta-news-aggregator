@@ -1,4 +1,5 @@
 import type { Article, NewsSource } from '@/core/sources/types'
+import { GUARDIAN_SECTIONS, isArticleCategory } from '@/core/sources/categories'
 import {
   bodyText,
   description,
@@ -46,6 +47,15 @@ export function selectItems(payload: GuardianPayload): GuardianRaw[] {
 const GUARDIAN_WIDTH = /\/(\d+)\.[a-z]+$/i
 const WIDER_RENDITION = 1000
 
+/** Our taxonomy → Guardian `section` ids, dropping anything it has no equivalent for. */
+function sections(categories: string[] | undefined): string | undefined {
+  const mapped = (categories ?? [])
+    .filter(isArticleCategory)
+    .map((category) => GUARDIAN_SECTIONS[category])
+    .filter((section): section is string => Boolean(section))
+  return mapped.length ? mapped.join('|') : undefined
+}
+
 function normalize(raw: GuardianRaw): Article {
   return {
     id: `${ID}:${text(raw.id) ?? raw.webUrl}`,
@@ -75,7 +85,9 @@ export const guardianSource: NewsSource<GuardianRaw> = {
       q: query.q,
       'from-date': query.from,
       'to-date': query.to,
-      section: query.categories?.join('|'),
+      // Our slugs are not the Guardian's: it files entertainment under `culture`. An
+      // unmappable category contributes no constraint rather than a guess that matches nothing.
+      section: sections(query.categories),
       page: query.page,
       'page-size': query.pageSize,
       'order-by': 'newest',
