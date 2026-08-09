@@ -39,7 +39,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | 11  | UI states + offline cache                       | done               | feat/ui-states-offline-cache                  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 12  | Responsive pass                                 | done        | feat/responsive-pass                          | Work IS on main (commit 9fa424d, e2e/responsive.spec.ts, 10 tests). The needs-human-review was a false negative: acceptance judged `git diff main...HEAD` before the commit step ran, so it saw an uncommitted tree and reported nothing shipped. Loop ordering fixed. | 12  | Responsive pass | in progress | feat/responsive-pass |     | `), not `done` — the author's own bookkeeping contradicts treating this as a finished, shippable item. The new e2e/responsive.spec.ts explicitly exercises the filter drawer, article list, article details, feed, bookmarks page + 'New list' modal, preferences modal, and save-search modal, but does NOT exercise AddToListModal or either AppConfirmDialog on BookmarksPage (delete-list / remove-article confirmations) or the delete-preset confirm in SavedSearches — the brief says 'every modal', and these were left untested even though I manually verified (via an ad-hoc probe, since removed) that they happen to pass at 375px once animations settle. Coverage of 'every modal' is therefore incomplete for the shipped test suite, even though the code path likely works. |
 | 13  | Docker + CI                                     | not started        |                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 14  | README + SETUP                                  | not started        |                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 14  | README (single file, submission-ready)          | not started        |                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ## Carry-forward
 
@@ -148,6 +148,7 @@ backlog rows. Appended by the loop; safe to add to by hand.
 - [x] (minor) Responsive e2e never checks for truncated critical text: The brief's item 12 acceptance criteria explicitly require 'no truncated critical text' at each breakpoint, but e2e/responsive.spec.ts only checks scrollWidth/clientWidth overflow and tap-target size; no assertion anywhere verifies that title/author/source text isn't silently clipped by line-clamp/ellipsis with real (longer) content. Already tracked separately in GOAL.md:146 as a carry-forward item about long/unbreakable fixture strings, so it should stay out of scope for item 12 rather than block it. — found in carry-forward-responsive-pass-transitive-coverage
       Status: done. Branch: `feat/responsive-e2e-never-checks-for-truncate`.
 - [ ] (minor) AppModal drawer variant has no sticky footer for tall content: The drawer variant (`h-dvh` with a single `overflow-auto` region covering title, body and footer) has no sticky/pinned footer. On a short viewport with a long filter form, the drawer's action button (e.g. 'Show results') can scroll out of reach behind the field list before it's clicked. The new e2e/responsive.spec.ts only asserts horizontal overflow and tap-target size, not that the footer stays reachable, so this gap is unverified either way. Worth a follow-up to pin the footer (flex column with a shrink-0 footer) and add a check that the primary action stays visible/reachable in the drawer at 375px. — found in carry-forward-responsive-pass-transitive-coverage
+      Status: in progress. Branch: `feat/appmodal-drawer-variant-has-no-sticky-fo`.
 - [ ] (minor) clippedText() only exercised on the search-card/details path, not feed/bookmarks/preferences: e2e/responsive.spec.ts:188-204 adds the new 'real-length headline and byline' test only for the article-list card and its details page. The feed page, bookmarks/saved cards, and any other place ArticleCard or similarly clamped text renders (e.g. e2e/responsive.spec.ts:209 'the feed fits the viewport', :230 'a populated saved page') never run clippedText() with the FULL_HEADLINE/FULL_BYLINE fixture, so a clamp regression introduced only in those surfaces (they reuse ArticleCard today, but that's not enforced) would go undetected. Low risk since ArticleCard is shared, but worth a follow-up if any of those pages ever render title/author text through a different component. — found in carry-forward-responsive-truncated-text
 
 ## Loop log
@@ -416,12 +417,45 @@ The brief's requirement #3. Every screen at 375 / 768 / 1280: no horizontal scro
 
 Acceptance: `docker compose up --build` serves the working app; the key-leak grep from item 4 still returns nothing.
 
-### 14 — README + SETUP
+### 14 — README
 
-Split the way the blueprint does it: **README = what and why, no commands. SETUP = how to run, nothing but commands.**
+**ONE file. `README.md`. No separate SETUP.md** — a reviewer opening this repo for a take-home
+submission must find everything in the first file they click. Do not split it.
 
-README sections: What Was Built · Challenge Requirements Covered · Enhancements Added · Data Sources (including the honest table of the three unreachable ones and why) · Architecture And The Adapter Layer · Search, Filters, And URL State · UI States · Internationalization · Validation · Testing · Docker · Project Structure · Author.
+**Keep it tight.** A reviewer skims. Short sentences, tables and command blocks over paragraphs.
+No marketing prose, no restating the challenge back at them, no "this project leverages…".
+If a section can be a 4-row table instead of three paragraphs, make it the table.
 
-SETUP sections: Requirements · Install · Development · Environment Variables · Build · Preview · Docker · Tests · Lint · Format · Available Scripts · Notes.
+Sections, in this order:
 
-Acceptance: a fresh clone followed literally through SETUP.md produces a running app. If it doesn't, SETUP.md is wrong.
+1. **One-paragraph intro** — what it is, in three sentences maximum.
+2. **Quick start** — the shortest path to a running app, Docker first since the challenge asks for it:
+   ```
+   cp .env.example .env.local   # add your API keys
+   docker compose up --build    # → http://localhost:8080
+   ```
+   Then the local-dev alternative (`npm install && npm run dev`). Both must be copy-pasteable and
+   actually work from a fresh clone.
+3. **API keys** — a 4-row table: source, whether a key is needed, where to get it. State plainly
+   that keys are never bundled: the proxy attaches them (Vite in dev, nginx in the container), and
+   `e2e/proxy-keys.spec.ts` asserts it.
+4. **Challenge requirements** — a compact table mapping each requirement from the brief to how it
+   was met, **with evidence**: a file path, a test name, or a script to run. One short line per row,
+   no essays. Cover all three requirements (search/filtering, personalized feed, mobile-responsive)
+   and all four guidelines (React+TS, ≥3 sources, Docker+docs, DRY/KISS/SOLID). This is the section
+   the reviewer scores from — make it scannable and make every claim checkable.
+5. **Data sources** — the honest table: four live, plus the three that are not usable and why
+   (NewsAPI duplicated in the brief; OpenNews is a journalism nonprofit with no article API;
+   NewsCred is now Optimizely CMP, enterprise-only). Two sentences on capability degradation —
+   BBC has no query/date/pagination, so the aggregator filters those client-side.
+6. **Architecture** — short. The `NewsSource` adapter interface, the registry, the aggregator's
+   `Promise.allSettled` fan-out and dedupe. State that adding a source is one file plus one registry
+   line. A small tree of `src/` with one-line comments beats a description.
+7. **Beyond the brief** — a bullet list, not prose: EN/AR/DE with RTL, dark mode, bookmarks and
+   reading lists, saved searches, offline cache, URL-shareable state.
+8. **Testing** — the real numbers (unit files/tests, e2e specs) and the commands to reproduce them.
+9. **Scripts** — one table.
+
+Acceptance: a fresh clone followed literally through the README produces a running app in Docker.
+Every claim in the requirements table points at something a reviewer can open or run. The whole
+file reads in under three minutes.
