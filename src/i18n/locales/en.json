@@ -75,6 +75,7 @@
   "articles.category.sport": "Sport",
   "feed.empty.title": "No preferences yet",
   "feed.empty.body": "Pick your sources, categories and authors, and this feed fills with them.",
+  "feed.results": "{{total}} articles in your feed",
   "pagination.label": "Pagination",
   "pagination.previous": "Previous page",
   "pagination.next": "Next page",

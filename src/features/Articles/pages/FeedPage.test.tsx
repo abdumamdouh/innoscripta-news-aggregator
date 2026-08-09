@@ -66,7 +66,7 @@ describe('FeedPage — a feed that could not load', () => {
 
     await screen.findByRole('heading', { name: en['articles.error.title'] })
     expect(screen.getByText(en['articles.error.body'])).toBeInTheDocument()
-    // "0 articles on this page" would read as "your preferences match nothing", which is
+    // "0 articles in your feed" would read as "your preferences match nothing", which is
     // a different, wrong answer.
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     // Nor the no-preferences card: preferences exist, the network is what broke.
@@ -98,6 +98,15 @@ describe('FeedPage — a feed that could not load', () => {
     expect(banner).toHaveTextContent('The New York Times')
     // Partial, not broken: the stories that did arrive are still on screen.
     expect(screen.getByRole('link', { name: article.title })).toBeInTheDocument()
+  })
+
+  it('counts the feed without implying pages to page through', async () => {
+    fetchFeedMock.mockResolvedValue(resolved())
+    renderFeed()
+
+    // The feed is page-1-only with no Pagination, so the paginated copy would be a lie here.
+    expect(await screen.findByRole('status')).toHaveTextContent('1 articles in your feed')
+    expect(screen.getByRole('status')).not.toHaveTextContent(/on this page/)
   })
 
   it('has no banner when every preferred provider answered', async () => {

@@ -75,6 +75,7 @@
   "articles.category.sport": "Sportnachrichten",
   "feed.empty.title": "Noch keine Einstellungen",
   "feed.empty.body": "Wählen Sie Ihre Quellen, Kategorien und Autoren – dann füllt sich dieser Feed damit.",
+  "feed.results": "{{total}} Artikel in Ihrem Feed",
   "pagination.label": "Seitennummerierung",
   "pagination.previous": "Vorherige Seite",
   "pagination.next": "Nächste Seite",
