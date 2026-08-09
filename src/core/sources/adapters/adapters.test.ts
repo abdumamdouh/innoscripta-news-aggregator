@@ -21,6 +21,7 @@ import nytFixture from '@/core/sources/adapters/__fixtures__/nyt.json'
 const CANONICAL_KEYS = [
   'author',
   'category',
+  'content',
   'description',
   'id',
   'imageUrl',
@@ -260,6 +261,34 @@ describe('guardian adapter — provider quirks', () => {
     expect(article.imageUrl).toBeUndefined()
     expect(article.author).toBeUndefined()
     expect(article.url).toMatch(/^https:\/\//)
+    expect(article.content).toBeUndefined()
+  })
+
+  it('flattens the requested body HTML into paragraph-separated text', () => {
+    expect(articles[0]?.content).toBe(
+      'The peloton rolled out of Sisteron under a hard sun & a hard pace.\n\n' +
+        'Vollering attacked with 3km left.\nNiewiadoma could not follow.',
+    )
+  })
+
+  it('leaves content absent for an entry the provider serves no body for', () => {
+    // Only the first fixture entry carries a body — the rest are body-less, as liveblogs
+    // and syndicated pieces often are.
+    expect(articles.slice(1).every((article) => article.content === undefined)).toBe(true)
+  })
+
+  it('asks the provider for the body field it maps', () => {
+    // The mapping is worthless if the request never opts into `body`.
+    const requested: string[] = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+      requested.push(String(input))
+      return Promise.resolve(new Response(JSON.stringify({ response: { results: [] } })))
+    })
+
+    return guardianSource.fetch({ page: 1, pageSize: 10 }).then(() => {
+      expect(requested[0]).toContain('show-fields=trailText%2Cthumbnail%2Cbyline%2Cbody')
+      vi.restoreAllMocks()
+    })
   })
 })
 

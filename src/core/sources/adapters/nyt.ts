@@ -80,6 +80,8 @@ function normalize(raw: NytRaw): Article {
     // "By Tripp Mickle and Cade Metz" — the prefix is presentation, not a name.
     author: text(raw.byline?.original?.replace(/^by\s+/i, '')),
     category: text(raw.section_name) ?? text(raw.news_desk),
+    // Article Search returns abstracts and lead paragraphs, never the full body.
+    content: undefined,
   }
 }
 

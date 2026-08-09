@@ -75,6 +75,8 @@ function normalize(raw: BbcRaw): Article {
     // RSS carries no byline. Left undefined rather than guessed from the description.
     author: undefined,
     category: raw.category,
+    // RSS carries the summary only; the body lives behind the link.
+    content: undefined,
   }
 }
 

@@ -20,6 +20,8 @@ interface Fake {
   url: string
   publishedAt: string
   author: string
+  /** Only the Guardian serves one, and only for some stories. */
+  body?: string
 }
 
 /**
@@ -35,6 +37,11 @@ function feed(prefix: string, offsetHours: number, count = 30): Fake[] {
     url: `https://${prefix.toLowerCase()}.test/story-${index + 1}`,
     publishedAt: new Date(BASE - (index * 4 + offsetHours) * 3_600_000).toISOString(),
     author: `${prefix} Reporter ${(index % 3) + 1}`,
+    // Guardian story 2 is the one with a full body, as `show-fields=body` returns it.
+    body:
+      prefix === 'Guardian' && index === 1
+        ? '<p>The full body opens here &amp; runs on.</p><p>A second paragraph the summary never had.</p>'
+        : undefined,
   }))
 }
 
@@ -59,7 +66,7 @@ const guardianBody = (items: Fake[]) =>
         webUrl: item.url,
         webPublicationDate: item.publishedAt,
         sectionId: 'technology',
-        fields: { trailText: item.description || null, byline: item.author },
+        fields: { trailText: item.description || null, byline: item.author, body: item.body },
       })),
     },
   })

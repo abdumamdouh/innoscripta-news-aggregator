@@ -66,6 +66,8 @@ function normalize(raw: NewsApiRaw): Article {
     author: text(raw.author),
     // `/everything` has no section concept — category is folded into `q` instead.
     category: undefined,
+    // NewsAPI truncates even its `content` field at ~200 chars — a summary, not a body.
+    content: undefined,
   }
 }
 

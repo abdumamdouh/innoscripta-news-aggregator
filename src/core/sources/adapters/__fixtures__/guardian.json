@@ -21,7 +21,8 @@
         "fields": {
           "trailText": "Demi Vollering took the yellow jersey on the Tour’s penultimate stage via a dramatic finish in Nice",
           "byline": "Tom Bassam",
-          "thumbnail": "https://media.guim.co.uk/3f857cf51fecb8a3a0f92517ae9a940102bf2ca0/612_198_5360_4291/500.jpg"
+          "thumbnail": "https://media.guim.co.uk/3f857cf51fecb8a3a0f92517ae9a940102bf2ca0/612_198_5360_4291/500.jpg",
+          "body": "<p>The peloton rolled out of Sisteron under a hard sun &amp; a hard pace.</p>\n<p>Vollering attacked with 3km left.<br>Niewiadoma could not follow.</p>"
         },
         "isHosted": false,
         "pillarId": "pillar/sport",

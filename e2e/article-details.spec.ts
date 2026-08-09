@@ -103,6 +103,23 @@ test.describe('article details', () => {
     await expect(page.getByText('This source published no summary.')).toBeVisible()
   })
 
+  test('shows the full body, not the summary, for a source that serves one', async ({ page }) => {
+    await page.goto('/')
+    // Guardian story 2 is the one the provider returns a body for.
+    await page.getByRole('searchbox', { name: 'Search articles' }).fill('Guardian story 2 on')
+    await page.waitForURL(/q=Guardian/)
+    await expect(firstHeading(page)).toHaveText(/^Guardian story 2 on/)
+
+    // The card only ever has room for the summary.
+    await expect(firstCard(page).getByText('Guardian summary 2')).toBeVisible()
+    await openFirstArticle(page)
+
+    const story = page.getByRole('article')
+    await expect(story.getByText(/The full body opens here & runs on\./)).toBeVisible()
+    await expect(story.getByText(/A second paragraph the summary never had\./)).toBeVisible()
+    await expect(story.getByText('Guardian summary 2')).toHaveCount(0)
+  })
+
   test('keeps a bookmarked article bookmarked across a cold reload', async ({ page }) => {
     await page.goto('/')
     await openFirstArticle(page)
