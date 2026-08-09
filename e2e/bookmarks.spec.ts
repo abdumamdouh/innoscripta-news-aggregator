@@ -218,6 +218,26 @@ test.describe('saved articles and reading lists', () => {
     )
   })
 
+  test('keeps card actions at the 44px touch target on a phone viewport', async ({ page }) => {
+    await saveStory(page, 0)
+    await page.setViewportSize({ width: 375, height: 900 })
+    await page.goto('/bookmarks')
+
+    for (const name of ['Add to a reading list', 'Remove saved article']) {
+      const button = cards(page).getByRole('button', { name })
+      // Polled: the card's entry animation scales it up, so the first box is still mid-flight.
+      await expect
+        .poll(
+          async () => {
+            const box = await button.boundingBox()
+            return Math.min(box?.width ?? 0, box?.height ?? 0)
+          },
+          { message: name },
+        )
+        .toBeGreaterThanOrEqual(44)
+    }
+  })
+
   test('has no horizontal scroll at 375, 768 or 1280', async ({ page }) => {
     await saveStory(page, 0)
     await page.goto('/bookmarks')
