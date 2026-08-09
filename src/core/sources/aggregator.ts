@@ -153,6 +153,14 @@ export async function aggregate(
     }
   })
 
+  // Every source we tried is down — that is an error, not an empty result set. Resolving it as
+  // a success makes "nothing matched your filters" and "you have no network" the same screen,
+  // and it overwrites a good cached feed with the empty one on the offline reload that the
+  // cache exists to survive. A partial failure still resolves; only a total one throws.
+  if (selected.length > 0 && failures.length === selected.length) {
+    throw new Error(failures.map((f) => f.reason).join('; '))
+  }
+
   articles.sort((a, b) => time(b) - time(a))
 
   // The whole merged window, not a page of it. Paging happens over this set, where every

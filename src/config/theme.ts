@@ -17,8 +17,7 @@ export const appTheme = {
     bookmarks: 'ina-bookmarks',
     readingLists: 'ina-reading-lists',
     savedSearches: 'ina-saved-searches',
-    feedCache: 'ina-feed-cache',
     directoryState: 'ina-directory-state',
-    directoryCache: 'ina-directory-cache',
+    queryCache: 'ina-query-cache',
   },
 } as const

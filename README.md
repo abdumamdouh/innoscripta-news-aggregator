@@ -111,7 +111,8 @@ src/
 - Dark mode, system-aware
 - Bookmarks and named reading lists
 - Saved searches (name a filter set, restore it in one click)
-- Offline cache — last results are shown with a notice when the network is gone
+- Offline cache — the TanStack Query client is persisted to localStorage, so a cold start with
+  no network replays the last results under a dated notice instead of an error card
 - URL-shareable state: search, filters, sort and page all live in the query string
 - Partial-failure banner naming the provider that fell over, instead of an empty page
 
@@ -119,7 +120,7 @@ src/
 
 | Suite                                       | Files | Tests | Command            |
 | ------------------------------------------- | ----- | ----- | ------------------ |
-| Unit / component (Vitest + Testing Library) | 37    | 438   | `npm test`         |
+| Unit / component (Vitest + Testing Library) | 35    | 411   | `npm test`         |
 | End-to-end (Playwright, Chromium)           | 16    | 133   | `npm run test:e2e` |
 
 E2E needs no real keys: every provider response is served from a fixture, and the stand-in keys the

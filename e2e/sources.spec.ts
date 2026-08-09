@@ -236,7 +236,16 @@ test.describe('news source adapters in the browser', () => {
       content: `
         import { aggregate } from '/src/core/sources/aggregator.ts'
         import { bbcNewsSource } from '/src/core/sources/adapters/bbc-rss.ts'
-        window.__result = await aggregate({ page: 1, pageSize: 5 }, [bbcNewsSource])
+
+        // A second source that answers, so this is a partial failure. BBC alone would be a
+        // total one, and those reject rather than resolving an empty feed.
+        const alive = {
+          id: 'stub', label: 'Stub', available: true,
+          capabilities: { query: true, dateRange: true, category: true, author: true, pagination: true },
+          fetch: async () => [{ id: 'a', title: 'Still standing', description: '', url: 'https://stub.test/a', publishedAt: '2026-06-01T00:00:00.000Z', sourceId: 'stub', sourceLabel: 'Stub' }],
+          normalize: (raw) => raw,
+        }
+        window.__result = await aggregate({ limit: 5 }, [bbcNewsSource, alive])
       `,
     })
     await page.waitForFunction(() => '__result' in globalThis)
@@ -245,7 +254,7 @@ test.describe('news source adapters in the browser', () => {
       () => (globalThis as unknown as Record<string, unknown>).__result,
     )) as { articles: unknown[]; failures: unknown[] }
 
-    expect(result.articles).toEqual([])
+    expect(result.articles).toHaveLength(1)
     expect(result.failures).toEqual([{ sourceId: 'bbc', reason: expect.stringContaining('503') }])
     // The shell is still standing — a dead provider must not take the page down.
     await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()

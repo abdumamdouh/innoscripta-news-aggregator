@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AggregateResult } from '@/core/sources/aggregator'
 import { fetchArticles, toArticleQuery } from '@/features/Articles/services/articles.service'
+import { QUERY_KEYS } from '@/features/Articles/queryKeys'
 import { useArticleActions } from '@/features/Articles/hooks/useArticleActions'
 import { useBookmarks } from '@/features/Articles/hooks/useBookmarks'
 import { parseArticlesState } from '@/features/Articles/utils/articlesState'
@@ -29,7 +30,7 @@ export function useArticleDetails(articleId: string) {
   const cached = useMemo(
     () =>
       findCachedArticle(
-        client.getQueriesData<AggregateResult>({ queryKey: ['articles'] }),
+        client.getQueriesData<AggregateResult>({ queryKey: QUERY_KEYS.articles.root }),
         articleId,
       ),
     [client, articleId],
@@ -51,7 +52,7 @@ export function useArticleDetails(articleId: string) {
     resolved ?? (lastResolved.current?.id === articleId ? lastResolved.current : undefined)
 
   const query = useQuery({
-    queryKey: ['articles', toArticleQuery(state)],
+    queryKey: QUERY_KEYS.articles.list(toArticleQuery(state)),
     queryFn: ({ signal }) => fetchArticles(state, signal),
     enabled: !known,
   })

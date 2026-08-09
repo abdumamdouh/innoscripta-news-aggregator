@@ -1,8 +1,8 @@
-import { hashKey, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { fetchFeed, hasPreferences } from '@/features/Articles/services/feed.service'
+import { QUERY_KEYS } from '@/features/Articles/queryKeys'
 import { useArticleActions } from '@/features/Articles/hooks/useArticleActions'
-import { useArticleListCache } from '@/features/Articles/hooks/useArticleListCache'
-import { feedCache } from '@/features/Articles/utils/articleListCache'
+import { useServedFromCache } from '@/features/Articles/hooks/useServedFromCache'
 import type { Preferences } from '@/features/Preferences'
 
 /**
@@ -14,33 +14,28 @@ import type { Preferences } from '@/features/Preferences'
 export function useFeed(preferences: Preferences) {
   const ready = hasPreferences(preferences)
 
-  // The preferences object is the whole query — a save re-fetches, nothing else does. The
-  // same key stamps the cache, so the fallback is only ever the current selection's own feed.
-  const queryKey = ['feed', preferences]
-  const cacheKey = hashKey(queryKey)
-
+  // The preferences object is the whole query — a save re-fetches, nothing else does.
   const query = useQuery({
-    queryKey,
+    queryKey: QUERY_KEYS.feed.forPreferences(preferences),
     queryFn: ({ signal }) => fetchFeed(preferences, signal),
     enabled: ready,
   })
 
   const actions = useArticleActions(query.refetch)
 
-  const articles = query.data?.articles
-  const cached = useArticleListCache(feedCache, cacheKey, query, articles)
+  const articles = query.data?.articles ?? []
+  const servedFromCache = useServedFromCache(query.data, query.dataUpdatedAt)
 
   return {
     ready,
-    articles: articles?.length ? articles : (cached?.articles ?? []),
-    // The cached notice already says why the live stories are missing — one message, not two.
-    failures: cached ? [] : (query.data?.failures ?? []),
-    /** ISO timestamp when the list on screen came from storage rather than the network. */
-    cachedAt: cached?.savedAt,
+    articles,
+    failures: query.data?.failures ?? [],
+    /** ISO timestamp when the list on screen predates this session. */
+    cachedAt: servedFromCache ? new Date(query.dataUpdatedAt).toISOString() : undefined,
     actions,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     // Cached stories under a notice beat an error card with nothing behind it.
-    isError: query.isError && !cached,
+    isError: query.isError && !query.data,
   }
 }

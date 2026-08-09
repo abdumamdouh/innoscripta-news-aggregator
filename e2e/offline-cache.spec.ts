@@ -66,7 +66,9 @@ test.describe('offline feed cache', () => {
 
     await expect(cards(page)).toHaveCount(0)
     // The dead provider is still named — but nothing pretends to be a cached result.
-    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+    // Every provider is dead, which is an error, not a partial one — the banner naming the
+    // ones that failed belongs over results that survived, and here nothing did.
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toBeVisible()
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
   })
 
@@ -87,7 +89,9 @@ test.describe('offline feed cache', () => {
 
     await expect(cards(page)).toHaveCount(0)
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
-    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+    // Every provider is dead, which is an error, not a partial one — the banner naming the
+    // ones that failed belongs over results that survived, and here nothing did.
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toBeVisible()
   })
 
   test('drops a feed cached before the upgrade rather than labelling it as this selection', async ({
@@ -97,11 +101,14 @@ test.describe('offline feed cache', () => {
     await loadTheFeedOnce(page)
 
     // Exactly what an upgrading reader has in storage: the same stories, written by a build
-    // that stamped no selection on them. The fallback is lost this once, on purpose.
+    // whose Article shape has since changed. The fallback is lost this once, on purpose —
+    // rendering last week's fields into this week's cards is the worse outcome.
     await page.evaluate(() => {
-      const raw = localStorage.getItem('ina-feed-cache') ?? '{}'
-      const { savedAt, articles } = JSON.parse(raw) as Record<string, unknown>
-      localStorage.setItem('ina-feed-cache', JSON.stringify({ savedAt, articles }))
+      const raw = localStorage.getItem('ina-query-cache')
+      if (!raw) throw new Error('nothing was persisted — the test is not exercising the cache')
+
+      const cached = JSON.parse(raw) as Record<string, unknown>
+      localStorage.setItem('ina-query-cache', JSON.stringify({ ...cached, buster: 'v1' }))
     })
 
     await killTheNetwork(page)
@@ -110,7 +117,9 @@ test.describe('offline feed cache', () => {
 
     await expect(cards(page)).toHaveCount(0)
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
-    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+    // Every provider is dead, which is an error, not a partial one — the banner naming the
+    // ones that failed belongs over results that survived, and here nothing did.
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toBeVisible()
   })
 
   test('retry from the notice puts the live feed back and drops the notice', async ({ page }) => {
@@ -171,7 +180,9 @@ test.describe('offline directory cache', () => {
 
     await expect(cards(page)).toHaveCount(0)
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
-    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+    // Every provider is dead, which is an error, not a partial one — the banner naming the
+    // ones that failed belongs over results that survived, and here nothing did.
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toBeVisible()
   })
 
   test('never offers the last filter set as the next one when the search fails', async ({
@@ -190,7 +201,9 @@ test.describe('offline directory cache', () => {
 
     await expect(cards(page)).toHaveCount(0)
     await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
-    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+    // Every provider is dead, which is an error, not a partial one — the banner naming the
+    // ones that failed belongs over results that survived, and here nothing did.
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toBeVisible()
 
     // And the unfiltered page is still the one in storage — the failed search never
     // restamped it as its own. Clearing the term goes back to the key that filled it.

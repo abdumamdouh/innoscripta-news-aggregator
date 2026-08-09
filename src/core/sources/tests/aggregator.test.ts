@@ -327,9 +327,36 @@ describe('cancellation', () => {
 
   it('still reports a genuine failure when nothing was cancelled', async () => {
     const dead: NewsSource = { ...hangs('dead'), fetch: () => Promise.reject(new Error('502')) }
-    const result = await aggregate({ limit: 9 }, [dead])
+
+    await expect(aggregate({ limit: 9 }, [dead])).rejects.toThrow('502')
+  })
+})
+
+describe('aggregate — total failure', () => {
+  const dead = (id: string, reason: string) =>
+    fakeSource(id, [], { fetch: () => Promise.reject(new Error(reason)) })
+
+  it('throws when every source is down rather than resolving an empty feed', async () => {
+    // The offline reload is the case: resolving `{ articles: [] }` here reads as a successful
+    // "nothing matched", and it overwrites the persisted feed the reader still wants to see.
+    await expect(aggregate(query(), [dead('guardian', '502'), dead('nyt', '429')])).rejects.toThrow(
+      '502; 429',
+    )
+  })
+
+  it('resolves when even one source answers', async () => {
+    const result = await aggregate(query(), [dead('nyt', '429'), fakeSource('bbc', [article('bbc')])])
+
+    expect(result.articles).toHaveLength(1)
+    expect(result.failures).toEqual([{ sourceId: 'nyt', reason: '429' }])
+  })
+
+  it('is not a failure when every source was merely unavailable', async () => {
+    const offline = fakeSource('opennews', [], { available: false })
+
+    const result = await aggregate(query(), [offline])
 
     expect(result.articles).toEqual([])
-    expect(result.failures).toEqual([{ sourceId: 'dead', reason: '502' }])
+    expect(result.failures).toEqual([])
   })
 })
