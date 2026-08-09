@@ -35,6 +35,7 @@
   "articles.filters.sources": "المصادر",
   "articles.filters.title": "عوامل التصفية",
   "articles.filters.to": "إلى",
+  "articles.lead": "أبرز الأخبار",
   "articles.loading": "جارٍ تحميل المقالات",
   "articles.noDescription": "لم ينشر هذا المصدر ملخصاً.",
   "articles.partial": "بعض المصادر لم تستجب: {{sources}}",

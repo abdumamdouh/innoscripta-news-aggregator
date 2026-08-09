@@ -35,6 +35,7 @@
   "articles.filters.sources": "Quellen",
   "articles.filters.title": "Filter",
   "articles.filters.to": "Bis",
+  "articles.lead": "Topmeldung",
   "articles.loading": "Artikel werden geladen",
   "articles.noDescription": "Diese Quelle hat keine Zusammenfassung veröffentlicht.",
   "articles.partial": "Einige Quellen haben nicht geantwortet: {{sources}}",

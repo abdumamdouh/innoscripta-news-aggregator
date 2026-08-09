@@ -147,9 +147,16 @@ export function ArticleDetailsPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">{article.title}</h1>
+        <h1 className="text-balance text-3xl font-semibold leading-tight text-ink-900 sm:text-4xl dark:text-ink-100">
+          {article.title}
+        </h1>
 
-        {article.author && <p className="text-sm text-ink-500">{article.author}</p>}
+        {/* Byline and dateline as one block, the way a newspaper sets them. */}
+        {article.author && (
+          <p className="border-s-2 border-accent-600 ps-3 text-sm text-ink-700 dark:text-ink-300">
+            {article.author}
+          </p>
+        )}
 
         {/*
           The Guardian is the only provider that serves a body; the other three give a summary
@@ -157,12 +164,16 @@ export function ArticleDetailsPage() {
           clamped — and `content` is already flattened to text by the adapter, so no markup is
           injected here.
         */}
+        {/* max-w-prose holds the measure near 65ch; past that the eye loses the line. */}
         {article.content ? (
-          <p className="whitespace-pre-line text-base text-ink-700 dark:text-ink-300">
+          <p className="max-w-prose whitespace-pre-line text-lg leading-relaxed text-ink-700 dark:text-ink-300">
             {article.content}
           </p>
         ) : (
-          <ArticleDescription description={article.description} className="text-base" />
+          <ArticleDescription
+            description={article.description}
+            className="max-w-prose text-lg leading-relaxed"
+          />
         )}
 
         <a
