@@ -3,6 +3,7 @@ import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { ArticlesFilters } from '@/features/Articles/components/ArticlesFilters'
 import { ArticlesToolbar } from '@/features/Articles/components/ArticlesToolbar'
+import { CachedFeedNotice } from '@/features/Articles/components/CachedFeedNotice'
 import { FilterChips } from '@/features/Articles/components/FilterChips'
 import { Pagination } from '@/features/Articles/components/Pagination'
 import { PartialFailureBanner } from '@/features/Articles/components/PartialFailureBanner'
@@ -12,8 +13,19 @@ import { useAuthorFacet } from '@/features/Articles/hooks/useAuthorFacet'
 
 export function ArticlesPage() {
   const { t } = useTranslation()
-  const { state, term, setTerm, update, reset, list, actions, isLoading, isFetching, isError } =
-    useArticlesDirectory()
+  const {
+    state,
+    term,
+    setTerm,
+    update,
+    reset,
+    list,
+    cachedAt,
+    actions,
+    isLoading,
+    isFetching,
+    isError,
+  } = useArticlesDirectory()
 
   // Every byline seen so far, not just this page's — see `useAuthorFacet`.
   const authors = useAuthorFacet(list.articles, state.author)
@@ -32,7 +44,11 @@ export function ArticlesPage() {
       <FilterChips state={state} onChange={update} onClear={reset} />
       <SavedSearches state={state} onApply={update} />
 
-      <PartialFailureBanner failures={list.failures} />
+      {cachedAt ? (
+        <CachedFeedNotice savedAt={cachedAt} actions={actions} />
+      ) : (
+        <PartialFailureBanner failures={list.failures} />
+      )}
 
       {isError ? (
         <ArticlesErrorState actions={actions} />

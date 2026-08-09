@@ -13,5 +13,6 @@ export const appTheme = {
     savedSearches: 'ina-saved-searches',
     feedCache: 'ina-feed-cache',
     directoryState: 'ina-directory-state',
+    directoryCache: 'ina-directory-cache',
   },
 } as const

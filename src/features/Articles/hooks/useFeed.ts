@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
 import { hashKey, useQuery } from '@tanstack/react-query'
 import { fetchFeed, hasPreferences } from '@/features/Articles/services/feed.service'
 import { useArticleActions } from '@/features/Articles/hooks/useArticleActions'
-import { readFeedCache, writeFeedCache } from '@/features/Articles/utils/feedCache'
+import { useArticleListCache } from '@/features/Articles/hooks/useArticleListCache'
+import { feedCache } from '@/features/Articles/utils/articleListCache'
 import type { Preferences } from '@/features/Preferences'
 
 /**
@@ -28,23 +28,7 @@ export function useFeed(preferences: Preferences) {
   const actions = useArticleActions(query.refetch)
 
   const articles = query.data?.articles
-  useEffect(() => {
-    // Only a feed with something in it is worth falling back to.
-    if (articles?.length)
-      writeFeedCache({ key: cacheKey, savedAt: new Date().toISOString(), articles })
-  }, [articles, cacheKey])
-
-  /**
-   * "The load failed" is two different shapes here. `aggregate` is `allSettled`, so the
-   * ordinary offline case does not reject at all — it resolves with no stories and one
-   * failure per source, and `isError` stays false. Both mean the same thing to a reader
-   * staring at an empty feed, so both reach for the cache; a load that returned stories
-   * never does, however many providers were missing from it.
-   */
-  const emptyAfterFailures = Boolean(
-    query.data && !query.data.articles.length && query.data.failures.length,
-  )
-  const cached = query.isError || emptyAfterFailures ? readFeedCache(cacheKey) : null
+  const cached = useArticleListCache(feedCache, cacheKey, query, articles)
 
   return {
     ready,
