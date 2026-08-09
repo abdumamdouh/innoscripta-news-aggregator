@@ -1,5 +1,6 @@
 import { appTheme } from '@/config/theme'
 import type { Article } from '@/core/sources/types'
+import { createLocalStorageStore } from '@/utils/localStorageStore'
 
 /**
  * A saved article keeps a copy of the story, not just its id. No adapter can fetch one
@@ -103,44 +104,9 @@ export const findBookmarkedArticle = (
   id: string,
 ): Article | undefined => bookmarks.find((bookmark) => bookmark.id === id)?.article
 
-/**
- * localStorage is the one source of truth; this is the read model over it, so two readers
- * in the same page see one list. It exists for identity, not speed: `useSyncExternalStore`
- * (see `useBookmarks`) tears the render down if a snapshot is a fresh array every call, and
- * a reader that re-parses on its own drifts the moment another one writes.
- *
- * Keyed on the raw string rather than invalidated by hand, so a change this module did not
- * make — a cleared store, another tab — still reparses on the next read.
- */
-let parsed: { raw: string | null; bookmarks: Bookmark[] } | undefined
-/** Shared so the unreadable-storage path is a stable snapshot too, not a new array. */
-const noBookmarks: Bookmark[] = []
-const listeners = new Set<() => void>()
+/** One read model over localStorage, shared so two readers in the same page see one list. */
+const store = createLocalStorageStore(appTheme.storageKeys.bookmarks, parseBookmarks)
 
-export function readBookmarks(): Bookmark[] {
-  try {
-    const raw = localStorage.getItem(appTheme.storageKeys.bookmarks)
-    if (!parsed || parsed.raw !== raw) parsed = { raw, bookmarks: parseBookmarks(raw) }
-    return parsed.bookmarks
-  } catch {
-    return noBookmarks
-  }
-}
-
-/** Returns the unsubscribe, which is the shape `useSyncExternalStore` asks for. */
-export function subscribeBookmarks(listener: () => void) {
-  listeners.add(listener)
-  return () => listeners.delete(listener)
-}
-
-export function writeBookmarks(bookmarks: readonly Bookmark[]) {
-  try {
-    localStorage.setItem(appTheme.storageKeys.bookmarks, JSON.stringify(bookmarks))
-  } catch {
-    // Private mode / quota: saving is a convenience, never a blocker.
-  }
-  // After the write, so every reader that wakes up re-reads what was actually stored —
-  // and unchanged storage (quota, private mode) is then honestly reported as unchanged.
-  readBookmarks()
-  listeners.forEach((listener) => listener())
-}
+export const readBookmarks = store.read
+export const subscribeBookmarks = store.subscribe
+export const writeBookmarks = store.write

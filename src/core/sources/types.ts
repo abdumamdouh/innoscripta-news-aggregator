@@ -47,7 +47,8 @@ export interface NewsSource<Raw = unknown> {
   capabilities: SourceCapabilities
   /** False for a source with no key configured — it is skipped, not failed. */
   available: boolean
-  unavailableReason?: string
+  /** i18n key, not a sentence — this reason is shown to the reader (see `PreferencesModal`). */
+  unavailableReasonKey?: string
   fetch(query: ArticleQuery, signal?: AbortSignal): Promise<Raw[]>
   normalize(raw: Raw): Article
 }

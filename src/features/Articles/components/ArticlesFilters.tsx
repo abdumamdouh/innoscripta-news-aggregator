@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { AppCard, AppCheckbox, AppInput, AppSelect } from '@/components/common/design-system'
-import { ARTICLE_CATEGORIES, SELECTABLE_SOURCES } from '@/features/Articles/constants'
+import { ARTICLE_CATEGORIES } from '@/core/sources/registry'
+import { SELECTABLE_SOURCES } from '@/features/Articles/constants'
 import type { ArticlesState } from '@/features/Articles/types/articles.types'
 
 const ALL = '__all__'

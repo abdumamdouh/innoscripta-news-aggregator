@@ -13,6 +13,7 @@ import { description } from '@/core/sources/adapters/shared'
 import { SOURCES } from '@/core/sources/registry'
 import type { Article, ArticleQuery } from '@/core/sources/types'
 import bbcFixture from '@/core/sources/adapters/__fixtures__/bbc-rss.json'
+import en from '@/i18n/locales/en.json'
 import guardianFixture from '@/core/sources/adapters/__fixtures__/guardian.json'
 import newsapiFixture from '@/core/sources/adapters/__fixtures__/newsapi.json'
 import nytFixture from '@/core/sources/adapters/__fixtures__/nyt.json'
@@ -554,7 +555,8 @@ describe('registry', () => {
     for (const source of [openNewsSource, newsCredSource]) {
       expect(SOURCES).toContain(source)
       expect(source.available).toBe(false)
-      expect(source.unavailableReason?.length).toBeGreaterThan(20)
+      // The reason is read by a human in three languages, so it has to be a real i18n key.
+      expect(en[source.unavailableReasonKey as keyof typeof en]).toBeTruthy()
     }
   })
 })

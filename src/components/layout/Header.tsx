@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigation } from '@/components/layout/Navigation'
 import { LanguageSelect } from '@/components/layout/LanguageSelect'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { PreferencesButton } from '@/features/Preferences'
 
 export function Header() {
   const { t } = useTranslation()
@@ -19,6 +20,7 @@ export function Header() {
         </Link>
         <Navigation />
         <div className="ms-auto flex items-center gap-2">
+          <PreferencesButton />
           <LanguageSelect />
           <ThemeToggle />
         </div>

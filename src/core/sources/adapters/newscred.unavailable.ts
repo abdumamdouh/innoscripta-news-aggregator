@@ -15,8 +15,7 @@ export const newsCredSource: NewsSource<never> = {
     pagination: false,
   },
   available: false,
-  unavailableReason:
-    'NewsCred is now Optimizely Content Marketing Platform — its content API is enterprise-only, with no public or free tier to sign up for.',
+  unavailableReasonKey: 'sources.unavailableReason.newscred',
   fetch: () => Promise.resolve([]),
   normalize: () => {
     throw new Error('newscred: no public API access to normalize')

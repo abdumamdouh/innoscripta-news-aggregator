@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AppButton, appFocusRing } from '@/components/common/design-system'
-import { SOURCE_LABELS } from '@/features/Articles/constants'
+import { SOURCE_LABELS } from '@/core/sources/registry'
 import type { ArticlesState } from '@/features/Articles/types/articles.types'
 import { hasActiveFilters } from '@/features/Articles/utils/articlesState'
 import { cn } from '@/utils/cn'
