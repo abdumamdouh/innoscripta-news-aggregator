@@ -141,6 +141,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/old-pre-fix-feed-cache-entries-are-silen`.
 - [x] (minor) feed.cached.notice translation key/component name is feed-specific but now shared with the directory: CachedFeedNotice is now rendered from both FeedPage and ArticlesPage, but the translation key is still `feed.cached.notice` and the component/file are still named for the feed. Current copy is generic enough not to leak on screen, but the naming misleads future editors. Consider renaming to something list-agnostic now that there's a second caller. — found in carry-forward-articlespage-no-offline-cache
       Status: done. Branch: `feat/feed-cached-notice-translation-key-compo`.
+- [ ] (minor) Responsive pass only lands on the Articles list/details path; other screens rely entirely on transitive fixes: the touched files are limited to shared primitives (AppButton, AppCheckbox, AppModal), Header, and the Articles list/details/filter-chips code — Preferences, Feed, Bookmarks, and SavedSearches pages themselves are untouched. They currently pass the responsive e2e checks only because they already used flex-col/flex-wrap layouts and shared AppButton/AppIconButton/AppCheckbox primitives that inherited the 44px fix automatically; there's no page-specific responsive work for them. Worth confirming this transitive coverage is intentional and not an oversight, since the item spec calls out preferences/feed/bookmarks/presets by name as in-scope. — found in 12
+      Status: in progress. Branch: `feat/responsive-pass-only-lands-on-the-articl`.
 
 ## Loop log
 
