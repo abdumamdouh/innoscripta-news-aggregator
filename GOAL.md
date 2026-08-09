@@ -151,7 +151,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: in progress. Branch: `feat/appmodal-drawer-variant-has-no-sticky-fo`.
 - [x] (minor) clippedText() only exercised on the search-card/details path, not feed/bookmarks/preferences: e2e/responsive.spec.ts:188-204 adds the new 'real-length headline and byline' test only for the article-list card and its details page. The feed page, bookmarks/saved cards, and any other place ArticleCard or similarly clamped text renders (e.g. e2e/responsive.spec.ts:209 'the feed fits the viewport', :230 'a populated saved page') never run clippedText() with the FULL_HEADLINE/FULL_BYLINE fixture, so a clamp regression introduced only in those surfaces (they reuse ArticleCard today, but that's not enforced) would go undetected. Low risk since ArticleCard is shared, but worth a follow-up if any of those pages ever render title/author text through a different component. — found in carry-forward-responsive-truncated-text
       Status: done. Branch: `feat/clippedtext-only-exercised-on-the-search`.
-- [ ] (minor) narrow() now matches on author too, coupling all e2e search-term fixtures: e2e/providerMocks.ts narrow() was widened from title-only substring matching to title+author. This is a global behavior change to the shared test fixture affecting every spec using mockProviders with a `q`/search term, not just the new feed/saved tests. Worth a follow-up check (or a comment) confirming no other spec's chosen search term coincidentally matches via the `Reporter N` author strings and passes for the wrong reason. — found in carry-forward-responsive-truncated-text (unresolved: clippedText() coverage gap)
+- [x] (minor) narrow() now matches on author too, coupling all e2e search-term fixtures: e2e/providerMocks.ts narrow() was widened from title-only substring matching to title+author. This is a global behavior change to the shared test fixture affecting every spec using mockProviders with a `q`/search term, not just the new feed/saved tests. Worth a follow-up check (or a comment) confirming no other spec's chosen search term coincidentally matches via the `Reporter N` author strings and passes for the wrong reason. — found in carry-forward-responsive-truncated-text (unresolved: clippedText() coverage gap)
+      Status: done. Branch: `feat/narrow-now-matches-on-author-too-couplin`.
 
 ## Loop log
 
@@ -199,6 +200,7 @@ iteration 9 — [carry-forward-responsive-pass-transitive-coverage] Responsive p
 iteration 1 — [carry-forward-146] Responsive e2e overflow check isn't exercised against long/unbreakable content — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 3 — [carry-forward-responsive-truncated-text] Responsive e2e never checks for truncated critical text — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 1 — [carry-forward-responsive-truncated-text (unresolved: clippedText() coverage gap)] clippedText() only exercised on the search-card/details path, not feed/bookmarks/preferences — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 2 — [carry-forward-responsive-truncated-text (unresolved: clippedText() coverage gap)] narrow() now matches on author too, coupling all e2e search-term fixtures — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
