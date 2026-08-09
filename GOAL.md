@@ -97,7 +97,8 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/two-independent-localstorage-reads-of-bo`.
 - [x] (minor) ArticlesPage's own isError branch has no unit coverage and may be unreachable via any provider-level mock: This diff's e2e comment and its new unit test both establish that aggregate() is allSettled-based, so no combination of 500s/aborts on provider routes can make the outer query promise reject — only a bug that throws before/outside the Promise.allSettled call (or a mocked fetchArticles) can. The backlog item's premise that ArticlesPage already has 'equivalent isError coverage from item 5' does not hold: there is no unit test file for ArticlesPage/useArticlesState exercising isError, and e2e/articles.spec.ts has no error-path test either — meaning that branch (src/features/Articles/pages/ArticlesPage.tsx isError block) is likely just as untested and just as hard to provoke as the details-page one was before this diff. Worth a follow-up item to add the same vi.mock-based unit test for ArticlesPage, or to confirm/document the branch is defensive-only dead code. — found in carry-forward-8
       Status: done. Branch: `feat/articlespage-s-own-iserror-branch-has-no`.
-- [ ] (minor) Preferences feature index.ts deviates from the stated feature-folder contract: patterns.md says "the feature's index.ts exports its routes and nothing else"; src/features/Preferences/index.ts exports PreferencesButton and usePreferences instead, since the feature has no route. This is the first non-route feature in the codebase, so the rule as literally written doesn't fit it, but nothing documents the exception at the rule level (only in the feature's own comment). Worth a one-line addendum to patterns.md once item 8 (which will import usePreferences) lands, so the exception isn't just tribal knowledge in one file. — found in 7
+- [x] (minor) Preferences feature index.ts deviates from the stated feature-folder contract: patterns.md says "the feature's index.ts exports its routes and nothing else"; src/features/Preferences/index.ts exports PreferencesButton and usePreferences instead, since the feature has no route. This is the first non-route feature in the codebase, so the rule as literally written doesn't fit it, but nothing documents the exception at the rule level (only in the feature's own comment). Worth a one-line addendum to patterns.md once item 8 (which will import usePreferences) lands, so the exception isn't just tribal knowledge in one file. — found in 7
+      Status: done. Branch: `feat/preferences-feature-index-ts-deviates-fr`.
 
 ## Loop log
 
@@ -124,6 +125,7 @@ iteration 7 — [carry-forward-6 (bookmark snapshot refresh)] Bookmark snapshot 
 iteration 9 — [carry-forward-10] ArticlesPage's own isError branch has no unit coverage and may be unreachable via any provider-level mock — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 10 — [carry-forward-9] Two independent localStorage reads of bookmarks are not synchronized in-session — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 11 — [7] Preferences (sources / categories / authors) — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 12 — [carry-forward-11] Preferences feature index.ts deviates from the stated feature-folder contract — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
