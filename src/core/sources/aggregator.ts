@@ -117,6 +117,12 @@ export async function aggregate(
 
   const settled = await Promise.allSettled(selected.map((s) => s.fetch(query, signal)))
 
+  // A cancelled request is not four dead providers. Without this, aborting mid-flight — which
+  // the debounced search box does on every keystroke — resolves as a success carrying an empty
+  // feed and a failure for every source, i.e. "nothing matched" under a banner naming them all.
+  // Rethrowing hands the caller a cancellation it can discard, which is what it asked for.
+  if (signal?.aborted) throw signal.reason ?? new DOMException('Aborted', 'AbortError')
+
   const failures: SourceFailure[] = []
   const articles: Article[] = []
 

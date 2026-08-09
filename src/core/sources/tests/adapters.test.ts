@@ -9,7 +9,7 @@ import { newsapiSource, selectItems as selectNewsapi } from '@/core/sources/adap
 import { nytSource, selectItems as selectNyt } from '@/core/sources/adapters/nyt'
 import { newsCredSource } from '@/core/sources/adapters/newscred.unavailable'
 import { openNewsSource } from '@/core/sources/adapters/opennews.unavailable'
-import { description } from '@/core/sources/adapters/shared'
+import { bodyText, description, url } from '@/core/sources/adapters/shared'
 import { SOURCES } from '@/core/sources/registry'
 import type { Article, ArticleQuery } from '@/core/sources/types'
 import bbcFixture from '@/core/sources/adapters/__fixtures__/bbc-rss.json'
@@ -642,5 +642,41 @@ describe('guardian image rendition', () => {
 
   it('stays undefined when the provider sends no thumbnail', () => {
     expect(normalize(null)).toBeUndefined()
+  })
+})
+
+describe('untrusted provider content', () => {
+  // Every field on an Article comes from a third party. The details page renders `content`
+  // as a text node precisely because of this, so these assert the flattening that decision
+  // depends on rather than trusting the comment above it.
+  it('strips a script tag out of a body instead of carrying it through', () => {
+    const flattened = bodyText('<p>Before<script>alert(1)</script>After</p>')
+    expect(flattened).not.toContain('<script')
+    expect(flattened).not.toContain('</script>')
+    expect(flattened).toContain('Before')
+    expect(flattened).toContain('After')
+  })
+
+  it('strips an event handler along with the tag carrying it', () => {
+    const flattened = bodyText('<p>Hi <img src=x onerror="alert(1)"> there</p>')
+    expect(flattened).not.toMatch(/<[a-z/]/i)
+    expect(flattened).not.toContain('onerror')
+  })
+
+  it('decodes entities to text without reconstituting a tag', () => {
+    // &lt;script&gt; decodes to <script> as literal characters. React escapes it on render;
+    // this asserts the adapter is not building markup that some other consumer might trust.
+    const flattened = bodyText('<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>')
+    expect(flattened).toBe('<script>alert(1)</script>')
+  })
+
+  it('refuses a javascript: url rather than passing it to an href', () => {
+    expect(url('javascript:alert(1)')).toBeUndefined()
+    expect(url('data:text/html,<script>alert(1)</script>')).toBeUndefined()
+    expect(url('https://example.test/story')).toBe('https://example.test/story')
+  })
+
+  it('keeps paragraph structure while dropping the tags that made it', () => {
+    expect(bodyText('<p>One</p><p>Two</p>')).toBe('One\n\nTwo')
   })
 })

@@ -24,7 +24,5 @@ export type { AppSelectProps, AppSelectOption } from '@/components/common/design
 export { AppSkeleton } from '@/components/common/design-system/AppSkeleton'
 export { ToastProvider } from '@/components/common/design-system/AppToast'
 export { useToast } from '@/components/common/design-system/toastContext'
-export { AppToggle } from '@/components/common/design-system/AppToggle'
-export type { AppToggleProps } from '@/components/common/design-system/AppToggle'
 export { AppTooltip, TooltipProvider } from '@/components/common/design-system/AppTooltip'
 export type { AppTooltipProps } from '@/components/common/design-system/AppTooltip'

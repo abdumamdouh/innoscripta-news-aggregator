@@ -16,7 +16,6 @@ every call site.
 | `AppSelect`     | `@radix-ui/react-select`         |
 | `AppModal`      | `@radix-ui/react-dialog`         |
 | `AppCheckbox`   | `@radix-ui/react-checkbox`       |
-| `AppToggle`     | `@radix-ui/react-switch`         |
 | `AppTooltip`    | `@radix-ui/react-tooltip`        |
 | `ToastProvider` | `<div role="status">` + Tailwind |
 

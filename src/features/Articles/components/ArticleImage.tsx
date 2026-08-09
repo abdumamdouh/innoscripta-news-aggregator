@@ -9,7 +9,7 @@ interface ArticleImageProps {
 }
 
 /**
- * Provider image URLs go stale — a publisher moves an asset and `urlToImage` 404s while the
+ * Provider image URLs go stale — a publisher moves an asset and the picture 404s while the
  * article itself is fine. A broken-image icon in the middle of the grid looks like the app
  * failed, so a failure falls back to the same empty frame an article without a picture gets
  * and the layout never moves.

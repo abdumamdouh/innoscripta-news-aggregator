@@ -265,3 +265,35 @@ describe('aggregate — capability degradation', () => {
     expect(result.articles).toHaveLength(1)
   })
 })
+
+describe('cancellation', () => {
+  const hangs = (id: string): NewsSource => ({
+    id,
+    label: id,
+    capabilities: { query: true, dateRange: true, category: true, author: true, pagination: true },
+    available: true,
+    fetch: (_query, signal) =>
+      new Promise((_resolve, reject) => {
+        signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+      }),
+    normalize: (raw) => raw as Article,
+  })
+
+  it('propagates the abort instead of reporting every source as failed', async () => {
+    const controller = new AbortController()
+    const promise = aggregate({ page: 1, pageSize: 9 }, [hangs('a'), hangs('b')], controller.signal)
+    controller.abort()
+
+    // The trap: allSettled swallows each rejection, so without an explicit check this
+    // resolves as a success carrying an empty feed and a failure per source.
+    await expect(promise).rejects.toThrow()
+  })
+
+  it('still reports a genuine failure when nothing was cancelled', async () => {
+    const dead: NewsSource = { ...hangs('dead'), fetch: () => Promise.reject(new Error('502')) }
+    const result = await aggregate({ page: 1, pageSize: 9 }, [dead])
+
+    expect(result.articles).toEqual([])
+    expect(result.failures).toEqual([{ sourceId: 'dead', reason: '502' }])
+  })
+})
