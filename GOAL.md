@@ -168,6 +168,7 @@ iteration 17 — [carry-forward-14] Stale ponytail comment in useBookmarks.ts �
 iteration 18 — [carry-forward (found in 9) — No toast/announcement for bookmark toggle outside the Bookmarks page] No toast/announcement for bookmark toggle outside the Bookmarks page — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 19 — [carry-forward (found in 9) — No literal toast component for bookmark/list mutations] No literal toast component for bookmark/list mutations — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 20 — [carry-forward (found in 9) — BookmarksPage has zero unit test coverage] BookmarksPage has zero unit test coverage — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 1 — [carry-forward-completeness-critic] Two completed carry-forward items left unchecked in the backlog file — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 
