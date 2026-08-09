@@ -83,7 +83,7 @@ describe('BookmarksPage — reading lists', () => {
 
     // Nothing was written, so nothing is announced either — checked with the dialog shut,
     // since an open Radix dialog `aria-hidden`s the live region behind it.
-    await userEvent.click(screen.getByRole('button', { name: en['bookmarks.list.cancel'] }))
+    await userEvent.click(screen.getByRole('button', { name: en['common.cancel'] }))
     expect(toastText()).toBe('')
   })
 

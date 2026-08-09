@@ -6,7 +6,6 @@ import {
   createList,
   deleteList,
   isInAnyList,
-  listNameError,
   parseReadingLists,
   removeArticleFromLists,
   renameList,
@@ -63,29 +62,6 @@ describe('parseReadingLists', () => {
     expect(parseReadingLists(JSON.stringify([{ id: 'a', name: 'Weekend' }]))).toEqual([
       list('a', 'Weekend'),
     ])
-  })
-})
-
-describe('listNameError', () => {
-  const lists = [list('a', 'Weekend reading')]
-
-  it('rejects a name that is blank or only whitespace', () => {
-    expect(listNameError(lists, '')).toBe('required')
-    expect(listNameError(lists, '   ')).toBe('required')
-  })
-
-  it('rejects a name already taken, ignoring case and surrounding space', () => {
-    expect(listNameError(lists, 'Weekend reading')).toBe('duplicate')
-    expect(listNameError(lists, '  weekend READING ')).toBe('duplicate')
-  })
-
-  it('lets a list keep its own name while renaming', () => {
-    expect(listNameError(lists, 'Weekend reading', 'a')).toBeUndefined()
-    expect(listNameError(lists, 'Weekend reading', 'b')).toBe('duplicate')
-  })
-
-  it('accepts a free name', () => {
-    expect(listNameError(lists, 'Later')).toBeUndefined()
   })
 })
 

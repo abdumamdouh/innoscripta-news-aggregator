@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@/i18n'
 import type { AggregateResult } from '@/core/sources/aggregator'
+import { ToastProvider } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { ArticlesPage } from '@/features/Articles/pages/ArticlesPage'
 import { fetchArticles } from '@/features/Articles/services/articles.service'
@@ -39,9 +40,11 @@ function renderList() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/']}>
-        <ArticlesPage />
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter initialEntries={['/']}>
+          <ArticlesPage />
+        </MemoryRouter>
+      </ToastProvider>
     </QueryClientProvider>,
   )
 }
@@ -59,7 +62,8 @@ describe('ArticlesPage — cold load that fails', () => {
     await screen.findByRole('heading', { name: en['articles.error.title'] })
     expect(screen.getByText(en['articles.error.body'])).toBeInTheDocument()
     // "0 articles on this page" would read as a successful empty search, which this is not.
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    // The always-mounted toast region is a live region too, so assert on the count itself.
+    expect(screen.queryByText(/articles on this page/)).not.toBeInTheDocument()
     // Filtering still works while the feed is down — the toolbar is outside the branch.
     expect(screen.getByRole('searchbox')).toBeInTheDocument()
   })
@@ -76,7 +80,8 @@ describe('ArticlesPage — cold load that fails', () => {
       expect(screen.getByRole('link', { name: article.title })).toBeInTheDocument(),
     )
     expect(screen.queryByText(en['articles.error.title'])).not.toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent('1 articles on this page')
+    // Two live regions on this page now: the result count, then the toast region.
+    expect(screen.getAllByRole('status')[0]).toHaveTextContent('1 articles on this page')
     expect(fetchArticlesMock).toHaveBeenCalledTimes(2)
   })
 })

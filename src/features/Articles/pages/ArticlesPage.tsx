@@ -6,6 +6,7 @@ import { ArticlesToolbar } from '@/features/Articles/components/ArticlesToolbar'
 import { FilterChips } from '@/features/Articles/components/FilterChips'
 import { Pagination } from '@/features/Articles/components/Pagination'
 import { PartialFailureBanner } from '@/features/Articles/components/PartialFailureBanner'
+import { SavedSearches } from '@/features/Articles/components/SavedSearches'
 import { useArticlesDirectory } from '@/features/Articles/hooks/useArticlesDirectory'
 import { useAuthorFacet } from '@/features/Articles/hooks/useAuthorFacet'
 
@@ -29,6 +30,7 @@ export function ArticlesPage() {
       />
       <ArticlesFilters state={state} authors={authors} onChange={update} />
       <FilterChips state={state} onChange={update} onClear={reset} />
+      <SavedSearches state={state} onApply={update} />
 
       <PartialFailureBanner failures={list.failures} />
 
