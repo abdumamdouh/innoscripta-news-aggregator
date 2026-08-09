@@ -17,6 +17,7 @@
   "route.error.title": "حدث خطأ ما",
   "route.error.body": "تعذّر عرض الصفحة. حاول من البداية.",
   "common.close": "إغلاق",
+  "common.dismiss": "تجاهل",
   "preferences.title": "التفضيلات",
   "preferences.description": "اختر الأخبار التي تريدها. تُحفظ على هذا الجهاز.",
   "preferences.sources": "المصادر المفضلة",

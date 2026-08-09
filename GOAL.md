@@ -106,8 +106,10 @@ backlog rows. Appended by the loop; safe to add to by hand.
 - [x] (minor) Stale ponytail comment in useBookmarks.ts: The existing comment says 'Item 9 (reading lists) can grow this into a real store' — but item 9 instead added a separate, parallel readingLists.ts store keyed by article id, not a merged store. The comment now misdescribes the actual architecture and should be updated (or the two stores should be reconsidered as one) so a future reader isn't misled about where the 'real' store lives. — found in 9
       Status: done. Branch: `feat/stale-ponytail-comment-in-usebookmarks-t`.
 - [x] (minor) No toast/announcement for bookmark toggle outside the Bookmarks page: Saving or unsaving an article from the details page changes only the icon's pressed state — there is no toast, no live region, nothing announced, even though the DoD calls for a toast on every bookmark mutation. This predates item 9 and the toast/ToastProvider gap is explicitly deferred to item 11 elsewhere in the code, so it's flagged here as a carry-forward rather than blocking this item. — found in 9
-  Status: done. Branch: `feat/no-toast-announcement-for-bookmark-toggl`.
-- [ ] (minor) No literal toast component for bookmark/list mutations: Both pages use a local aria-live status paragraph instead of a real toast, deliberately deferred (per in-code ponytail comments) until backlog item 11 ships a ToastProvider. When item 11 lands, wire these two mutation-feedback sites into the real toast system instead of leaving the aria-live paragraphs as a permanent parallel mechanism. — found in 9
+      Status: done. Branch: `feat/no-toast-announcement-for-bookmark-toggl`.
+- [x] (minor) No literal toast component for bookmark/list mutations: Both pages use a local aria-live status paragraph instead of a real toast, deliberately deferred (per in-code ponytail comments) until backlog item 11 ships a ToastProvider. When item 11 lands, wire these two mutation-feedback sites into the real toast system instead of leaving the aria-live paragraphs as a permanent parallel mechanism. — found in 9
+      Status: done. Branch: `feat/no-literal-toast-component-for-bookmark-`.
+- [ ] (minor) BookmarksPage has zero unit test coverage: src/features/Articles/pages/BookmarksPage.tsx has no corresponding BookmarksPage.test.tsx anywhere in the repo (FeedPage, ArticlesPage and ArticleDetailsPage all have one). This predates the toast migration but means none of the list CRUD or toast-triggering logic in this file has component-level coverage. Worth a dedicated backlog item to add BookmarksPage.test.tsx. — found in carry-forward (found in 9) — No literal toast component for bookmark/list mutations
 
 ## Loop log
 
@@ -141,6 +143,7 @@ iteration 15 — [9] Bookmarks + reading lists (CRUD) — done — static:pass r
 iteration 16 — [carry-forward-13] Shrunk touch target on saved-page card actions — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 17 — [carry-forward-14] Stale ponytail comment in useBookmarks.ts — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 18 — [carry-forward (found in 9) — No toast/announcement for bookmark toggle outside the Bookmarks page] No toast/announcement for bookmark toggle outside the Bookmarks page — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 19 — [carry-forward (found in 9) — No literal toast component for bookmark/list mutations] No literal toast component for bookmark/list mutations — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

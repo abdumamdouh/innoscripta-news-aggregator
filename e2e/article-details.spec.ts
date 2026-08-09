@@ -70,7 +70,8 @@ test.describe('article details', () => {
     })
 
     await openFirstArticle(page)
-    await expect(page.getByRole('status')).toHaveCount(0)
+    // Scoped to `main`: the app-wide toast region is a `status` too, and is always mounted.
+    await expect(page.getByRole('main').getByRole('status')).toHaveCount(0)
     expect(requests).toEqual([])
   })
 
@@ -151,24 +152,28 @@ test.describe('article details', () => {
     )
   })
 
-  test('announces every save and unsave, not just the icon changing state', async ({ page }) => {
+  test('toasts every save and unsave, not just the icon changing state', async ({ page }) => {
     await page.goto('/')
     await openFirstArticle(page)
 
-    // sr-only, so assert the text rather than visibility: what a screen reader gets is the
-    // whole point, and there is nothing on screen to look at.
-    const announcement = page.locator('[aria-live="polite"]')
+    // The app-wide toast region is always mounted and starts silent — nothing to announce yet.
+    const announcement = page.getByRole('status')
     await expect(announcement).toBeEmpty()
 
     await page.getByRole('button', { name: 'Save article' }).click()
     await expect(announcement).toHaveText('Article saved.')
+    await expect(page.getByText('Article saved.')).toBeVisible()
 
     await page.getByRole('button', { name: 'Remove saved article' }).click()
     await expect(announcement).toHaveText('Article removed from saved.')
 
-    // Saving again has to re-announce, not sit on the stale "removed" line.
+    // Saving again has to re-toast, not sit on the stale "removed" line.
     await page.getByRole('button', { name: 'Save article' }).click()
     await expect(announcement).toHaveText('Article saved.')
+
+    // And the reader can put it away without waiting it out.
+    await page.getByRole('button', { name: 'Dismiss' }).click()
+    await expect(announcement).toBeEmpty()
   })
 
   test('still reads as saved when the story is reopened without a reload', async ({ page }) => {
