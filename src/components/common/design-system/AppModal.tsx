@@ -5,6 +5,20 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/utils/cn'
 import { AppIconButton } from '@/components/common/design-system/AppIconButton'
 
+/**
+ * Centred panel, or a sheet down the inline edge for the panels a phone opens over the page.
+ * Both are the same Radix dialog — only the box it lands in differs, so focus, escape and
+ * the scrim behave identically either way.
+ */
+export type AppModalVariant = 'modal' | 'drawer'
+
+const VARIANTS: Record<AppModalVariant, string> = {
+  modal:
+    'motion-modal-panel inset-x-0 top-1/2 mx-auto max-h-[90dvh] w-[min(100%-2rem,32rem)] -translate-y-1/2 rounded-xl',
+  // `app-drawer-content` already carries the slide-in, RTL included.
+  drawer: 'app-drawer-content inset-y-0 end-0 h-dvh w-[min(100%-3rem,24rem)]',
+}
+
 export interface AppModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -13,6 +27,7 @@ export interface AppModalProps {
   children: ReactNode
   footer?: ReactNode
   className?: string
+  variant?: AppModalVariant
 }
 
 export function AppModal({
@@ -23,6 +38,7 @@ export function AppModal({
   children,
   footer,
   className,
+  variant = 'modal',
 }: AppModalProps) {
   const { t } = useTranslation()
 
@@ -32,8 +48,8 @@ export function AppModal({
         <Dialog.Overlay className="motion-modal-backdrop fixed inset-0 z-40 bg-ink-900/50" />
         <Dialog.Content
           className={cn(
-            'motion-modal-panel fixed inset-x-0 top-1/2 z-50 mx-auto max-h-[90dvh] w-[min(100%-2rem,32rem)]',
-            '-translate-y-1/2 overflow-auto rounded-xl bg-paper-0 p-6 shadow-soft dark:bg-ink-800',
+            'fixed z-50 overflow-auto bg-paper-0 p-6 shadow-soft dark:bg-ink-800',
+            VARIANTS[variant],
             className,
           )}
         >
@@ -49,7 +65,8 @@ export function AppModal({
               ) : null}
             </div>
             <Dialog.Close asChild>
-              <AppIconButton label={t('common.close')}>
+              {/* A long title must never squeeze the way out below a thumb's width. */}
+              <AppIconButton label={t('common.close')} className="shrink-0">
                 <X className="size-5" aria-hidden />
               </AppIconButton>
             </Dialog.Close>

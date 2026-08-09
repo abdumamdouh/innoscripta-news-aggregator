@@ -13,7 +13,7 @@ export function Header() {
       <div className="app-shell flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
         <Link
           to="/"
-          className="text-lg font-semibold text-ink-900 dark:text-ink-100"
+          className="inline-flex min-h-11 items-center text-lg font-semibold text-ink-900 lg:min-h-0 dark:text-ink-100"
           aria-label={t('app.name')}
         >
           {t('app.name')}

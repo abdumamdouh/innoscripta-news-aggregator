@@ -62,7 +62,7 @@ export function FilterChips({ state, onChange, onClear }: FilterChipsProps) {
           onClick={() => onChange(chip.clear)}
           aria-label={t('articles.filters.remove', { label: chip.text })}
           className={cn(
-            'inline-flex min-h-9 items-center gap-1.5 rounded-full border border-ink-300 bg-paper-0 px-3 text-sm text-ink-700',
+            'inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink-300 bg-paper-0 px-3 text-sm text-ink-700 lg:min-h-9',
             'hover:bg-accent-50 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-100 dark:hover:bg-ink-700',
             appFocusRing,
           )}

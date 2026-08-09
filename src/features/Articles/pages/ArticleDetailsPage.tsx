@@ -27,7 +27,7 @@ function BackLink({ search }: { search: string }) {
   return (
     <Link
       to={{ pathname: '/', search }}
-      className="inline-flex items-center gap-2 text-sm text-ink-700 hover:text-accent-600 hover:underline dark:text-ink-100"
+      className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-700 hover:text-accent-600 hover:underline lg:min-h-0 dark:text-ink-100"
     >
       <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
       {t('articles.details.back')}
@@ -174,7 +174,7 @@ export function ArticleDetailsPage() {
           href={article.url}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 self-start text-sm font-medium text-accent-600 hover:underline"
+          className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-medium text-accent-600 hover:underline lg:min-h-0"
         >
           {t('articles.details.readOriginal')}
           <ExternalLink className="size-4" aria-hidden />

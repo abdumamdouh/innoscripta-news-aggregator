@@ -42,6 +42,7 @@
   "articles.filters.anyAuthor": "كل الكُتّاب",
   "articles.filters.sources": "المصادر",
   "articles.filters.clear": "مسح عوامل التصفية",
+  "articles.filters.apply": "عرض النتائج",
   "articles.filters.remove": "إزالة عامل التصفية: {{label}}",
   "articles.sort.label": "الترتيب",
   "articles.sort.newest": "الأحدث أولاً",
