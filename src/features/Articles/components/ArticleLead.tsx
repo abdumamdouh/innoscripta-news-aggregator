@@ -18,13 +18,15 @@ export function ArticleLead({ article }: { article: Article }) {
   const { t, i18n } = useTranslation()
   const { search } = useLocation()
 
+  // Centred rather than top-aligned: a standfirst is a third the height of the picture
+  // beside it, and pinning it to the top left the card looking half-empty.
   return (
-    <AppCard as="article" className="motion-card flex flex-col gap-4 lg:flex-row lg:items-start">
-      <div className="lg:w-1/2 lg:shrink-0">
+    <AppCard as="article" className="motion-card flex flex-col gap-5 lg:flex-row lg:items-center">
+      <div className="lg:w-7/12 lg:shrink-0">
         <ArticleImage src={article.imageUrl} priority />
       </div>
 
-      <div className="flex flex-col gap-3 lg:w-1/2">
+      <div className="flex flex-col gap-3 lg:w-5/12">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-accent-600">
             {t('articles.lead')}

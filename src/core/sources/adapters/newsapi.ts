@@ -6,6 +6,7 @@ import {
   queryString,
   text,
   url,
+  longerThan,
 } from '@/core/sources/adapters/shared'
 
 const ID = 'newsapi'
@@ -21,6 +22,7 @@ interface NewsApiRaw {
   author?: string | null
   title?: string | null
   description?: string | null
+  content?: string | null
   url?: string | null
   urlToImage?: string | null
   publishedAt?: string | null
@@ -66,8 +68,12 @@ function normalize(raw: NewsApiRaw): Article {
     author: text(raw.author),
     // `/everything` has no section concept — category is folded into `q` instead.
     category: undefined,
-    // NewsAPI truncates even its `content` field at ~200 chars — a summary, not a body.
-    content: undefined,
+    // NewsAPI truncates `content` at ~200 chars and marks the cut with "[+1234 chars]".
+    // Still three times the description, so it is worth showing once the marker is gone.
+    content: longerThan(
+      text(raw.content)?.replace(/\s*\[\+\d+\s*chars\]\s*$/, ''),
+      raw.description,
+    ),
   }
 }
 

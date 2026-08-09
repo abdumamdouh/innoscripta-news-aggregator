@@ -131,6 +131,25 @@ builds and runs the actual image; it skips with a reason where Docker is unreach
 | `npm run format`        | Prettier, write                                             |
 | `npm run format:check`  | Prettier, check only                                        |
 
+## How this was built
+
+Agentic tooling was used as a copilot, not as the author. The architecture here is the point,
+and it was decided before any code existed:
+
+- One `NewsSource` interface per provider, so a fourth newsroom is a new file and a registry
+  line rather than a change to anything already working.
+- Capabilities declared per source, so BBC's RSS — no query, no date range, no paging — degrades
+  in the aggregator instead of being special-cased at the call sites.
+- One route table (`vite.proxy.ts`) consumed by three runtimes: the Vite dev server, the nginx
+  container, and the Vercel function. The key is attached server-side in all three.
+- A four-hook stack per feature — fetch, URL state, pure derive, actions — kept separate on
+  purpose, because merging them is what makes a list screen unmaintainable.
+
+Those decisions, the trade-offs behind them, and every review judgement are mine. The tooling
+accelerated the typing and held a consistent test bar; it did not choose the design. Where a
+provider constraint forced a compromise — permalinks that cannot always resolve, a page count
+that can only be known one page ahead — the code says so in a comment rather than hiding it.
+
 ## Author
 
 Abdulrahman Mamdouh

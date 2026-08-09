@@ -49,6 +49,9 @@ const ENTITIES: Record<string, string> = {
  * Drops images, links and emphasis with the tags. Render real markup only if the
  * details page is ever asked to look like the original article.
  */
+/** Below this, the longer field is the same sentence with a comma moved. */
+const MEANINGFUL_GAIN = 40
+
 export function bodyText(value: unknown): string | undefined {
   const raw = text(value)
   if (!raw) return undefined
@@ -113,4 +116,20 @@ export function queryString(params: Record<string, string | number | undefined>)
     if (value !== undefined && value !== '') search.set(key, String(value))
   }
   return search.toString()
+}
+
+/**
+ * The richer of two summary fields, or nothing when the longer one adds no reading.
+ *
+ * Only the Guardian serves a real body. The others publish a summary and a slightly longer
+ * one — NYT's lead paragraph over its abstract, NewsAPI's truncated content over its
+ * description — and the details page is worth the extra sentences. Returning undefined when
+ * they are the same length keeps it from repeating the standfirst back at the reader.
+ */
+export function longerThan(candidate: unknown, current: unknown): string | undefined {
+  const longer = bodyText(candidate)
+  const shorter = bodyText(current)
+  if (!longer) return undefined
+
+  return !shorter || longer.length > shorter.length + MEANINGFUL_GAIN ? longer : undefined
 }

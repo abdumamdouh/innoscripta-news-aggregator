@@ -6,6 +6,7 @@ import {
   queryString,
   text,
   url,
+  longerThan,
 } from '@/core/sources/adapters/shared'
 
 const ID = 'nyt'
@@ -80,8 +81,10 @@ function normalize(raw: NytRaw): Article {
     // "By Tripp Mickle and Cade Metz" — the prefix is presentation, not a name.
     author: text(raw.byline?.original?.replace(/^by\s+/i, '')),
     category: text(raw.section_name) ?? text(raw.news_desk),
-    // Article Search returns abstracts and lead paragraphs, never the full body.
-    content: undefined,
+    // Article Search never returns the full body, but the lead paragraph is the opening of
+    // the real article and runs well past the abstract. It is only worth showing when it
+    // says more than the summary already on screen.
+    content: longerThan(raw.lead_paragraph, raw.abstract),
   }
 }
 
