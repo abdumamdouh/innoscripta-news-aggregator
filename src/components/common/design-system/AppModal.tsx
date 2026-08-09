@@ -28,6 +28,12 @@ export interface AppModalProps {
   footer?: ReactNode
   className?: string
   variant?: AppModalVariant
+  /**
+   * A controlled dialog has no Radix Trigger to hand focus back to on close, so without
+   * this a keyboard user lands at the top of the document. Call `preventDefault` and focus
+   * the control that opened it.
+   */
+  onCloseAutoFocus?: (event: Event) => void
 }
 
 export function AppModal({
@@ -39,6 +45,7 @@ export function AppModal({
   footer,
   className,
   variant = 'modal',
+  onCloseAutoFocus,
 }: AppModalProps) {
   const { t } = useTranslation()
 
@@ -47,6 +54,7 @@ export function AppModal({
       <Dialog.Portal>
         <Dialog.Overlay className="motion-modal-backdrop fixed inset-0 z-40 bg-ink-900/50" />
         <Dialog.Content
+          onCloseAutoFocus={onCloseAutoFocus}
           className={cn(
             'fixed z-50 flex flex-col bg-paper-0 p-6 shadow-soft dark:bg-ink-800',
             VARIANTS[variant],

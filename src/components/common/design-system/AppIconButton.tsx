@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import { cn } from '@/utils/cn'
 import { appFocusRing } from '@/components/common/design-system/tokens'
 
@@ -6,6 +6,8 @@ export interface AppIconButtonProps extends ButtonHTMLAttributes<HTMLButtonEleme
   /** Icon-only control, so a label is not optional. */
   label: string
   children: ReactNode
+  /** For a controlled dialog that has to hand focus back here on close. */
+  ref?: Ref<HTMLButtonElement>
 }
 
 export function AppIconButton({
