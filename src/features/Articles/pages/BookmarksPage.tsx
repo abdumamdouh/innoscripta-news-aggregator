@@ -6,6 +6,7 @@ import {
   AppCard,
   AppConfirmDialog,
   AppIconButton,
+  useToast,
 } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { AddToListModal } from '@/features/Articles/components/AddToListModal'
@@ -24,7 +25,6 @@ import {
   toggleArticleInList,
   writeReadingLists,
 } from '@/features/Articles/utils/readingLists'
-import { cn } from '@/utils/cn'
 
 /** Which dialog is open, as one value — two of them can never be open at once. */
 type Naming = { mode: 'new' } | { mode: 'rename'; list: ReadingList } | null
@@ -43,9 +43,7 @@ export function BookmarksPage() {
   const [adding, setAdding] = useState<Article | null>(null)
   const [removing, setRemoving] = useState<Article | null>(null)
   const [deletingList, setDeletingList] = useState(false)
-  // ponytail: one live region, not a toast stack — `ToastProvider` ships with backlog item 11
-  // and is deliberately absent from the provider stack. Swap this for a toast when it lands.
-  const [message, setMessage] = useState('')
+  const toast = useToast()
 
   const activeList = lists.find((list) => list.id === activeListId)
   const articles = savedArticles(bookmarks, lists, activeListId)
@@ -55,10 +53,10 @@ export function BookmarksPage() {
     const stored = readReadingLists()
     if (naming.mode === 'new') {
       writeReadingLists(createList(stored, name))
-      setMessage(t('bookmarks.toast.listCreated'))
+      toast(t('bookmarks.toast.listCreated'))
     } else {
       writeReadingLists(renameList(stored, naming.list.id, name))
-      setMessage(t('bookmarks.toast.listRenamed'))
+      toast(t('bookmarks.toast.listRenamed'))
     }
     setNaming(null)
   }
@@ -68,19 +66,19 @@ export function BookmarksPage() {
     // The filter it was showing is gone, so fall back to everything saved.
     setActiveListId(null)
     setDeletingList(false)
-    setMessage(t('bookmarks.toast.listDeleted'))
+    toast(t('bookmarks.toast.listDeleted'))
   }
 
   const confirmRemove = () => {
     if (removing) unsaveArticle(removing.id)
     setRemoving(null)
-    setMessage(t('bookmarks.toast.saveRemoved'))
+    toast(t('bookmarks.toast.saveRemoved'))
   }
 
   const toggleInList = (list: ReadingList, article: Article) => {
     writeReadingLists(toggleArticleInList(readReadingLists(), list.id, article.id))
     const added = !list.articleIds.includes(article.id)
-    setMessage(
+    toast(
       t(added ? 'bookmarks.toast.addedToList' : 'bookmarks.toast.removedFromList', {
         list: list.name,
       }),
@@ -136,11 +134,6 @@ export function BookmarksPage() {
           </div>
         ) : null}
       </div>
-
-      {/* Every mutation says so here — one polite announcement, never a layout jump. */}
-      <p role="status" className={cn('text-sm text-ink-500', !message && 'sr-only')}>
-        {message}
-      </p>
 
       {articles.length ? (
         <ArticleGrid

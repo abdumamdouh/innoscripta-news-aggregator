@@ -7,19 +7,23 @@ every call site.
 
 ## The primitives
 
-| Component       | Built on                       |
-| --------------- | ------------------------------ |
-| `AppButton`     | `<button>` + Tailwind          |
-| `AppIconButton` | `<button>` + Tailwind          |
-| `AppInput`      | `<input>` + Tailwind           |
-| `AppCard`       | `<div>`/`<article>` + Tailwind |
-| `AppSelect`     | `@radix-ui/react-select`       |
-| `AppModal`      | `@radix-ui/react-dialog`       |
-| `AppCheckbox`   | `@radix-ui/react-checkbox`     |
-| `AppToggle`     | `@radix-ui/react-switch`       |
-| `AppTooltip`    | `@radix-ui/react-tooltip`      |
+| Component       | Built on                         |
+| --------------- | -------------------------------- |
+| `AppButton`     | `<button>` + Tailwind            |
+| `AppIconButton` | `<button>` + Tailwind            |
+| `AppInput`      | `<input>` + Tailwind             |
+| `AppCard`       | `<div>`/`<article>` + Tailwind   |
+| `AppSelect`     | `@radix-ui/react-select`         |
+| `AppModal`      | `@radix-ui/react-dialog`         |
+| `AppCheckbox`   | `@radix-ui/react-checkbox`       |
+| `AppToggle`     | `@radix-ui/react-switch`         |
+| `AppTooltip`    | `@radix-ui/react-tooltip`        |
+| `ToastProvider` | `<div role="status">` + Tailwind |
 
 `TooltipProvider` is re-exported here too, so `App.tsx` mounts it without importing Radix either.
+
+`ToastProvider` owns the app's single live region; features announce a mutation with `useToast()`
+(from `toastContext.ts`) rather than rolling their own `role="status"` paragraph.
 
 ## Conventions
 

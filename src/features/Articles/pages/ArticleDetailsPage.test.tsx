@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@/i18n'
 import type { AggregateResult } from '@/core/sources/aggregator'
 import type { Article } from '@/core/sources/types'
+import { ToastProvider } from '@/components/common/design-system'
 import { ArticleDetailsPage } from '@/features/Articles/pages/ArticleDetailsPage'
 import { fetchArticles } from '@/features/Articles/services/articles.service'
 import en from '@/i18n/locales/en.json'
@@ -39,11 +40,13 @@ function renderDetails() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[`/articles/${encodeURIComponent(article.id)}`]}>
-        <Routes>
-          <Route path="/articles/:articleId" element={<ArticleDetailsPage />} />
-        </Routes>
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter initialEntries={[`/articles/${encodeURIComponent(article.id)}`]}>
+          <Routes>
+            <Route path="/articles/:articleId" element={<ArticleDetailsPage />} />
+          </Routes>
+        </MemoryRouter>
+      </ToastProvider>
     </QueryClientProvider>,
   )
 }

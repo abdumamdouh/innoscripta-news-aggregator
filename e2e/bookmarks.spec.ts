@@ -10,7 +10,8 @@ import { mockProviders } from './providerMocks.ts'
 const cards = (page: Page) => page.getByRole('article')
 const dialog = (page: Page) => page.getByRole('dialog')
 const saved = (page: Page) => page.getByRole('main')
-const announcement = (page: Page) => saved(page).getByRole('status')
+/** The app-wide toast region — it lives outside `main`, next to the router. */
+const announcement = (page: Page) => page.getByRole('status')
 
 /** Save the nth story on the front page, from its own details view. */
 async function saveStory(page: Page, index: number) {

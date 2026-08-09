@@ -17,6 +17,7 @@
   "route.error.title": "Etwas ist schiefgelaufen",
   "route.error.body": "Die Seite konnte nicht angezeigt werden. Bitte von vorn beginnen.",
   "common.close": "Schließen",
+  "common.dismiss": "Ausblenden",
   "preferences.title": "Einstellungen",
   "preferences.description": "Wählen Sie Ihre Nachrichten. Auf diesem Gerät gespeichert.",
   "preferences.sources": "Bevorzugte Quellen",

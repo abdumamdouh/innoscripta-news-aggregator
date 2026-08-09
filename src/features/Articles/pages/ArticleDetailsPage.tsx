@@ -7,6 +7,7 @@ import {
   AppCard,
   AppConfirmDialog,
   AppIconButton,
+  useToast,
 } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
@@ -37,14 +38,12 @@ function BookmarkButton({ article }: { article: Article }) {
   const { isBookmarked, toggle } = useBookmark(article)
   const lists = useReadingLists()
   const [confirming, setConfirming] = useState(false)
-  // ponytail: one live region, same as the saved page — `ToastProvider` ships with backlog
-  // item 11 and is deliberately absent from the provider stack. Swap for a toast when it lands.
-  const [message, setMessage] = useState('')
+  const toast = useToast()
 
   const remove = () => {
     toggle()
     setConfirming(false)
-    setMessage(t('bookmarks.toast.saveRemoved'))
+    toast(t('bookmarks.toast.saveRemoved'))
   }
 
   // Unsaving cascades into every list holding the story, so when a list holds it the reader
@@ -53,7 +52,7 @@ function BookmarkButton({ article }: { article: Article }) {
   const onClick = () => {
     if (isBookmarked && isInAnyList(lists, article.id)) return setConfirming(true)
     toggle()
-    setMessage(t(isBookmarked ? 'bookmarks.toast.saveRemoved' : 'bookmarks.toast.saved'))
+    toast(t(isBookmarked ? 'bookmarks.toast.saveRemoved' : 'bookmarks.toast.saved'))
   }
 
   return (
@@ -68,13 +67,6 @@ function BookmarkButton({ article }: { article: Article }) {
           aria-hidden
         />
       </AppIconButton>
-      {/*
-        `aria-live` rather than `role="status"`: this page already spends that role on its
-        loading card, and one live region per page is enough for a screen reader to follow.
-      */}
-      <p aria-live="polite" className="sr-only">
-        {message}
-      </p>
       <AppConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}

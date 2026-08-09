@@ -17,6 +17,7 @@
   "route.error.title": "Something went wrong",
   "route.error.body": "The page could not be displayed. Try again from the start.",
   "common.close": "Close",
+  "common.dismiss": "Dismiss",
   "preferences.title": "Preferences",
   "preferences.description": "Choose the news you want. Saved on this device.",
   "preferences.sources": "Preferred sources",
