@@ -20,8 +20,8 @@ done
 # runs the key through encodeURIComponent for the dev proxy; this is the same escaping, so a key
 # with url-significant characters behaves identically in dev and in the container.
 #
-# ponytail: printable ASCII only (keys are). A byte outside 32..126 encodes as %00; widen the
-# ord[] table if a provider ever issues a non-ASCII key.
+# Printable ASCII only, which every provider key is. A byte outside 32..126 would encode as
+# %00 — widen the ord[] table if one ever issues a non-ASCII key.
 urlencode() {
   printf '%s' "${1:-}" | awk '
     BEGIN {

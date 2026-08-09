@@ -21,6 +21,11 @@ test-results
 .env.*
 !.env.example
 
+# Local tooling notes — kept on this machine, not part of the project.
+GOAL.md
+.claude/
+.implement-feature-loop/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
