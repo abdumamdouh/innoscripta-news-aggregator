@@ -1,0 +1,23 @@
+{
+  // Vercel bundles this directory itself and rejects an explicit `.ts` in a specifier, so it
+  // needs bundler resolution rather than the nodenext the other root-level scripts use.
+  // `vite.proxy.ts` is deliberately shared rather than copied — one route table, three
+  // runtimes (Vite dev server, nginx container, this).
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["**/*.ts", "../vite.proxy.ts"]
+}

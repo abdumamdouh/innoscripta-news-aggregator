@@ -27,7 +27,6 @@
     "docker.test.ts",
     "theme-tokens.test.ts",
     "playwright.config.ts",
-    "e2e/**/*.ts",
-    "api/**/*.ts"
+    "e2e/**/*.ts"
   ]
 }

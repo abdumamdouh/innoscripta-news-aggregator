@@ -1,4 +1,4 @@
-import { PROXY_ROUTES, withKey } from '../vite.proxy.ts'
+import { PROXY_ROUTES, withKey } from '../vite.proxy'
 
 /**
  * The third consumer of `PROXY_ROUTES`, after the Vite dev server and the nginx container.
