@@ -36,26 +36,6 @@ export function parseReadingLists(raw: string | null): ReadingList[] {
   }
 }
 
-export type ListNameError = 'required' | 'duplicate'
-
-/**
- * The one gate every write goes through: blank names cannot be picked and two lists with
- * the same name cannot be told apart. Case- and whitespace-insensitive, because "Weekend"
- * and "weekend " are the same list to the reader who typed them.
- */
-export function listNameError(
-  lists: readonly ReadingList[],
-  name: string,
-  exceptId?: string,
-): ListNameError | undefined {
-  const trimmed = name.trim()
-  if (!trimmed) return 'required'
-  const taken = lists.some(
-    (list) => list.id !== exceptId && list.name.toLowerCase() === trimmed.toLowerCase(),
-  )
-  return taken ? 'duplicate' : undefined
-}
-
 // ponytail: timestamp + random suffix, not `crypto.randomUUID` — ids never leave this device
 // and never index anything. Swap in a uuid if lists ever sync between devices.
 const newId = () => `list-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`

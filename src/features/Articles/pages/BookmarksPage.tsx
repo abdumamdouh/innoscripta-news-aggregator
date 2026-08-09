@@ -14,6 +14,7 @@ import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ListNameModal } from '@/features/Articles/components/ListNameModal'
 import { useBookmarks } from '@/features/Articles/hooks/useBookmarks'
 import { unsaveArticle } from '@/features/Articles/hooks/useBookmark'
+import { useNamedCrud } from '@/features/Articles/hooks/useNamedCrud'
 import { useReadingLists } from '@/features/Articles/hooks/useReadingLists'
 import type { ReadingList } from '@/features/Articles/utils/readingLists'
 import {
@@ -26,9 +27,6 @@ import {
   writeReadingLists,
 } from '@/features/Articles/utils/readingLists'
 
-/** Which dialog is open, as one value — two of them can never be open at once. */
-type Naming = { mode: 'new' } | { mode: 'rename'; list: ReadingList } | null
-
 /**
  * Everything the reader saved, and the named lists over it. Nothing here fetches: the saved
  * copy of a story is the snapshot taken when it was saved, so this page has no loading or
@@ -39,7 +37,6 @@ export function BookmarksPage() {
   const bookmarks = useBookmarks()
   const lists = useReadingLists()
   const [activeListId, setActiveListId] = useState<string | null>(null)
-  const [naming, setNaming] = useState<Naming>(null)
   const [adding, setAdding] = useState<Article | null>(null)
   const [removing, setRemoving] = useState<Article | null>(null)
   const [deletingList, setDeletingList] = useState(false)
@@ -48,25 +45,24 @@ export function BookmarksPage() {
   const activeList = lists.find((list) => list.id === activeListId)
   const articles = savedArticles(bookmarks, lists, activeListId)
 
-  const submitName = (name: string) => {
-    if (!naming) return
-    const stored = readReadingLists()
-    if (naming.mode === 'new') {
-      writeReadingLists(createList(stored, name))
-      toast(t('bookmarks.toast.listCreated'))
-    } else {
-      writeReadingLists(renameList(stored, naming.list.id, name))
-      toast(t('bookmarks.toast.listRenamed'))
-    }
-    setNaming(null)
-  }
+  const crud = useNamedCrud<ReadingList>({
+    read: readReadingLists,
+    write: writeReadingLists,
+    create: createList,
+    rename: renameList,
+    remove: deleteList,
+    toasts: {
+      created: 'bookmarks.toast.listCreated',
+      renamed: 'bookmarks.toast.listRenamed',
+      deleted: 'bookmarks.toast.listDeleted',
+    },
+  })
 
   const confirmDeleteList = () => {
-    if (activeList) writeReadingLists(deleteList(readReadingLists(), activeList.id))
+    if (activeList) crud.deleteItem(activeList.id)
     // The filter it was showing is gone, so fall back to everything saved.
     setActiveListId(null)
     setDeletingList(false)
-    toast(t('bookmarks.toast.listDeleted'))
   }
 
   const confirmRemove = () => {
@@ -104,12 +100,7 @@ export function BookmarksPage() {
         <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">
           {t('bookmarks.title')}
         </h1>
-        <AppButton
-          size="sm"
-          variant="secondary"
-          className="ms-auto"
-          onClick={() => setNaming({ mode: 'new' })}
-        >
+        <AppButton size="sm" variant="secondary" className="ms-auto" onClick={crud.startNew}>
           <Plus className="size-4" aria-hidden />
           {t('bookmarks.list.new')}
         </AppButton>
@@ -124,7 +115,7 @@ export function BookmarksPage() {
           <div className="flex items-center gap-1">
             <AppIconButton
               label={t('bookmarks.list.rename')}
-              onClick={() => setNaming({ mode: 'rename', list: activeList })}
+              onClick={() => crud.startRename(activeList)}
             >
               <Pencil className="size-5" aria-hidden />
             </AppIconButton>
@@ -162,11 +153,11 @@ export function BookmarksPage() {
       )}
 
       <ListNameModal
-        open={naming !== null}
-        list={naming?.mode === 'rename' ? naming.list : undefined}
+        open={crud.isNaming}
+        list={crud.renaming}
         lists={lists}
-        onSubmit={submitName}
-        onClose={() => setNaming(null)}
+        onSubmit={crud.submitName}
+        onClose={crud.close}
       />
 
       <AddToListModal
