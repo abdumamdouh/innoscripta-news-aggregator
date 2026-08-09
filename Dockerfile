@@ -1,23 +1,31 @@
-# Two stages: node builds the static bundle, nginx serves it and attaches the provider keys.
+# Build the bundle with node, serve it with nginx. Two stages so the image that ships is
+# nginx + static files — no node, no node_modules, no sources.
 #
-# The keys are runtime-only. They are never build args and never COPYd in — docker/entrypoint.sh
-# renders them into the nginx config from the container's environment at start, which is what
-# keeps item 4's promise ("no key in dist/") true for the image too.
+# The provider keys are NOT here on purpose: no ARG, no ENV, nothing COPYd in. They arrive at
+# container start as environment variables and are rendered into the nginx config by
+# docker/entrypoint.sh, exactly as in dev where vite.proxy.ts attaches them. That is what keeps
+# `grep -r VITE_ dist/` (and a grep for the key itself) empty.
 
+# Matches .nvmrc.
 FROM node:20-alpine AS build
 WORKDIR /app
-# package files first so `npm ci` re-runs only when a dependency actually changed.
+
+# package*.json first so a source-only edit reuses the cached install layer.
 COPY package.json package-lock.json ./
 RUN npm ci
+
 COPY . .
 RUN npm run build
 
-FROM nginx:1.29-alpine
-# nginx:alpine ships envsubst already (it is what its own template mechanism uses), so
-# entrypoint.sh needs nothing installed. We replace that mechanism rather than use it:
-# ours percent-encodes the keys first, exactly as the dev proxy does.
-COPY --from=build /app/dist /usr/share/nginx/html
+# nginx:alpine already carries the gettext binary the entrypoint renders the template with —
+# it is what the image's own /etc/nginx/templates mechanism uses. No extra package needed.
+FROM nginx:1.29-alpine AS serve
+
 COPY docker/nginx.conf.template /etc/nginx/templates/nginx.conf.template
-COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY docker/entrypoint.sh /docker-entrypoint-custom.sh
+RUN chmod +x /docker-entrypoint-custom.sh
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 80
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint-custom.sh"]

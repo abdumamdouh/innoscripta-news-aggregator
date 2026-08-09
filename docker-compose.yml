@@ -1,19 +1,29 @@
-# `docker compose up --build` → the app on http://localhost:8080.
+# docker compose up --build   →   http://localhost:8080  (override with WEB_PORT)
+#
+# The three keys are passed at *run* time, never as build args — see the note in the Dockerfile.
+# They are picked up from the shell, or from .env / .env.local if you followed the README
+# (`cp .env.example .env.local`). Neither file is required: without keys only BBC answers, which
+# is the same degraded-but-useful behaviour docker/entrypoint.sh warns about.
 services:
   web:
     build: .
     ports:
-      # WEB_PORT exists so a second stack (the e2e spec runs one) can take another port.
       - '${WEB_PORT:-8080}:80'
-    # The three keys, passed as runtime environment. Deliberately not build args: a build arg
-    # is recorded in the image's layer history, and these must not outlive the container.
-    #
-    # Compose reads them from the shell, or from a `.env` beside this file. The dev server
-    # reads `.env.local` instead (vite's convention), so either export the keys or run
-    # `docker compose --env-file .env.local up --build` to use the one file for both.
-    #
-    # A missing key is not fatal: BBC needs none, and entrypoint.sh warns about the rest.
+    env_file:
+      - path: .env
+        required: false
+      - path: .env.local
+        required: false
+    # No `=default` here on purpose: an unset shell variable is omitted rather than passed as
+    # empty, so it cannot shadow the value coming from env_file.
     environment:
-      NEWSAPI_KEY: ${NEWSAPI_KEY:-}
-      GUARDIAN_KEY: ${GUARDIAN_KEY:-}
-      NYT_KEY: ${NYT_KEY:-}
+      - NEWSAPI_KEY
+      - GUARDIAN_KEY
+      - NYT_KEY
+    restart: unless-stopped
+    healthcheck:
+      # 127.0.0.1, not localhost: nginx listens on IPv4 only and busybox wget tries ::1 first.
+      test: ['CMD', 'wget', '--spider', '-q', 'http://127.0.0.1/']
+      interval: 5s
+      timeout: 3s
+      retries: 12

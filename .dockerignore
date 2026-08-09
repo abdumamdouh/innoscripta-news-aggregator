@@ -1,22 +1,26 @@
-# The build-irrelevant half of .gitignore, plus the things git tracks but the image never needs.
-# Everything here is either rebuilt inside the image, or must not enter the build context at all.
-
-# Secrets. No .env file has any business in the context: the keys arrive at runtime.
-.env
-.env.*
-
+# Mirrors .gitignore: the build context is source + package manifests, nothing else.
+# `dist` matters most — a stale local build must never be copied over the one npm run build
+# produces inside the image.
 node_modules
 dist
 dist-ssr
 coverage
-test-results
 playwright-report
+test-results
 .playwright-mcp
+*.log
+
+# Secrets never enter the build context. Keys are runtime-only (see docker-compose.yml).
+.env
+.env.*
+!.env.example
 
 .git
 .github
-.claude
-.implement-feature-loop
-e2e
-*.log
+.vscode
+.idea
 .DS_Store
+
+# Not e2e/ — tsconfig.node.json references it and `npm run build` runs `tsc -b`.
+Dockerfile
+.dockerignore
