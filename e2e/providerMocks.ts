@@ -84,8 +84,18 @@ const FEEDS = {
   bbc: feed('BBC', 3),
 }
 
-const narrow = (items: Fake[], term: string) =>
-  term ? items.filter((item) => item.title.toLowerCase().includes(term.toLowerCase())) : items
+/**
+ * Title *and* byline, which is what the app's own `degrade()` searches — a reader's author
+ * preference reaches NewsAPI as a `q` expression, so a title-only mock would answer a
+ * perfectly valid byline search with nothing. Quotes come off first: the adapter wraps any
+ * multi-word term in them.
+ */
+const narrow = (items: Fake[], term: string) => {
+  const needle = term.replaceAll('"', '').toLowerCase()
+  return needle
+    ? items.filter((item) => `${item.title} ${item.author}`.toLowerCase().includes(needle))
+    : items
+}
 
 const slice = (items: Fake[], page: number) => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
