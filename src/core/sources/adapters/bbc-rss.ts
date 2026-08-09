@@ -1,9 +1,17 @@
 import type { Article, ArticleQuery, NewsSource } from '@/core/sources/types'
-import { description, getText, isoDate, text, url } from '@/core/sources/adapters/shared'
+import { description, getText, isoDate, text, upscale, url } from '@/core/sources/adapters/shared'
 
 const ID = 'bbc'
 const LABEL = 'BBC News'
 const MEDIA_NS = 'http://search.yahoo.com/mrss/'
+
+/**
+ * The feed advertises a 240px thumbnail, which is the smallest of the four providers and
+ * badly soft stretched across a card. The width is a path segment (`/ace/standard/240/`)
+ * and ichef serves every size from the same master, so ask for one that holds up.
+ */
+const BBC_WIDTH = /\/ace\/[a-z]+\/(\d+)\//i
+const WIDER_RENDITION = 800
 
 /**
  * BBC publishes RSS, not an API: there is no query, no date range and no paging —
@@ -67,7 +75,7 @@ function normalize(raw: BbcRaw): Article {
     title: text(child(item, 'title')) ?? '',
     description: description(child(item, 'description')),
     url: url(child(item, 'link')) ?? '',
-    imageUrl: thumbnail(item),
+    imageUrl: upscale(thumbnail(item), BBC_WIDTH, WIDER_RENDITION),
     // RFC-822: "Sat, 08 Aug 2026 11:55:30 GMT".
     publishedAt: isoDate(child(item, 'pubDate')) ?? '',
     sourceId: ID,

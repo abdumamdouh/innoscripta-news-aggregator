@@ -133,3 +133,27 @@ export function longerThan(candidate: unknown, current: unknown): string | undef
 
   return !shorter || longer.length > shorter.length + MEANINGFUL_GAIN ? longer : undefined
 }
+
+/**
+ * Swap the width baked into an image URL for a larger one.
+ *
+ * Both providers that publish a width do it in the path and serve every size from the same
+ * master: the Guardian ends its URL with the pixel width (`…/500.jpg`), the BBC puts it in a
+ * segment (`…/ace/standard/240/…`). Both hand back a thumbnail far too small for a card at 2x
+ * — 240px stretched across 578 is the worst of them — so each adapter names its own pattern
+ * and this asks for the bigger rendition.
+ *
+ * `pattern` must capture the width in group 1. Anything that does not match is returned
+ * untouched, so a provider changing its URL shape degrades to the original image.
+ */
+export function upscale(
+  source: string | undefined,
+  pattern: RegExp,
+  target: number,
+): string | undefined {
+  if (!source) return undefined
+
+  return source.replace(pattern, (whole: string, width: string) =>
+    Number(width) < target ? whole.replace(width, String(target)) : whole,
+  )
+}

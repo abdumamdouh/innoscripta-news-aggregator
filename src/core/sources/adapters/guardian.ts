@@ -6,6 +6,7 @@ import {
   isoDate,
   queryString,
   text,
+  upscale,
   url,
 } from '@/core/sources/adapters/shared'
 
@@ -39,18 +40,11 @@ export function selectItems(payload: GuardianPayload): GuardianRaw[] {
 
 /**
  * `show-fields=thumbnail` always returns the 500px rendition, which is soft on a card at 2x.
- * The final path segment of a media.guim.co.uk URL is the width, and the crop box earlier in
- * the path (`612_198_5360_4291`) shows the master is far larger, so asking for a wider
- * rendition is safe. Anything that doesn't match the pattern is left exactly as it came.
+ * The width is the final path segment of a media.guim.co.uk URL, and the crop box before it
+ * (`612_198_5360_4291`) shows the master is far larger, so asking for more is safe.
  */
+const GUARDIAN_WIDTH = /\/(\d+)\.[a-z]+$/i
 const WIDER_RENDITION = 1000
-
-function widen(thumbnail: string | undefined): string | undefined {
-  if (!thumbnail) return undefined
-  return thumbnail.replace(/\/(\d+)(\.[a-z]+)$/i, (whole, width: string, ext: string) =>
-    Number(width) < WIDER_RENDITION ? `/${WIDER_RENDITION}${ext}` : whole,
-  )
-}
 
 function normalize(raw: GuardianRaw): Article {
   return {
@@ -59,7 +53,7 @@ function normalize(raw: GuardianRaw): Article {
     // trailText is the Guardian's standfirst and carries inline markup.
     description: description(raw.fields?.trailText),
     url: url(raw.webUrl) ?? '',
-    imageUrl: widen(url(raw.fields?.thumbnail)),
+    imageUrl: upscale(url(raw.fields?.thumbnail), GUARDIAN_WIDTH, WIDER_RENDITION),
     publishedAt: isoDate(raw.webPublicationDate) ?? '',
     sourceId: ID,
     sourceLabel: LABEL,

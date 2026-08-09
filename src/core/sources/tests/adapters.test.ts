@@ -609,6 +609,45 @@ describe('description()', () => {
   })
 })
 
+describe('image renditions', () => {
+  const guardian = (thumbnail: unknown) =>
+    guardianSource.normalize({
+      webTitle: 't',
+      webUrl: 'https://e.test/a',
+      webPublicationDate: '2024-01-01T00:00:00Z',
+      fields: { thumbnail },
+    } as never).imageUrl
+
+  const bbc = (thumbnailUrl: string) => {
+    const [item] = selectBbc(
+      `<rss xmlns:media="http://search.yahoo.com/mrss/"><channel><item>
+         <title>t</title><link>https://e.test/a</link>
+         <pubDate>Sat, 08 Aug 2026 11:55:30 GMT</pubDate>
+         <media:thumbnail width="240" url="${thumbnailUrl}"/>
+       </item></channel></rss>`,
+    )
+    return bbcNewsSource.normalize(item!).imageUrl
+  }
+
+  it('asks BBC for a rendition wide enough for a card, not its 240px thumbnail', () => {
+    expect(bbc('https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/a/live/b.jpg')).toBe(
+      'https://ichef.bbci.co.uk/ace/standard/800/cpsprodpb/a/live/b.jpg',
+    )
+  })
+
+  it('leaves a BBC url alone when it already asks for enough', () => {
+    const wide = 'https://ichef.bbci.co.uk/ace/standard/1024/cpsprodpb/a/live/b.jpg'
+    expect(bbc(wide)).toBe(wide)
+  })
+
+  it('rewrites only the width segment of a BBC url, not the id after it', () => {
+    // cpsprodpb ids are digits too; a loose pattern would corrupt them.
+    const src = bbc('https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/6240/live/240240.jpg')
+    expect(src).toContain('/cpsprodpb/6240/live/240240.jpg')
+    expect(src).toContain('/ace/standard/800/')
+  })
+})
+
 describe('guardian image rendition', () => {
   const normalize = (thumbnail: unknown) =>
     guardianSource.normalize({
