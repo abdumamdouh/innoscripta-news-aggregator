@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 coverage
+*.tsbuildinfo
 .playwright-mcp
 playwright-report
 test-results
