@@ -40,16 +40,38 @@ export const GUARDIAN_SECTIONS: Partial<Record<ArticleCategory, string>> = {
   sport: 'sport',
 }
 
-/** NYT `section_name` values, which are display names rather than slugs. */
-export const NYT_SECTIONS: Partial<Record<ArticleCategory, string>> = {
-  world: 'World',
-  business: 'Business Day',
-  politics: 'Politics',
-  health: 'Health',
-  science: 'Science',
-  technology: 'Technology',
-  entertainment: 'Arts',
-  sport: 'Sports',
+/**
+ * NYT `section_name` → our slug, applied when normalizing rather than when querying.
+ *
+ * Article Search documents `fq=section_name:(...)` but it returned zero hits for every value
+ * tried — including "Business", which live documents demonstrably carry — so the adapter does
+ * not claim `category` and the aggregator filters what comes back instead. Mapping inbound is
+ * what makes that check work: without it, our `entertainment` would be compared against the
+ * NYT's `Arts` and match nothing.
+ */
+const NYT_SECTION_TO_CATEGORY: Record<string, ArticleCategory> = {
+  world: 'world',
+  business: 'business',
+  'business day': 'business',
+  technology: 'technology',
+  science: 'science',
+  health: 'health',
+  well: 'health',
+  politics: 'politics',
+  'u.s.': 'politics',
+  arts: 'entertainment',
+  movies: 'entertainment',
+  theater: 'entertainment',
+  music: 'entertainment',
+  television: 'entertainment',
+  sports: 'sport',
+}
+
+/** A provider's own section wording, folded into the taxonomy the app filters on. */
+export function toArticleCategory(section: string | undefined): ArticleCategory | undefined {
+  if (!section) return undefined
+  const key = section.trim().toLowerCase()
+  return NYT_SECTION_TO_CATEGORY[key] ?? (isArticleCategory(key) ? key : undefined)
 }
 
 /**

@@ -1,5 +1,5 @@
 import type { Article, NewsSource } from '@/core/sources/types'
-import { NYT_SECTIONS, isArticleCategory } from '@/core/sources/categories'
+import { toArticleCategory } from '@/core/sources/categories'
 import {
   description,
   getJson,
@@ -81,7 +81,8 @@ function normalize(raw: NytRaw): Article {
     sourceLabel: LABEL,
     // "By Tripp Mickle and Cade Metz" — the prefix is presentation, not a name.
     author: text(raw.byline?.original?.replace(/^by\s+/i, '')),
-    category: text(raw.section_name) ?? text(raw.news_desk),
+    // Folded into our taxonomy so the aggregator's check compares like with like.
+    category: toArticleCategory(text(raw.section_name) ?? text(raw.news_desk)),
     // Article Search never returns a body. It documents `lead_paragraph` and the captured
     // fixture carries one, but live responses have come back with it empty on every doc —
     // so in practice this resolves to undefined and the details page shows the abstract.
@@ -93,22 +94,21 @@ function normalize(raw: NytRaw): Article {
 export const nytSource: NewsSource<NytRaw> = {
   id: ID,
   label: LABEL,
-  capabilities: { query: true, dateRange: true, category: true, author: false, pagination: true },
+  capabilities: {
+    query: true,
+    dateRange: true,
+    // Article Search documents fq on section_name but it matched zero for every value tried,
+    // including ones live documents carry. Filtering the results is the honest option.
+    category: false,
+    author: false,
+    pagination: true,
+  },
   available: true,
   async fetch(query, signal) {
-    // `section_name` holds display names — "Business Day", "Sports" — not our slugs, so
-    // sending `business` matched nothing while the capability claimed it had filtered.
-    const sections = query.categories
-      ?.filter(isArticleCategory)
-      .map((category) => NYT_SECTIONS[category])
-      .filter((section): section is string => Boolean(section))
-      .map((section) => `"${section}"`)
-      .join(' ')
     const search = queryString({
       q: query.q,
       begin_date: compactDate(query.from),
       end_date: compactDate(query.to),
-      fq: sections ? `section_name:(${sections})` : undefined,
       // Article Search pages are a fixed 10 docs; `page` is a page index, not an offset.
       page: query.page - 1,
       sort: 'newest',

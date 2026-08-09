@@ -91,7 +91,7 @@ merge-sorts.
 Capabilities are a contract, and the aggregator only skips a filter the source genuinely performs.
 NewsAPI's `/everything` has no taxonomy and no author field, so it declares `category: false` and
 `author: false` and gets checked client-side — the alternative was claiming a filter that a bare
-search term does not deliver. The keyword is re-checked for *every* source regardless: the Guardian
+search term does not deliver. The keyword is re-checked for _every_ source regardless: the Guardian
 and NYT search full article bodies, so a match can be real and still invisible on a card.
 
 ```
@@ -119,7 +119,7 @@ src/
 
 | Suite                                       | Files | Tests | Command            |
 | ------------------------------------------- | ----- | ----- | ------------------ |
-| Unit / component (Vitest + Testing Library) | 37    | 436   | `npm test`         |
+| Unit / component (Vitest + Testing Library) | 37    | 438   | `npm test`         |
 | End-to-end (Playwright, Chromium)           | 16    | 133   | `npm run test:e2e` |
 
 E2E needs no real keys: every provider response is served from a fixture, and the stand-in keys the

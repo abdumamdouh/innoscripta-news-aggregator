@@ -127,9 +127,15 @@ export const bbcNewsSource: NewsSource<BbcRaw> = {
     )
 
     const items = feeds.flatMap((feed) => (feed.status === 'fulfilled' ? feed.value : []))
-    // Every feed failing is a real failure, not an empty result — say so.
-    if (!items.length && feeds.every((feed) => feed.status === 'rejected')) {
-      throw new Error(`bbc: every requested feed failed (${categories.join(', ')})`)
+
+    // Every feed failing is a real failure, not an empty result. Carry the first reason
+    // through rather than a summary of our own — the banner and the logs both want the
+    // provider's own status, not "something went wrong".
+    if (feeds.every((feed) => feed.status === 'rejected')) {
+      const [first] = feeds
+      throw first?.status === 'rejected' && first.reason instanceof Error
+        ? first.reason
+        : new Error(`bbc: every requested feed failed (${categories.join(', ')})`)
     }
 
     return items

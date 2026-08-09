@@ -68,9 +68,11 @@ function expression(query: ArticleQuery): string {
     .map((term) => (term.includes(' ') ? `"${term}"` : term))
 
   const keyword = text(query.q)
-  const subject = topic.length ? `(${topic.join(' OR ')})` : ''
+  // Parenthesise only when the OR actually needs binding — a lone term reads as itself, and
+  // wrapping it would put punctuation into a query that is otherwise the reader's own words.
+  const subject = topic.length > 1 ? `(${topic.join(' OR ')})` : (topic[0] ?? '')
 
-  // Keyword AND topic: both narrow, where OR-ing them would widen past what was asked.
+  // Keyword AND subject: both narrow, where OR-ing them would widen past what was asked.
   const parts = [keyword, subject].filter(Boolean)
   return parts.length ? parts.join(' AND ') : DEFAULT_QUERY
 }

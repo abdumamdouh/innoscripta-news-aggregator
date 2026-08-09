@@ -3,7 +3,7 @@ import {
   ARTICLE_CATEGORIES,
   GUARDIAN_SECTIONS,
   NEWSAPI_TERMS,
-  NYT_SECTIONS,
+  toArticleCategory,
   isArticleCategory,
 } from '@/core/sources/categories'
 import { bbcNewsSource, resolveCategories } from '@/core/sources/adapters/bbc-rss'
@@ -19,20 +19,34 @@ describe('category taxonomy', () => {
   })
 
   it('never sends our slug to a provider that uses a different word for it', () => {
-    // The bug this replaces: asking the Guardian for `entertainment` or the NYT for
-    // `business` matched nothing, while both declared they had filtered.
+    // The bug this replaces: asking the Guardian for `entertainment` matched nothing while
+    // it declared it had filtered.
     expect(GUARDIAN_SECTIONS.entertainment).toBe('culture')
     expect(GUARDIAN_SECTIONS.uk).toBe('uk-news')
     expect(GUARDIAN_SECTIONS.health).toBe('society')
-    expect(NYT_SECTIONS.business).toBe('Business Day')
-    expect(NYT_SECTIONS.sport).toBe('Sports')
   })
 
   it('maps to undefined rather than guessing where a provider has no equivalent', () => {
-    // NYT has no UK section; sending one anyway would return an unfiltered page.
-    expect(NYT_SECTIONS.uk).toBeUndefined()
-    expect(NYT_SECTIONS.general).toBeUndefined()
+    // `general` is the whole front page — constraining to it would exclude everything.
     expect(GUARDIAN_SECTIONS.general).toBeUndefined()
+  })
+
+  it('folds a provider’s own section wording back into the taxonomy', () => {
+    // NYT filters nothing server-side, so its results are checked here — and "Arts" has to
+    // become "entertainment" or the comparison silently matches nothing.
+    expect(toArticleCategory('Arts')).toBe('entertainment')
+    expect(toArticleCategory('Business')).toBe('business')
+    expect(toArticleCategory('Business Day')).toBe('business')
+    expect(toArticleCategory('Sports')).toBe('sport')
+    expect(toArticleCategory('Technology')).toBe('technology')
+  })
+
+  it('returns undefined for a section with no home in the taxonomy', () => {
+    // "Magazine" and "New York" are real NYT sections with no equivalent here; inventing one
+    // would put them under a filter the reader did not choose.
+    expect(toArticleCategory('Magazine')).toBeUndefined()
+    expect(toArticleCategory('New York')).toBeUndefined()
+    expect(toArticleCategory(undefined)).toBeUndefined()
   })
 
   it('gives every mappable category a term for each provider that claims one', () => {

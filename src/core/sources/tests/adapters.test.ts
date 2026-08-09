@@ -302,7 +302,9 @@ describe('nyt adapter — provider quirks', () => {
       'Journalist Quits Kenosha Paper in Protest of Its Jacob Blake Rally Coverage',
     )
     expect(articles[0]?.description).toMatch(/^Daniel Thompson, an editor at The Kenosha News/)
-    expect(articles[0]?.category).toBe('Business Day')
+    // The fixture says "Business Day"; the article carries our slug, because NYT filters
+    // nothing server-side and the aggregator has to compare it against the reader's choice.
+    expect(articles[0]?.category).toBe('business')
   })
 
   it('parses the +0000 pub_date form and strips the byline prefix', () => {
