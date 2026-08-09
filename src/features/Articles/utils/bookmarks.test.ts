@@ -1,11 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { appTheme } from '@/config/theme'
 import type { Article } from '@/core/sources/types'
 import {
   findBookmarkedArticle,
   isBookmarked,
   parseBookmarks,
+  readBookmarks,
   refreshBookmark,
+  subscribeBookmarks,
   toggleBookmark,
+  writeBookmarks,
 } from '@/features/Articles/utils/bookmarks'
 
 const article = (id: string): Article => ({
@@ -172,5 +176,71 @@ describe('isBookmarked', () => {
     expect(isBookmarked([{ id: saved.id, article: saved }], saved.id)).toBe(true)
     expect(isBookmarked([{ id: saved.id }], saved.id)).toBe(true)
     expect(isBookmarked([{ id: 'nyt:2' }], saved.id)).toBe(false)
+  })
+})
+
+describe('the bookmarks store — one list behind every reader', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    // Storage the store has never seen still reads as itself, not as a stale parse.
+    readBookmarks()
+  })
+
+  it('hands every reader the same snapshot until something is written', () => {
+    const first = readBookmarks()
+    expect(first).toEqual([])
+    // Identity, not just equality: a fresh array per read tears down useSyncExternalStore.
+    expect(readBookmarks()).toBe(first)
+  })
+
+  it('shows a write to the next read, and tells the readers already looking', () => {
+    const before = readBookmarks()
+    const saved = article('guardian:1')
+    const heard: number[] = []
+    const unsubscribe = subscribeBookmarks(() => heard.push(readBookmarks().length))
+
+    writeBookmarks(toggleBookmark(readBookmarks(), saved))
+
+    // The notified reader saw the new list, not the one it was holding.
+    expect(heard).toEqual([1])
+    const after = readBookmarks()
+    expect(after).not.toBe(before)
+    expect(findBookmarkedArticle(after, saved.id)).toEqual(saved)
+    expect(isBookmarked(after, saved.id)).toBe(true)
+
+    // ...and unsaving travels the same way.
+    writeBookmarks(toggleBookmark(readBookmarks(), saved))
+    expect(heard).toEqual([1, 0])
+    expect(isBookmarked(readBookmarks(), saved.id)).toBe(false)
+
+    unsubscribe()
+    writeBookmarks(toggleBookmark(readBookmarks(), saved))
+    expect(heard).toEqual([1, 0])
+  })
+
+  it('survives what it stored being changed underneath it', () => {
+    const saved = article('guardian:1')
+    writeBookmarks([{ id: saved.id, article: saved }])
+    expect(isBookmarked(readBookmarks(), saved.id)).toBe(true)
+
+    // Another tab, or a reader clearing site data: the raw string moved, so the read does.
+    localStorage.setItem(appTheme.storageKeys.bookmarks, '[]')
+    expect(readBookmarks()).toEqual([])
+
+    localStorage.clear()
+    expect(readBookmarks()).toEqual([])
+  })
+
+  it('keeps a stable empty snapshot when storage cannot be read at all', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('denied')
+    })
+
+    try {
+      expect(readBookmarks()).toEqual([])
+      expect(readBookmarks()).toBe(readBookmarks())
+    } finally {
+      getItem.mockRestore()
+    }
   })
 })

@@ -1,11 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AggregateResult } from '@/core/sources/aggregator'
 import { fetchArticles, toArticleQuery } from '@/features/Articles/services/articles.service'
 import { useArticleActions } from '@/features/Articles/hooks/useArticleActions'
+import { useBookmarks } from '@/features/Articles/hooks/useBookmarks'
 import { parseArticlesState } from '@/features/Articles/utils/articlesState'
-import { findBookmarkedArticle, readBookmarks } from '@/features/Articles/utils/bookmarks'
+import { findBookmarkedArticle } from '@/features/Articles/utils/bookmarks'
 import { findCachedArticle } from '@/features/Articles/utils/findCachedArticle'
 
 /**
@@ -33,11 +34,21 @@ export function useArticleDetails(articleId: string) {
       ),
     [client, articleId],
   )
+  // The same saved list the save button writes to, so a save made on this page is readable
+  // here in the same breath instead of behind a second, staler parse of storage.
+  const saved = useBookmarks()
   // Cached wins: it is the fresher copy of the same story.
-  const known = useMemo(
-    () => cached ?? findBookmarkedArticle(readBookmarks(), articleId),
-    [cached, articleId],
+  const resolved = useMemo(
+    () => cached ?? findBookmarkedArticle(saved, articleId),
+    [cached, saved, articleId],
   )
+  // Unsaving is not "the story is gone": once a copy has been resolved it stays on screen for
+  // as long as this id does, so removing a bookmark on a cold permalink cannot swap the story
+  // the reader is looking at for the missing-article card.
+  const lastResolved = useRef(resolved)
+  if (resolved) lastResolved.current = resolved
+  const known =
+    resolved ?? (lastResolved.current?.id === articleId ? lastResolved.current : undefined)
 
   const query = useQuery({
     queryKey: ['articles', toArticleQuery(state)],
