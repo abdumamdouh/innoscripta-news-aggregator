@@ -2,6 +2,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Bookmark, ExternalLink } from 'lucide-react'
 import { AppButton, AppCard, AppIconButton } from '@/components/common/design-system'
+import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
 import { useArticleDetails } from '@/features/Articles/hooks/useArticleDetails'
@@ -23,9 +24,9 @@ function BackLink({ search }: { search: string }) {
   )
 }
 
-function BookmarkButton({ articleId }: { articleId: string }) {
+function BookmarkButton({ article }: { article: Article }) {
   const { t } = useTranslation()
-  const { isBookmarked, toggle } = useBookmark(articleId)
+  const { isBookmarked, toggle } = useBookmark(article)
 
   return (
     <AppIconButton
@@ -121,7 +122,7 @@ export function ArticleDetailsPage() {
             {formatArticleDate(article.publishedAt, i18n.language)}
           </time>
           <div className="ms-auto">
-            <BookmarkButton articleId={article.id} />
+            <BookmarkButton article={article} />
           </div>
         </div>
 
