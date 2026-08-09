@@ -77,7 +77,7 @@ function feed(prefix: string, offsetHours: number, count = 30): Fake[] {
   }))
 }
 
-const FEEDS = {
+export const FEEDS = {
   newsapi: feed('NewsAPI', 0),
   guardian: feed('Guardian', 1),
   nyt: feed('NYT', 2),
@@ -89,8 +89,14 @@ const FEEDS = {
  * preference reaches NewsAPI as a `q` expression, so a title-only mock would answer a
  * perfectly valid byline search with nothing. Quotes come off first: the adapter wraps any
  * multi-word term in them.
+ *
+ * Matching the byline widens what every spec's search term can pull in, so a term that
+ * happens to appear in a `<Prefix> Reporter N` byline would return stories whose titles
+ * never matched — and the spec asserting on them would pass for the wrong reason.
+ * `providerMocks.test.ts` pins that: it fails if a new fixture byline or a new search
+ * term ever collides.
  */
-const narrow = (items: Fake[], term: string) => {
+export const narrow = (items: Fake[], term: string) => {
   const needle = term.replaceAll('"', '').toLowerCase()
   return needle
     ? items.filter((item) => `${item.title} ${item.author}`.toLowerCase().includes(needle))
