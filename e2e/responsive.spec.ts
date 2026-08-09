@@ -125,8 +125,8 @@ async function openFiltersIfDrawer(page: Page, width: number) {
 }
 
 /** Saved articles are the precondition for the bookmarks page's cards and their modals. */
-async function saveFirstStory(page: Page) {
-  await page.goto('/')
+async function saveFirstStory(page: Page, term = '') {
+  await page.goto(term ? `/?q=${term}` : '/')
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
   await page.getByRole('article').first().getByRole('link').click()
   await page.getByRole('button', { name: 'Save article' }).click()
@@ -201,6 +201,47 @@ for (const viewport of VIEWPORTS) {
       await card.getByRole('link', { name: FULL_HEADLINE }).click()
       await expect(page.getByRole('heading', { name: FULL_HEADLINE, level: 1 })).toBeVisible()
       await expect(page.getByText(FULL_BYLINE)).toBeVisible()
+
+      await settled(page)
+      expect(await clippedText(page)).toEqual([])
+    })
+
+    /**
+     * The feed and the saved page render the reader's stories through the same `ArticleCard`
+     * the list page does — but nothing enforces that, so each surface runs the long-text
+     * fixture itself instead of trusting the list page's check to cover it.
+     */
+    test('a real-length headline and byline are shown in full on the feed', async ({ page }) => {
+      await page.goto('/feed')
+      await page.getByRole('main').getByRole('button', { name: 'Preferences' }).click()
+      const dialog = page.getByRole('dialog')
+      // Byline as a preferred author: the only handle the feed has on one story — it takes
+      // no search term, and this fixture sits far past the page of stories a source returns.
+      await dialog.getByRole('checkbox', { name: 'NewsAPI' }).click()
+      await dialog.getByLabel('Preferred authors').fill(FULL_BYLINE)
+      await dialog.getByRole('button', { name: 'Save preferences' }).click()
+      await expect(dialog).toBeHidden()
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+
+      const card = page.getByRole('article')
+      await expect(card).toHaveCount(1)
+      await expect(card.getByRole('link', { name: FULL_HEADLINE })).toBeVisible()
+      await expect(card.getByText(FULL_BYLINE)).toBeVisible()
+
+      await settled(page)
+      expect(await clippedText(page)).toEqual([])
+    })
+
+    test('a real-length headline and byline are shown in full on the saved page', async ({
+      page,
+    }) => {
+      await saveFirstStory(page, FULL_HEADLINE_TERM)
+      await page.goto('/bookmarks')
+
+      const card = page.getByRole('article')
+      await expect(card).toHaveCount(1)
+      await expect(card.getByRole('link', { name: FULL_HEADLINE })).toBeVisible()
+      await expect(card.getByText(FULL_BYLINE)).toBeVisible()
 
       await settled(page)
       expect(await clippedText(page)).toEqual([])
