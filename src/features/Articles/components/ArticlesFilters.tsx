@@ -10,9 +10,11 @@ export interface ArticlesFiltersProps {
   state: ArticlesState
   authors: string[]
   onChange: (patch: Partial<ArticlesState>) => void
+  /** Inside the mobile drawer the dialog already supplies the card and the title. */
+  embedded?: boolean
 }
 
-export function ArticlesFilters({ state, authors, onChange }: ArticlesFiltersProps) {
+export function ArticlesFilters({ state, authors, onChange, embedded }: ArticlesFiltersProps) {
   const { t } = useTranslation()
   const allIds = SELECTABLE_SOURCES.map((source) => source.id)
   // `[]` is "every source", so an unticked box only exists once a subset is chosen.
@@ -23,12 +25,8 @@ export function ArticlesFilters({ state, authors, onChange }: ArticlesFiltersPro
     onChange({ sources: next.length === allIds.length ? [] : next })
   }
 
-  return (
-    <AppCard as="section" className="flex flex-col gap-4">
-      <h2 className="text-sm font-semibold text-ink-700 dark:text-ink-100">
-        {t('articles.filters.title')}
-      </h2>
-
+  const fields = (
+    <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AppInput
           type="date"
@@ -90,6 +88,18 @@ export function ArticlesFilters({ state, authors, onChange }: ArticlesFiltersPro
           })}
         </div>
       </fieldset>
+    </>
+  )
+
+  // Inside the drawer the dialog already draws the card and names it: fields only.
+  if (embedded) return <div className="flex flex-col gap-4">{fields}</div>
+
+  return (
+    <AppCard as="section" className="flex flex-col gap-4">
+      <h2 className="text-sm font-semibold text-ink-700 dark:text-ink-100">
+        {t('articles.filters.title')}
+      </h2>
+      {fields}
     </AppCard>
   )
 }

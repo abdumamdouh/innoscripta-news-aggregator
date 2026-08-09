@@ -27,21 +27,33 @@ export function AppCheckbox({
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
+      {/*
+        The tick stays 20px at every width; what grows below `lg` is the button around it,
+        so a thumb gets its 44px without the box turning into a slab on the desktop layout.
+      */}
       <Checkbox.Root
         id={boxId}
         checked={checked}
         onCheckedChange={(next) => onCheckedChange(next === true)}
         disabled={disabled}
         className={cn(
-          'flex size-5 shrink-0 items-center justify-center rounded border border-ink-300 bg-paper-0 transition-colors',
-          'data-[state=checked]:border-accent-600 data-[state=checked]:bg-accent-600',
-          'disabled:cursor-not-allowed disabled:opacity-50 dark:border-ink-700 dark:bg-ink-800',
+          'group flex size-11 shrink-0 items-center justify-center rounded-lg',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          'lg:size-5 lg:rounded',
           appFocusRing,
         )}
       >
-        <Checkbox.Indicator>
-          <Check className="size-4 text-paper-0" aria-hidden />
-        </Checkbox.Indicator>
+        <span
+          className={cn(
+            'flex size-5 items-center justify-center rounded border border-ink-300 bg-paper-0 transition-colors',
+            'group-data-[state=checked]:border-accent-600 group-data-[state=checked]:bg-accent-600',
+            'dark:border-ink-700 dark:bg-ink-800',
+          )}
+        >
+          <Checkbox.Indicator>
+            <Check className="size-4 text-paper-0" aria-hidden />
+          </Checkbox.Indicator>
+        </span>
       </Checkbox.Root>
       <label
         htmlFor={boxId}

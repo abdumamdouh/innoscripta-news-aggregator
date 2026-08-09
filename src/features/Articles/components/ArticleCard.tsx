@@ -43,7 +43,8 @@ export function ArticleCard({ article, actions }: ArticleCardProps) {
       <h2 className="text-base font-semibold text-ink-900 dark:text-ink-100">
         <Link
           to={{ pathname: `/articles/${encodeURIComponent(article.id)}`, search }}
-          className="line-clamp-3 hover:text-accent-600 hover:underline"
+          // Clamped text cannot take a min-height, so the touch target comes from padding.
+          className="line-clamp-3 py-3 hover:text-accent-600 hover:underline lg:py-0"
         >
           {article.title}
         </Link>
