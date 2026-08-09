@@ -22,8 +22,15 @@ server {
   index index.html;
 
   # proxy_pass with variables in it needs an explicit resolver, and needs SNI turned on or
-  # the TLS handshake to these CDNs fails. 127.0.0.11 is Docker's embedded DNS.
-  resolver 127.0.0.11 1.1.1.1 valid=30s ipv6=off;
+  # the TLS handshake to these CDNs fails. 127.0.0.11 is Docker's embedded DNS, which already
+  # forwards public names to whatever the host uses.
+  #
+  # Docker's resolver alone, deliberately. nginx round-robins a list, so naming a public
+  # resolver beside it sent roughly half of all lookups outside the container — and the very
+  # first one, before the network had settled, came back SERVFAIL. nginx returns that as-is
+  # rather than trying the next server, so a reviewer's first page load answered 502 on the
+  # one source that works without an API key.
+  resolver 127.0.0.11 valid=30s ipv6=off;
   resolver_timeout 5s;
 
   location ~ ^/api/newsapi/(?<upstream_path>.*)$ {
