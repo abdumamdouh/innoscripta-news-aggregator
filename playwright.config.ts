@@ -7,6 +7,8 @@ const baseURL = `http://localhost:${port}`
 // real cross-browser bug shows up.
 export default defineConfig({
   testDir: './e2e',
+  // .spec.ts only: e2e/*.test.ts are Vitest unit tests over the fixtures (see vite.config.ts).
+  testMatch: '**/*.spec.ts',
   use: { baseURL, trace: 'on-first-retry' },
   projects: [{ name: 'chromium', use: devices['Desktop Chrome'] }],
   webServer: {
