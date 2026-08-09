@@ -151,6 +151,24 @@ test.describe('article details', () => {
     )
   })
 
+  test('still reads as saved when the story is reopened without a reload', async ({ page }) => {
+    await page.goto('/')
+    const title = await openFirstArticle(page)
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toBeVisible()
+
+    // Back and in again, all within one page lifecycle: nothing is re-read from a cold
+    // start here, so a reader holding its own copy of the list is what would go stale.
+    await page.getByRole('link', { name: 'Back to results' }).click()
+    await expect(page.getByRole('link', { name: title })).toBeVisible()
+    await openFirstArticle(page)
+
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+  })
+
   test('opens a saved story from a bare permalink after it has left the first page', async ({
     page,
   }) => {
