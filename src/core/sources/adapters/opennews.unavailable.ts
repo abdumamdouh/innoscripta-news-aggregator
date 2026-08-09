@@ -15,8 +15,7 @@ export const openNewsSource: NewsSource<never> = {
     pagination: false,
   },
   available: false,
-  unavailableReason:
-    'OpenNews is a journalism-technology nonprofit — it runs programmes and publishes Source, but exposes no article API to aggregate.',
+  unavailableReasonKey: 'sources.unavailableReason.opennews',
   fetch: () => Promise.resolve([]),
   normalize: () => {
     throw new Error('opennews: no article API exists to normalize')

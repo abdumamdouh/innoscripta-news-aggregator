@@ -84,7 +84,7 @@ describe('aggregate — partial failure', () => {
     const fetch = vi.fn()
     const offline = fakeSource('nyt', [], {
       available: false,
-      unavailableReason: 'no key',
+      unavailableReasonKey: 'sources.unavailableReason.nyt',
       fetch,
     })
 

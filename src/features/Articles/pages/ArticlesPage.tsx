@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { AppButton, AppCard } from '@/components/common/design-system'
 import type { SourceFailure } from '@/core/sources/aggregator'
+import { SOURCE_LABELS } from '@/core/sources/registry'
 import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ArticlesFilters } from '@/features/Articles/components/ArticlesFilters'
 import { ArticlesToolbar } from '@/features/Articles/components/ArticlesToolbar'
 import { FilterChips } from '@/features/Articles/components/FilterChips'
 import { Pagination } from '@/features/Articles/components/Pagination'
-import { SOURCE_LABELS } from '@/features/Articles/constants'
 import { useArticlesDirectory } from '@/features/Articles/hooks/useArticlesDirectory'
 import { useAuthorFacet } from '@/features/Articles/hooks/useAuthorFacet'
 
