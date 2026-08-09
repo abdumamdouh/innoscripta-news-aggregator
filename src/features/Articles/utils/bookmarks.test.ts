@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Article } from '@/core/sources/types'
 import {
-  backfillBookmark,
   findBookmarkedArticle,
   isBookmarked,
   parseBookmarks,
+  refreshBookmark,
   toggleBookmark,
 } from '@/features/Articles/utils/bookmarks'
 
@@ -104,28 +104,51 @@ describe('toggleBookmark', () => {
   })
 })
 
-describe('backfillBookmark', () => {
+describe('refreshBookmark', () => {
   it('fills in the snapshot an id-only entry lacks, in place', () => {
     const saved = article('guardian:1')
     const bookmarks = [{ id: saved.id }, { id: 'a' }]
-    expect(backfillBookmark(bookmarks, saved)).toEqual([
+    expect(refreshBookmark(bookmarks, saved)).toEqual([
       { id: saved.id, article: saved },
       { id: 'a' },
     ])
     expect(bookmarks).toEqual([{ id: saved.id }, { id: 'a' }])
   })
 
-  it('hands back the very same array when there is nothing to fill in', () => {
+  it('replaces a snapshot the source has since corrected, leaving the rest alone', () => {
+    const stale = article('guardian:1')
+    const corrected = { ...stale, title: 'Story guardian:1 (corrected)' }
+    const bookmarks = [{ id: 'a' }, { id: stale.id, article: stale }]
+    expect(refreshBookmark(bookmarks, corrected)).toEqual([
+      { id: 'a' },
+      { id: stale.id, article: corrected },
+    ])
+    expect(bookmarks[1]?.article).toEqual(stale)
+  })
+
+  it('notices a field that appeared and one that vanished, not just a changed one', () => {
+    const saved = article('guardian:1')
+    const withAuthor = { ...saved, author: 'A. Reporter' }
+    expect(refreshBookmark([{ id: saved.id, article: saved }], withAuthor)).toEqual([
+      { id: saved.id, article: withAuthor },
+    ])
+    expect(refreshBookmark([{ id: saved.id, article: withAuthor }], saved)).toEqual([
+      { id: saved.id, article: saved },
+    ])
+  })
+
+  it('hands back the very same array when the entry already matches', () => {
     const saved = article('guardian:1')
     const withSnapshot = [{ id: saved.id, article: saved }]
-    expect(backfillBookmark(withSnapshot, saved)).toBe(withSnapshot)
+    // A fresh copy carrying identical fields is not a change worth a write.
+    expect(refreshBookmark(withSnapshot, { ...saved })).toBe(withSnapshot)
 
     const unsaved = [{ id: 'a' }]
-    expect(backfillBookmark(unsaved, saved)).toBe(unsaved)
+    expect(refreshBookmark(unsaved, saved)).toBe(unsaved)
   })
 
   it('never saves an article that was not bookmarked', () => {
-    expect(backfillBookmark([], article('guardian:1'))).toEqual([])
+    expect(refreshBookmark([], article('guardian:1'))).toEqual([])
   })
 })
 

@@ -208,6 +208,51 @@ test.describe('article details', () => {
     )
   })
 
+  test('serves the corrected story from a permalink once the reader has seen the fix', async ({
+    page,
+  }) => {
+    // One Guardian story, under our control, so "the newsroom corrected it" is a real event.
+    let headline = 'Guardian story 3 on quantum'
+    await page.route('**/api/guardian/**', (route) =>
+      route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          response: {
+            results: [
+              {
+                id: 'https://guardian.test/story-3',
+                webTitle: headline,
+                webUrl: 'https://guardian.test/story-3',
+                webPublicationDate: '2026-06-01T09:00:00.000Z',
+                sectionId: 'technology',
+                fields: { trailText: 'Guardian summary 3', byline: 'Guardian Reporter 3' },
+              },
+            ],
+          },
+        }),
+      }),
+    )
+
+    // No other provider publishes a story by this name, so the list holds exactly ours.
+    await page.goto('/?q=Guardian+story+3')
+    const title = await openFirstArticle(page)
+    expect(title).toBe(headline)
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toBeVisible()
+    const permalink = new URL(page.url()).pathname
+
+    // The correction lands, and the reader meets it the ordinary way: back on the list.
+    headline = 'Guardian story 3 on quantum, corrected'
+    await page.goto('/?q=Guardian+story+3')
+    await openFirstArticle(page)
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toBeVisible()
+
+    // The kept link, cold and with nothing left to ask: the saved copy is the corrected one.
+    await page.route('**/api/**', (route) => route.abort())
+    await page.goto(permalink)
+    await expect(page.getByRole('heading', { level: 1, name: headline })).toBeVisible()
+  })
+
   test('offers a way back instead of a broken page for an unknown article id', async ({ page }) => {
     await page.goto('/articles/guardian%3Ano-such-story')
 
