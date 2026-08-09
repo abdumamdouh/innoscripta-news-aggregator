@@ -36,3 +36,8 @@ GOAL.md
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel's local link + the OIDC token it writes into .env.local. The env rules above
+# already cover that file; a bare `.env*` here would sit after the !.env.example negation
+# and quietly re-ignore the one env file that belongs in the repo.
+.vercel
