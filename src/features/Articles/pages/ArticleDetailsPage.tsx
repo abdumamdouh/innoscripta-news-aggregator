@@ -131,10 +131,18 @@ export function ArticleDetailsPage() {
         {article.author ? <p className="text-sm text-ink-500">{article.author}</p> : null}
 
         {/*
-          Providers give a summary, never a body — so this is the whole text there is, shown
-          in full rather than clamped.
+          The Guardian is the only provider that serves a body; the other three give a summary
+          and nothing more. Either way it is the whole text there is, shown in full rather than
+          clamped — and `content` is already flattened to text by the adapter, so no markup is
+          injected here.
         */}
-        <ArticleDescription description={article.description} className="text-base" />
+        {article.content ? (
+          <p className="whitespace-pre-line text-base text-ink-700 dark:text-ink-300">
+            {article.content}
+          </p>
+        ) : (
+          <ArticleDescription description={article.description} className="text-base" />
+        )}
 
         <a
           href={article.url}

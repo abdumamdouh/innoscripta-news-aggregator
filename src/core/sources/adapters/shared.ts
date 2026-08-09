@@ -33,6 +33,40 @@ export function description(...candidates: unknown[]): string {
   return candidates.map(plainText).find(Boolean) ?? ''
 }
 
+const ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+}
+
+/**
+ * `Article.content` — a provider's full article HTML flattened to text: block ends become
+ * paragraph breaks, every tag goes, entities are decoded. Text, not markup, so no sanitizer
+ * and no `dangerouslySetInnerHTML` anywhere downstream.
+ * ponytail: drops images, links and emphasis with the tags. Render real markup only if the
+ * details page is ever asked to look like the original article.
+ */
+export function bodyText(value: unknown): string | undefined {
+  const raw = text(value)
+  if (!raw) return undefined
+  const flat = raw
+    .replace(/<\/(p|div|li|h[1-6]|blockquote|figcaption|tr)>/gi, '\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (entity, name: string) => {
+      if (!name.startsWith('#')) return ENTITIES[name.toLowerCase()] ?? entity
+      const code = Number(name.replace(/^#x/i, '0x').replace(/^#/, ''))
+      return code <= 0x10ffff ? String.fromCodePoint(code) : entity
+    })
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+  return text(flat)
+}
+
 /** An absolute http(s) URL, or undefined. Relative provider paths are resolved against `base`. */
 export function url(value: unknown, base?: string): string | undefined {
   const raw = text(value)

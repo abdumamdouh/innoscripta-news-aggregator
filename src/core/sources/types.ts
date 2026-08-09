@@ -11,6 +11,11 @@ export interface Article {
   sourceLabel: string
   author?: string
   category?: string
+  /**
+   * The full article text, plain, with a blank line between paragraphs. Only a provider
+   * that actually serves a body fills this in — today only the Guardian.
+   */
+  content?: string
 }
 
 export interface ArticleQuery {

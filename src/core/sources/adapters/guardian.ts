@@ -1,5 +1,6 @@
 import type { Article, NewsSource } from '@/core/sources/types'
 import {
+  bodyText,
   description,
   getJson,
   isoDate,
@@ -18,7 +19,12 @@ interface GuardianRaw {
   webPublicationDate?: string | null
   webTitle?: string | null
   webUrl?: string | null
-  fields?: { trailText?: string | null; byline?: string | null; thumbnail?: string | null } | null
+  fields?: {
+    trailText?: string | null
+    byline?: string | null
+    thumbnail?: string | null
+    body?: string | null
+  } | null
 }
 
 interface GuardianPayload {
@@ -44,6 +50,8 @@ function normalize(raw: GuardianRaw): Article {
     sourceLabel: LABEL,
     author: text(raw.fields?.byline),
     category: text(raw.sectionId),
+    // The one provider of the four that serves a body. It is HTML; `bodyText` flattens it.
+    content: bodyText(raw.fields?.body),
   }
 }
 
@@ -62,7 +70,7 @@ export const guardianSource: NewsSource<GuardianRaw> = {
       page: query.page,
       'page-size': query.pageSize,
       'order-by': 'newest',
-      'show-fields': 'trailText,thumbnail,byline',
+      'show-fields': 'trailText,thumbnail,byline,body',
     })
     return selectItems(await getJson<GuardianPayload>(`/api/guardian/search?${search}`, signal))
   },
