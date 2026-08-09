@@ -43,7 +43,7 @@ export function FeedPage() {
           <p role="status" className="text-sm text-ink-500">
             {t('feed.results', { total: articles.length })}
           </p>
-          <ArticleGrid articles={articles} isLoading={isLoading} lead />
+          <ArticleGrid articles={articles} isLoading={isLoading} />
         </>
       )}
     </section>

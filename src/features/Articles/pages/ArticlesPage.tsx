@@ -87,7 +87,7 @@ export function ArticlesPage() {
           <p role="status" className="text-sm text-ink-500">
             {t('articles.results', { total: list.articles.length })}
           </p>
-          <ArticleGrid articles={list.articles} isLoading={isLoading} lead={state.page === 1} />
+          <ArticleGrid articles={list.articles} isLoading={isLoading} />
           <Pagination
             page={state.page}
             totalPages={list.knownPages}

@@ -610,14 +610,6 @@ describe('description()', () => {
 })
 
 describe('image renditions', () => {
-  const guardian = (thumbnail: unknown) =>
-    guardianSource.normalize({
-      webTitle: 't',
-      webUrl: 'https://e.test/a',
-      webPublicationDate: '2024-01-01T00:00:00Z',
-      fields: { thumbnail },
-    } as never).imageUrl
-
   const bbc = (thumbnailUrl: string) => {
     const [item] = selectBbc(
       `<rss xmlns:media="http://search.yahoo.com/mrss/"><channel><item>

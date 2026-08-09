@@ -35,7 +35,7 @@
   "articles.filters.sources": "Sources",
   "articles.filters.title": "Filters",
   "articles.filters.to": "To",
-  "articles.lead": "Top story",
+  "articles.image.none": "No image",
   "articles.loading": "Loading articles",
   "articles.noDescription": "This source published no summary.",
   "articles.partial": "Some sources did not answer: {{sources}}",
