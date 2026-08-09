@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Article } from '@/core/sources/types'
 import {
-  backfillBookmark,
   isBookmarked,
+  refreshBookmark,
   readBookmarks,
   toggleBookmark,
   writeBookmarks,
@@ -19,11 +19,12 @@ import {
 export function useBookmark(article: Article) {
   const [bookmarks, setBookmarks] = useState(readBookmarks)
 
-  // An entry saved before snapshots existed gains one as soon as the article is on screen,
-  // so the button below stays an honest save/unsave.
+  // A saved entry catches up with the article on screen: one saved before snapshots existed
+  // gains one, and one the source has since corrected takes the newer copy. The button below
+  // stays an honest save/unsave either way.
   useEffect(() => {
     setBookmarks((previous) => {
-      const next = backfillBookmark(previous, article)
+      const next = refreshBookmark(previous, article)
       if (next !== previous) writeBookmarks(next)
       return next
     })

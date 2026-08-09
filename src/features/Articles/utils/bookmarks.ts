@@ -70,15 +70,28 @@ export function toggleBookmark(bookmarks: readonly Bookmark[], article: Article)
     : [...bookmarks, { id: article.id, article }]
 }
 
+/** Flat by shape — an Article is strings and nothing else, so field equality is the whole story. */
+const sameArticle = (a: Article, b: Article) =>
+  ([...new Set([...Object.keys(a), ...Object.keys(b)])] as (keyof Article)[]).every(
+    (field) => a[field] === b[field],
+  )
+
 /**
- * Give an entry saved under the earlier id-only shape the snapshot it lacks, so a
- * pre-existing bookmark's permalink starts resolving without the reader unsaving and
- * re-saving it. Returns the same array when there is nothing to fill in — the save button
- * stays a plain save/unsave, so this never rides along on a click.
+ * Bring a saved entry up to date with the copy on screen: fills in the snapshot an entry
+ * saved under the earlier id-only shape lacks, and replaces one the source has since
+ * corrected, so a permalink stops serving a story its newsroom has moved on from. Returns
+ * the same array when the entry is unsaved or already matches — the save button stays a
+ * plain save/unsave, so this never rides along on a click.
+ *
+ * A snapshot only refreshes while a fresher copy is on screen, which means a cache hit
+ * (see `useArticleDetails`) — no adapter can fetch one article by id to check on it, so a
+ * bookmark nobody opens from a warm list keeps the copy it has. That is the permalink
+ * surviving, which is the point of the snapshot; item 9 (reading lists) is where a real
+ * store can afford to re-resolve saved stories in bulk.
  */
-export function backfillBookmark(bookmarks: Bookmark[], article: Article): Bookmark[] {
+export function refreshBookmark(bookmarks: Bookmark[], article: Article): Bookmark[] {
   const existing = bookmarks.find((bookmark) => bookmark.id === article.id)
-  if (!existing || existing.article) return bookmarks
+  if (!existing || (existing.article && sameArticle(existing.article, article))) return bookmarks
   return bookmarks.map((bookmark) =>
     bookmark.id === article.id ? { id: article.id, article } : bookmark,
   )
