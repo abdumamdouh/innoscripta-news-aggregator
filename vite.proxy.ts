@@ -58,3 +58,28 @@ export function createProxy(env: Record<string, string | undefined>) {
     ]),
   )
 }
+
+/**
+ * Resolve a caller-supplied path against a route's target, or reject it.
+ *
+ * The path arrives from the query string on Vercel, and `fetch` resolves dot segments before
+ * it sends anything — so `../../../svc/topstories/v2/home.json` reaches an endpoint the route
+ * never configured, signed with our key, turning the deployment into a free proxy for someone
+ * else's traffic. `new URL` normalizes first, so comparing after resolution tests where the
+ * request will actually go rather than the string we assembled.
+ *
+ * nginx and the Vite dev server both normalize the URI before matching a location, so this is
+ * the one runtime that has to check for itself.
+ */
+export function resolveUpstream(target: string, path: string): URL | undefined {
+  const base = new URL(target.endsWith('/') ? target : `${target}/`)
+  let resolved: URL
+  try {
+    resolved = new URL(path.replace(/^\/+/, ''), base)
+  } catch {
+    return undefined
+  }
+
+  const contained = resolved.origin === base.origin && resolved.pathname.startsWith(base.pathname)
+  return contained ? resolved : undefined
+}

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { PROXY_ROUTES, createProxy, withKey } from './vite.proxy.ts'
+import { PROXY_ROUTES, createProxy, resolveUpstream, withKey } from './vite.proxy.ts'
 
 const repoFile = (relative: string) => fileURLToPath(new URL(relative, import.meta.url))
 const read = (relative: string) => readFileSync(repoFile(relative), 'utf8')
@@ -170,5 +170,49 @@ describe.skipIf(!hasEnvsubst)('entrypoint rendering', () => {
 
     expect(rendered).toContain('set $upstream_args "apiKey=&$args"')
     expect(rendered).toContain('proxy_pass https://feeds.bbci.co.uk/$upstream_path$is_args$args')
+  })
+})
+
+describe('resolveUpstream', () => {
+  const NYT = PROXY_ROUTES['/api/nyt']!.target
+
+  it('resolves a normal path under the configured target', () => {
+    expect(resolveUpstream(NYT, 'articlesearch.json')?.href).toBe(`${NYT}/articlesearch.json`)
+  })
+
+  it('rejects a path that walks out of the target', () => {
+    // Shipped live and reachable: this returned NYT Top Stories signed with our key,
+    // i.e. the deployment lending its credentials to anyone who asked.
+    expect(resolveUpstream(NYT, '../../../svc/topstories/v2/home.json')).toBeUndefined()
+  })
+
+  it('rejects an absolute url that would send our key to another host', () => {
+    expect(resolveUpstream(NYT, 'https://evil.test/steal')).toBeUndefined()
+  })
+
+  // The invariant that matters is not "these inputs are rejected" but "nothing reaches a host
+  // or a prefix the route did not configure". Encoded slashes and a protocol-relative path
+  // both survive as literal path segments rather than traversing, which is equally safe —
+  // asserting containment says that, where asserting undefined would only describe today's
+  // branch and would fail the day one of them is normalized differently.
+  it.each([
+    '..%2F..%2F..%2Fsvc%2Ftopstories%2Fv2%2Fhome.json',
+    '....//....//svc/topstories/v2/home.json',
+    '//evil.test/steal',
+    '../../../svc/topstories/v2/home.json',
+    '../../../../etc/passwd',
+    './../../svc/topstories/v2/home.json',
+  ])('never escapes the configured target for %s', (path) => {
+    const resolved = resolveUpstream(NYT, path)
+    if (resolved) expect(resolved.href.startsWith(`${NYT}/`)).toBe(true)
+  })
+
+  it('strips leading slashes rather than treating the path as root-absolute', () => {
+    expect(resolveUpstream(NYT, '/articlesearch.json')?.href).toBe(`${NYT}/articlesearch.json`)
+  })
+
+  it('allows a deeper path inside the target', () => {
+    const bbc = PROXY_ROUTES['/api/bbc']!.target
+    expect(resolveUpstream(bbc, 'news/world/rss.xml')?.href).toBe(`${bbc}/news/world/rss.xml`)
   })
 })

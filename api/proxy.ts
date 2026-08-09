@@ -1,4 +1,4 @@
-import { PROXY_ROUTES, withKey } from '../vite.proxy'
+import { PROXY_ROUTES, resolveUpstream, withKey } from '../vite.proxy'
 
 /**
  * The third consumer of `PROXY_ROUTES`, after the Vite dev server and the nginx container.
@@ -36,12 +36,21 @@ export default async function handler(request: Request): Promise<Response> {
   const route = source ? PROXY_ROUTES[`/api/${source}`] : undefined
   if (!route) return json({ error: `Unknown source: ${source ?? '(none)'}` }, 404)
 
+  // `__path` is attacker-controlled and `fetch` resolves dot segments before sending, so this
+  // is what stops the deployment becoming a free proxy for our keys. See `resolveUpstream`.
+  const resolved = resolveUpstream(route.target, path)
+  if (!resolved) return json({ error: 'Path escapes the configured source' }, 400)
+
   const forwarded = new URLSearchParams(url.searchParams)
   for (const param of ROUTING_PARAMS) forwarded.delete(param)
 
   const query = forwarded.toString()
   const key = route.env ? process.env[route.env] : undefined
-  const upstream = `${route.target}/${path}${withKey(query ? `?${query}` : '', route.param, key)}`
+  const upstream = `${resolved.origin}${resolved.pathname}${withKey(
+    query ? `?${query}` : '',
+    route.param,
+    key,
+  )}`
 
   try {
     const response = await fetch(upstream, {
