@@ -33,7 +33,7 @@ Full spec for each item is in **§ Item specs** below, in a `### <id> — <title
 | 5   | Article list: search, filters, sort, pagination | done        | feat/article-list-search-filters-sort-paginat |                                                                                                                                                                                                                             |
 | 6   | Article details page                            | done        | feat/article-details-page                     |                                                                                                                                                                                                                             |
 | 7   | Preferences (sources / categories / authors)    | done        | feat/preferences-sources-categories-authors   |                                                                                                                                                                                                                             |
-| 8   | Personalized feed                               | not started |                                               |                                                                                                                                                                                                                             |
+| 8   | Personalized feed                               | done        | feat/personalized-feed                        |                                                                                                                                                                                                                             |
 | 9   | Bookmarks + reading lists (CRUD)                | not started |                                               |                                                                                                                                                                                                                             |
 | 10  | Saved search presets (CRUD)                     | not started |                                               |                                                                                                                                                                                                                             |
 | 11  | UI states + offline cache                       | not started |                                               |                                                                                                                                                                                                                             |
@@ -99,6 +99,7 @@ backlog rows. Appended by the loop; safe to add to by hand.
       Status: done. Branch: `feat/articlespage-s-own-iserror-branch-has-no`.
 - [x] (minor) Preferences feature index.ts deviates from the stated feature-folder contract: patterns.md says "the feature's index.ts exports its routes and nothing else"; src/features/Preferences/index.ts exports PreferencesButton and usePreferences instead, since the feature has no route. This is the first non-route feature in the codebase, so the rule as literally written doesn't fit it, but nothing documents the exception at the rule level (only in the feature's own comment). Worth a one-line addendum to patterns.md once item 8 (which will import usePreferences) lands, so the exception isn't just tribal knowledge in one file. — found in 7
       Status: done. Branch: `feat/preferences-feature-index-ts-deviates-fr`.
+- [ ] (minor) Feed reuses "articles on this page" copy though the feed has no pagination UI: src/features/Articles/pages/FeedPage.tsx:52-54 reuses the articles.results i18n key ('{{total}} articles on this page') for the result count, but feed.service.ts's toFeedQuery is hard-capped to page 1 with no Pagination component rendered on this page. 'on this page' implies other pages exist to page through, which isn't true here — minor copy mismatch, not a blocker for this item. — found in 8
 
 ## Loop log
 
@@ -126,6 +127,7 @@ iteration 9 — [carry-forward-10] ArticlesPage's own isError branch has no unit
 iteration 10 — [carry-forward-9] Two independent localStorage reads of bookmarks are not synchronized in-session — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 11 — [7] Preferences (sources / categories / authors) — done — static:pass review:pass e2e:pass acceptance:pass
 iteration 12 — [carry-forward-11] Preferences feature index.ts deviates from the stated feature-folder contract — done — static:pass review:pass e2e:pass acceptance:pass
+iteration 13 — [8] Personalized feed — done — static:pass review:pass e2e:pass acceptance:pass
 
 ---
 

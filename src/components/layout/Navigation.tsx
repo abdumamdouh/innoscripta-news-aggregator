@@ -2,8 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/utils/cn'
 
-// ponytail: one entry today. Later items add their route here, not a new nav component.
-const NAV_ITEMS = [{ to: '/', labelKey: 'nav.articles' }] as const
+// ponytail: later items add their route here, not a new nav component.
+const NAV_ITEMS = [
+  { to: '/', labelKey: 'nav.articles' },
+  { to: '/feed', labelKey: 'nav.feed' },
+] as const
 
 export function Navigation() {
   const { t } = useTranslation()
