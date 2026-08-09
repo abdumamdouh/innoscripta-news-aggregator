@@ -5,7 +5,7 @@ paths:
 
 # Project patterns — the musts
 
-- **Feature folders.** `src/features/<Feature>/{components,hooks,services,utils,types,pages,routes.tsx,index.ts}`. The feature's `index.ts` exports its routes and nothing else; `src/routes/router.tsx` spreads them.
+- **Feature folders.** `src/features/<Feature>/{components,hooks,services,utils,types,pages,routes.tsx,index.ts}`. The feature's `index.ts` exports its routes and nothing else; `src/routes/router.tsx` spreads them. Exception: a feature that owns no route (e.g. `src/features/Preferences/`, a header-opened modal) exports its public hook(s)/component(s) from `index.ts` instead — that export list is still the feature's only public surface.
 - **Hook layering.** `use<X>Directory` composes four hooks, each with one job: TanStack Query (fetch) + `use<X>State` (URL/localStorage query state) + `use<X>List` (pure filter → sort → paginate) + `use<X>Actions` (mutations, busy flags, toasts). Do not merge them.
 - **Sources are adapters.** Anything that knows a provider's field names lives in `src/core/sources/adapters/`. Features import `Article` and the aggregator — never a provider shape. Adding a source = one adapter file + one line in `registry.ts`.
 - **Never call a provider directly from a component.** All traffic goes through `/api/<source>/*` so the key stays in the Vite proxy (dev) or nginx (prod). A `VITE_*` key in client code is a blocker.
