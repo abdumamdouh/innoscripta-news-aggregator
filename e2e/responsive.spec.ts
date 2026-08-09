@@ -366,6 +366,33 @@ test.describe('the filter panel below lg', () => {
     await expect(page).toHaveURL(/category=technology/)
     await expect(page.getByRole('button', { name: /Remove filter: Technology/ })).toBeVisible()
   })
+
+  test('keeps its action reachable when the fields outgrow a short viewport', async ({ page }) => {
+    // Short enough that the filter fields cannot all fit — the fold the reader actually hits.
+    const height = 420
+    await page.setViewportSize({ width: 375, height })
+    await page.goto('/')
+    await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Filters', exact: true }).click()
+    const drawer = page.getByRole('dialog', { name: 'Filters' })
+    await expect(drawer).toBeVisible()
+    await settled(page)
+
+    const apply = drawer.getByRole('button', { name: 'Show results' })
+    const before = await apply.boundingBox()
+    expect(before, 'the drawer action has no box').not.toBeNull()
+    expect(before!.y + before!.height).toBeLessThanOrEqual(height)
+
+    // Scrolling the field list must not carry the action away with it.
+    await drawer.getByLabel('From').hover()
+    await page.mouse.wheel(0, 2000)
+    await settled(page)
+
+    const after = await apply.boundingBox()
+    expect(after).toEqual(before)
+    expect(after!.y + after!.height).toBeLessThanOrEqual(height)
+  })
 })
 
 test.describe('at desktop the filter panel stays inline', () => {
