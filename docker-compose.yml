@@ -1,0 +1,19 @@
+# `docker compose up --build` → the app on http://localhost:8080.
+services:
+  web:
+    build: .
+    ports:
+      # WEB_PORT exists so a second stack (the e2e spec runs one) can take another port.
+      - '${WEB_PORT:-8080}:80'
+    # The three keys, passed as runtime environment. Deliberately not build args: a build arg
+    # is recorded in the image's layer history, and these must not outlive the container.
+    #
+    # Compose reads them from the shell, or from a `.env` beside this file. The dev server
+    # reads `.env.local` instead (vite's convention), so either export the keys or run
+    # `docker compose --env-file .env.local up --build` to use the one file for both.
+    #
+    # A missing key is not fatal: BBC needs none, and entrypoint.sh warns about the rest.
+    environment:
+      NEWSAPI_KEY: ${NEWSAPI_KEY:-}
+      GUARDIAN_KEY: ${GUARDIAN_KEY:-}
+      NYT_KEY: ${NYT_KEY:-}

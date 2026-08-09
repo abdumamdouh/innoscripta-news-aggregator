@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  # ponytail: one job, one runner. Split into parallel jobs when the wall clock hurts —
+  # every step here shares the same `npm ci`, so splitting costs more than it saves today.
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # .nvmrc is the single place the Node version is pinned (the Dockerfile reads it too).
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+
+      # Item 4's acceptance, enforced on every push: no key and no VITE_ inline in the bundle.
+      - name: no provider key in the built bundle
+        run: |
+          ! grep -rE 'VITE_|NEWSAPI_KEY|GUARDIAN_KEY|NYT_KEY' dist/
+
+      - name: docker build
+        run: docker build -t innoscripta-news-aggregator .
