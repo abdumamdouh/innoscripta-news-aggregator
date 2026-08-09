@@ -6,6 +6,11 @@ import { mockProviders } from './providerMocks.ts'
  * The details page, reached the way a reader reaches it: from a list they had already
  * filtered. The two things worth proving are that leaving and coming back does not lose
  * their search, and that arriving does not re-fetch a feed the app already has.
+ *
+ * The page's failed-cold-load card has no case here on purpose: `aggregate` is `allSettled`,
+ * so aborting or 500-ing every provider route still resolves the query (into `failures`) and
+ * renders the missing-article card, not the error one. That branch is covered where it can
+ * actually be provoked — src/features/Articles/pages/ArticleDetailsPage.test.tsx.
  */
 
 const firstCard = (page: Page) => page.getByRole('article').first()
