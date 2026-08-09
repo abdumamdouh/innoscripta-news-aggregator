@@ -94,6 +94,15 @@ async function openFiltersIfDrawer(page: Page, width: number) {
   return drawer
 }
 
+/** Saved articles are the precondition for the bookmarks page's cards and their modals. */
+async function saveFirstStory(page: Page) {
+  await page.goto('/')
+  await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+  await page.getByRole('article').first().getByRole('link').click()
+  await page.getByRole('button', { name: 'Save article' }).click()
+  await expect(page.getByRole('button', { name: 'Remove saved article' })).toBeVisible()
+}
+
 test.beforeEach(async ({ page }) => {
   await mockProviders(page)
 })
@@ -140,6 +149,48 @@ for (const viewport of VIEWPORTS) {
       await expectResponsive(page, viewport.width)
     })
 
+    /**
+     * The page with something actually on it: cards, the list filter row, and the three modals
+     * the empty page never reaches — add-to-list, delete-list, remove-save.
+     */
+    test('a populated saved page and its list modals fit the viewport', async ({ page }) => {
+      await saveFirstStory(page)
+      await page.goto('/bookmarks')
+      const saved = page.getByRole('main')
+      const dialog = page.getByRole('dialog')
+
+      await expect(page.getByRole('article')).toHaveCount(1)
+      await expectResponsive(page, viewport.width)
+
+      await saved.getByRole('button', { name: 'New list' }).click()
+      await dialog.getByLabel('List name').fill('Weekend reading')
+      await dialog.getByRole('button', { name: 'Save list' }).click()
+      await expect(dialog).toBeHidden()
+      // The filter row now carries a second chip — the one that would wrap on a phone.
+      await expectResponsive(page, viewport.width)
+
+      await page.getByRole('button', { name: 'Add to a reading list' }).click()
+      await expect(dialog.getByRole('checkbox', { name: 'Weekend reading' })).toBeVisible()
+      await expectResponsive(page, viewport.width)
+      // File it, so filtering down to the list below still has a card to act on.
+      await dialog.getByRole('checkbox', { name: 'Weekend reading' }).click()
+      await dialog.getByRole('button', { name: 'Done' }).click()
+      await expect(dialog).toBeHidden()
+
+      await saved.getByRole('button', { name: 'Weekend reading' }).click()
+      await saved.getByRole('button', { name: 'Delete list' }).click()
+      await expect(dialog.getByText('“Weekend reading” is deleted')).toBeVisible()
+      await expectResponsive(page, viewport.width)
+      await dialog.getByRole('button', { name: 'Cancel' }).click()
+      await expect(dialog).toBeHidden()
+
+      await page.getByRole('button', { name: 'Remove saved article' }).click()
+      await expect(
+        dialog.getByRole('heading', { name: 'Remove this saved article?' }),
+      ).toBeVisible()
+      await expectResponsive(page, viewport.width)
+    })
+
     test('the preferences modal fits the viewport', async ({ page }) => {
       await page.goto('/')
       await page.getByRole('button', { name: 'Preferences' }).click()
@@ -154,6 +205,25 @@ for (const viewport of VIEWPORTS) {
 
       await page.getByRole('button', { name: 'Save this search' }).click()
       await expect(page.getByRole('dialog')).toBeVisible()
+      await expectResponsive(page, viewport.width)
+    })
+
+    /** A saved preset adds a row of chips plus two icon buttons each, and a delete confirm. */
+    test('a saved preset and its delete confirm fit the viewport', async ({ page }) => {
+      await page.goto('/?q=quantum')
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+      const dialog = page.getByRole('dialog')
+
+      await page.getByRole('button', { name: 'Save this search' }).click()
+      await dialog.getByLabel('Search name').fill('Quantum beat')
+      await dialog.getByRole('button', { name: 'Save search' }).click()
+      await expect(dialog).toBeHidden()
+
+      await expect(page.getByRole('button', { name: 'Quantum beat', exact: true })).toBeVisible()
+      await expectResponsive(page, viewport.width)
+
+      await page.getByRole('button', { name: 'Delete search: Quantum beat' }).click()
+      await expect(dialog.getByRole('button', { name: 'Delete search' })).toBeVisible()
       await expectResponsive(page, viewport.width)
     })
   })
