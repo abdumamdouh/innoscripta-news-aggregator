@@ -25,6 +25,18 @@ const TOPICS = ['quantum', 'harvest']
 export const LONG_TOKEN = 'antidisestablishmentarianism'.repeat(3)
 const LONG_TOKEN_INDEX = 20
 
+/**
+ * A second story carries a headline and byline at the length a real newsroom publishes, where
+ * the template titles are a handful of words. Clamping is meant to be invisible at that length:
+ * this is the fixture that catches a title or byline the card silently cuts off.
+ */
+export const FULL_HEADLINE =
+  'Physicists switch on the supercollider that may explain what dark matter is made of'
+export const FULL_BYLINE = 'Margarethe Villanueva-Andersson'
+/** The one word in the headline no other fixture title contains, so a search returns just it. */
+export const FULL_HEADLINE_TERM = 'supercollider'
+const FULL_HEADLINE_INDEX = 21
+
 interface Fake {
   title: string
   description: string
@@ -41,10 +53,12 @@ interface Fake {
  */
 function feed(prefix: string, offsetHours: number, count = 30): Fake[] {
   const unbreakable = (index: number) => prefix === 'NewsAPI' && index === LONG_TOKEN_INDEX
+  const fullLength = (index: number) => prefix === 'NewsAPI' && index === FULL_HEADLINE_INDEX
   return Array.from({ length: count }, (_, index) => ({
-    title:
-      `${prefix} story ${index + 1} on ${TOPICS[index % 2] as string}` +
-      (unbreakable(index) ? ` ${LONG_TOKEN}` : ''),
+    title: fullLength(index)
+      ? FULL_HEADLINE
+      : `${prefix} story ${index + 1} on ${TOPICS[index % 2] as string}` +
+        (unbreakable(index) ? ` ${LONG_TOKEN}` : ''),
     // The first Guardian story deliberately has no summary: a provider is allowed to
     // publish none, and the card must say so rather than leave a hole.
     description: prefix === 'Guardian' && index === 0 ? '' : `${prefix} summary ${index + 1}`,
@@ -52,7 +66,9 @@ function feed(prefix: string, offsetHours: number, count = 30): Fake[] {
     publishedAt: new Date(BASE - (index * 4 + offsetHours) * 3_600_000).toISOString(),
     author: unbreakable(index)
       ? `${prefix} Reporter ${LONG_TOKEN}`
-      : `${prefix} Reporter ${(index % 3) + 1}`,
+      : fullLength(index)
+        ? FULL_BYLINE
+        : `${prefix} Reporter ${(index % 3) + 1}`,
     // Guardian story 2 is the one with a full body, as `show-fields=body` returns it.
     body:
       prefix === 'Guardian' && index === 1

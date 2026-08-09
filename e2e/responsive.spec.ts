@@ -1,6 +1,12 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { LONG_TOKEN, mockProviders } from './providerMocks.ts'
+import {
+  FULL_BYLINE,
+  FULL_HEADLINE,
+  FULL_HEADLINE_TERM,
+  LONG_TOKEN,
+  mockProviders,
+} from './providerMocks.ts'
 
 /**
  * The brief's requirement #3, checked the way a reader would hit it: every screen and every
@@ -57,6 +63,30 @@ async function smallTargets(page: Page, min: number) {
         )
     )
   }, min - SUB_PIXEL)
+}
+
+/**
+ * Overflow only catches text that pushes the page sideways. `line-clamp` and `text-overflow`
+ * do the opposite — they cut the words off and leave no trace on screen — so a headline the
+ * reader can only half-read passes every other check here. Every clamped or ellipsised node is
+ * measured against the text it is holding, and the ones that are hiding some of it are named.
+ */
+async function clippedText(page: Page) {
+  return page.evaluate(() =>
+    [...document.body.querySelectorAll<HTMLElement>('*')]
+      .filter((node) => node.getClientRects().length > 0)
+      .filter((node) => {
+        const style = getComputedStyle(node)
+        if (style.webkitLineClamp === 'none' && style.textOverflow !== 'ellipsis') return false
+        // Sub-pixel line heights round up, so a clamp that fits can report a pixel of overflow.
+        return node.scrollHeight > node.clientHeight + 1 || node.scrollWidth > node.clientWidth + 1
+      })
+      .map(
+        (node) =>
+          `${node.tagName}[${node.textContent?.trim().slice(0, 40)}] ` +
+          `${node.scrollWidth}x${node.scrollHeight} shown in ${node.clientWidth}x${node.clientHeight}`,
+      ),
+  )
 }
 
 /**
@@ -149,6 +179,31 @@ for (const viewport of VIEWPORTS) {
       await page.getByRole('article').first().getByRole('link').click()
       await expect(page.getByRole('button', { name: 'Save article' })).toBeVisible()
       await expectResponsive(page, viewport.width)
+    })
+
+    /**
+     * The brief's "no truncated critical text": a headline and byline at real newsroom length
+     * must be readable in full, not quietly cut short by the card's clamp at this width.
+     */
+    test('a real-length headline and byline are shown in full, not clamped away', async ({
+      page,
+    }) => {
+      await page.goto(`/?q=${FULL_HEADLINE_TERM}`)
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+      const card = page.getByRole('article')
+      await expect(card).toHaveCount(1)
+      await expect(card.getByRole('link', { name: FULL_HEADLINE })).toBeVisible()
+      await expect(card.getByText(FULL_BYLINE)).toBeVisible()
+
+      await settled(page)
+      expect(await clippedText(page)).toEqual([])
+
+      await card.getByRole('link', { name: FULL_HEADLINE }).click()
+      await expect(page.getByRole('heading', { name: FULL_HEADLINE, level: 1 })).toBeVisible()
+      await expect(page.getByText(FULL_BYLINE)).toBeVisible()
+
+      await settled(page)
+      expect(await clippedText(page)).toEqual([])
     })
 
     test('the feed fits the viewport', async ({ page }) => {
