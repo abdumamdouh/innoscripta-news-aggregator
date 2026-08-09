@@ -14,6 +14,17 @@ export const PAGE_SIZE = 9
 const BASE = Date.parse('2026-06-01T12:00:00.000Z')
 const TOPICS = ['quantum', 'harvest']
 
+/**
+ * One story carries an unbreakable token in its title and its byline. `line-clamp` only cuts at a
+ * wrap point, and a single word this long has none — so it is the case that catches a card
+ * pushing past the viewport, which the short template titles never could.
+ *
+ * It sits deep in the NewsAPI feed on purpose: too far down to reach any page the other specs
+ * count or assert against, and reachable only by searching for the token itself.
+ */
+export const LONG_TOKEN = 'antidisestablishmentarianism'.repeat(3)
+const LONG_TOKEN_INDEX = 20
+
 interface Fake {
   title: string
   description: string
@@ -29,14 +40,19 @@ interface Fake {
  * genuinely carries all four newsrooms instead of one provider's block.
  */
 function feed(prefix: string, offsetHours: number, count = 30): Fake[] {
+  const unbreakable = (index: number) => prefix === 'NewsAPI' && index === LONG_TOKEN_INDEX
   return Array.from({ length: count }, (_, index) => ({
-    title: `${prefix} story ${index + 1} on ${TOPICS[index % 2] as string}`,
+    title:
+      `${prefix} story ${index + 1} on ${TOPICS[index % 2] as string}` +
+      (unbreakable(index) ? ` ${LONG_TOKEN}` : ''),
     // The first Guardian story deliberately has no summary: a provider is allowed to
     // publish none, and the card must say so rather than leave a hole.
     description: prefix === 'Guardian' && index === 0 ? '' : `${prefix} summary ${index + 1}`,
     url: `https://${prefix.toLowerCase()}.test/story-${index + 1}`,
     publishedAt: new Date(BASE - (index * 4 + offsetHours) * 3_600_000).toISOString(),
-    author: `${prefix} Reporter ${(index % 3) + 1}`,
+    author: unbreakable(index)
+      ? `${prefix} Reporter ${LONG_TOKEN}`
+      : `${prefix} Reporter ${(index % 3) + 1}`,
     // Guardian story 2 is the one with a full body, as `show-fields=body` returns it.
     body:
       prefix === 'Guardian' && index === 1

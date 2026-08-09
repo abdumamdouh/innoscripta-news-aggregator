@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { mockProviders } from './providerMocks.ts'
+import { LONG_TOKEN, mockProviders } from './providerMocks.ts'
 
 /**
  * The brief's requirement #3, checked the way a reader would hit it: every screen and every
@@ -129,6 +129,25 @@ for (const viewport of VIEWPORTS) {
       await page.getByRole('article').first().getByRole('link').click()
       await expect(page.getByRole('button', { name: 'Save article' })).toBeVisible()
 
+      await expectResponsive(page, viewport.width)
+    })
+
+    /**
+     * The rest of the fixture wraps at every space, so clamping is enough to keep it in the box.
+     * This story's title and byline are one unbroken word each — nowhere to wrap — which is the
+     * only shape that can push a card past the viewport on a 375px phone.
+     */
+    test('a card whose title and byline cannot wrap still fits the viewport', async ({ page }) => {
+      await page.goto(`/?q=${LONG_TOKEN}`)
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+      await expect(page.getByRole('article')).toHaveCount(1)
+      await expect(page.getByRole('link', { name: new RegExp(LONG_TOKEN) })).toBeVisible()
+
+      await expectResponsive(page, viewport.width)
+
+      // The details page renders both strings unclamped, so it is the harder half of the case.
+      await page.getByRole('article').first().getByRole('link').click()
+      await expect(page.getByRole('button', { name: 'Save article' })).toBeVisible()
       await expectResponsive(page, viewport.width)
     })
 

@@ -62,13 +62,15 @@ export function FilterChips({ state, onChange, onClear }: FilterChipsProps) {
           onClick={() => onChange(chip.clear)}
           aria-label={t('articles.filters.remove', { label: chip.text })}
           className={cn(
-            'inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink-300 bg-paper-0 px-3 text-sm text-ink-700 lg:min-h-9',
+            // A chip echoes the reader's own search term, which has no length limit: cap it at the
+            // row's width and cut it, rather than let one long word push the page sideways.
+            'inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-ink-300 bg-paper-0 px-3 text-sm text-ink-700 lg:min-h-9',
             'hover:bg-accent-50 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-100 dark:hover:bg-ink-700',
             appFocusRing,
           )}
         >
-          {chip.text}
-          <X className="size-3.5" aria-hidden />
+          <span className="truncate">{chip.text}</span>
+          <X className="size-3.5 shrink-0" aria-hidden />
         </button>
       ))}
       <AppButton variant="ghost" size="sm" onClick={onClear}>
