@@ -117,4 +117,23 @@ export function writeBookmarks(bookmarks: readonly Bookmark[]) {
   } catch {
     // Private mode / quota: saving is a convenience, never a blocker.
   }
+  // Fired even when the write above failed: the list still moved for this session, and a
+  // reader showing a saved flag it can no longer act on is the worse of the two.
+  listeners.forEach((listener) => listener())
+}
+
+const listeners = new Set<() => void>()
+
+/**
+ * Storage is the one copy of the list; this is how a reader hears it changed. Nobody polls
+ * localStorage, so a second reader in the same page would otherwise sit on whatever it read
+ * at mount — the split item 9 (reading lists) would have walked into.
+ *
+ * ponytail: same-tab only. The `storage` event covers other tabs if that ever matters.
+ */
+export function subscribeBookmarks(listener: () => void): () => void {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
 }

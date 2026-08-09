@@ -33,7 +33,9 @@ export function useArticleDetails(articleId: string) {
       ),
     [client, articleId],
   )
-  // Cached wins: it is the fresher copy of the same story.
+  // Cached wins: it is the fresher copy of the same story. Read once per article and not
+  // subscribed (see `useBookmarks`) on purpose: unsaving the story being read must not pull
+  // it off the screen, and on a bare permalink the snapshot is all there is to render from.
   const known = useMemo(
     () => cached ?? findBookmarkedArticle(readBookmarks(), articleId),
     [cached, articleId],

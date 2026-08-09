@@ -1,11 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Article } from '@/core/sources/types'
+import type { Bookmark } from '@/features/Articles/utils/bookmarks'
 import {
   findBookmarkedArticle,
   isBookmarked,
   parseBookmarks,
+  readBookmarks,
   refreshBookmark,
+  subscribeBookmarks,
   toggleBookmark,
+  writeBookmarks,
 } from '@/features/Articles/utils/bookmarks'
 
 const article = (id: string): Article => ({
@@ -172,5 +176,57 @@ describe('isBookmarked', () => {
     expect(isBookmarked([{ id: saved.id, article: saved }], saved.id)).toBe(true)
     expect(isBookmarked([{ id: saved.id }], saved.id)).toBe(true)
     expect(isBookmarked([{ id: 'nyt:2' }], saved.id)).toBe(false)
+  })
+})
+
+describe('subscribeBookmarks', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('tells every reader to re-read, so two of them never drift apart', () => {
+    const saved = article('guardian:1')
+    const first: Bookmark[][] = []
+    const second: Bookmark[][] = []
+    const stopFirst = subscribeBookmarks(() => first.push(readBookmarks()))
+    const stopSecond = subscribeBookmarks(() => second.push(readBookmarks()))
+
+    writeBookmarks(toggleBookmark(readBookmarks(), saved))
+    expect(first).toEqual([[{ id: saved.id, article: saved }]])
+    expect(second).toEqual(first)
+
+    writeBookmarks(toggleBookmark(readBookmarks(), saved))
+    expect(first.at(-1)).toEqual([])
+    expect(second).toEqual(first)
+
+    stopFirst()
+    stopSecond()
+  })
+
+  it('stops calling a reader that unsubscribed', () => {
+    const seen: number[] = []
+    const stop = subscribeBookmarks(() => seen.push(readBookmarks().length))
+
+    writeBookmarks([{ id: 'guardian:1' }])
+    stop()
+    writeBookmarks([{ id: 'guardian:1' }, { id: 'nyt:2' }])
+
+    expect(seen).toEqual([1])
+    // Unsubscribing is not a rollback: the second write still landed in storage.
+    expect(readBookmarks()).toHaveLength(2)
+  })
+
+  it('still notifies when storage refuses the write, so nobody shows a stale flag', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota exceeded')
+    })
+    let notified = 0
+    const stop = subscribeBookmarks(() => notified++)
+
+    expect(() => writeBookmarks([{ id: 'guardian:1' }])).not.toThrow()
+    expect(notified).toBe(1)
+
+    stop()
+    setItem.mockRestore()
   })
 })
