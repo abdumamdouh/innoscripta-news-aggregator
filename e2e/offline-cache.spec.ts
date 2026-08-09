@@ -110,6 +110,96 @@ test.describe('offline feed cache', () => {
   })
 })
 
+test.describe('offline directory cache', () => {
+  /** The directory at `/`, loaded once so the page in front of the reader gets cached. */
+  async function loadTheDirectoryOnce(page: Page) {
+    await page.goto('/')
+    await settle(page)
+    await expect(cards(page)).toHaveCount(9)
+  }
+
+  test('shows the last loaded page, dated, when a cold load finds no network', async ({ page }) => {
+    await mockProviders(page)
+    await loadTheDirectoryOnce(page)
+    const titles = await cards(page).getByRole('heading').allInnerTexts()
+
+    // Same filters, no network at all this time.
+    await killTheNetwork(page)
+    await page.reload()
+    await settle(page)
+
+    await expect(feed(page).getByRole('heading', { name: 'Could not load articles' })).toHaveCount(
+      0,
+    )
+    await expect(cards(page)).toHaveCount(9)
+    expect(await cards(page).getByRole('heading').allInnerTexts()).toEqual(titles)
+    await expect(feed(page).getByRole('alert')).toContainText('Showing cached results from')
+  })
+
+  test('offers no cached page to a search the cache was never filled under', async ({ page }) => {
+    await mockProviders(page)
+    await loadTheDirectoryOnce(page)
+
+    // The stored page is the unfiltered one — showing it under a search term would read
+    // as that term's results.
+    await killTheNetwork(page)
+    await page.goto('/?q=quantum')
+    await settle(page)
+
+    await expect(cards(page)).toHaveCount(0)
+    await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
+    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+  })
+
+  test('never offers the last filter set as the next one when the search fails', async ({
+    page,
+  }) => {
+    await mockProviders(page)
+    await loadTheDirectoryOnce(page)
+    const titles = await cards(page).getByRole('heading').allInnerTexts()
+
+    // No reload this time: the previous page is still on screen as the placeholder while
+    // the search is in flight, which is exactly when it must not be cached or offered.
+    await killTheNetwork(page)
+    await page.getByRole('searchbox', { name: 'Search articles' }).fill('quantum')
+    await expect(page.getByRole('button', { name: 'Remove filter: quantum' })).toBeVisible()
+    await settle(page)
+
+    await expect(cards(page)).toHaveCount(0)
+    await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
+    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+
+    // And the unfiltered page is still the one in storage — the failed search never
+    // restamped it as its own. Clearing the term goes back to the key that filled it.
+    // Clearing the term restores the filter set that filled the cache, and the reload
+    // drops React Query's in-memory copy so storage is the only thing left to answer with.
+    await page.getByRole('searchbox', { name: 'Search articles' }).fill('')
+    await expect(page.getByRole('button', { name: 'Remove filter: quantum' })).toHaveCount(0)
+    await page.reload()
+    await settle(page)
+    await expect(feed(page).getByRole('alert')).toContainText('Showing cached results from')
+    expect(await cards(page).getByRole('heading').allInnerTexts()).toEqual(titles)
+  })
+
+  test('retry from the notice puts the live page back and drops the notice', async ({ page }) => {
+    await mockProviders(page)
+    await loadTheDirectoryOnce(page)
+
+    await killTheNetwork(page)
+    await page.reload()
+    await settle(page)
+    await expect(feed(page).getByRole('alert')).toContainText('Showing cached results from')
+
+    await page.unrouteAll({ behavior: 'ignoreErrors' })
+    await mockProviders(page)
+    await feed(page).getByRole('alert').getByRole('button', { name: 'Try again' }).click()
+
+    await settle(page)
+    await expect(feed(page).getByRole('alert')).toHaveCount(0)
+    await expect(cards(page)).toHaveCount(9)
+  })
+})
+
 test.describe('loading and empty states', () => {
   test('holds a full grid of placeholders while the articles are in flight', async ({ page }) => {
     await mockProviders(page)
