@@ -90,6 +90,29 @@ test.describe('offline feed cache', () => {
     await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
   })
 
+  test('drops a feed cached before the upgrade rather than labelling it as this selection', async ({
+    page,
+  }) => {
+    await mockProviders(page)
+    await loadTheFeedOnce(page)
+
+    // Exactly what an upgrading reader has in storage: the same stories, written by a build
+    // that stamped no selection on them. The fallback is lost this once, on purpose.
+    await page.evaluate(() => {
+      const raw = localStorage.getItem('ina-feed-cache') ?? '{}'
+      const { savedAt, articles } = JSON.parse(raw) as Record<string, unknown>
+      localStorage.setItem('ina-feed-cache', JSON.stringify({ savedAt, articles }))
+    })
+
+    await killTheNetwork(page)
+    await page.reload()
+    await settle(page)
+
+    await expect(cards(page)).toHaveCount(0)
+    await expect(feed(page).getByText('Showing cached results from')).toHaveCount(0)
+    await expect(feed(page).getByRole('alert')).toContainText('Some sources did not answer')
+  })
+
   test('retry from the notice puts the live feed back and drops the notice', async ({ page }) => {
     await mockProviders(page)
     await loadTheFeedOnce(page)

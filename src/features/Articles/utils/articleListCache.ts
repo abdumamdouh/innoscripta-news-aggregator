@@ -53,7 +53,14 @@ export function parseArticleListCache(raw: string | null): ArticleListCache | nu
       savedAt?: unknown
       articles?: unknown
     }
-    // Unstamped means written before the list was keyed — it belongs to no known selection.
+    /*
+     * Unstamped means written before the list was keyed — it belongs to no known selection.
+     * Accepted one-time cost of keying it: a reader upgrading across that change loses the
+     * offline fallback on the first load after it, once, and the next load that succeeds
+     * refills the slot. Deliberately no migration — the selection a legacy entry was fetched
+     * under is the one thing it never recorded, so adopting it under today's key would put
+     * one selection's stories behind another's notice, which is what the key exists to stop.
+     */
     if (typeof key !== 'string' || !key) return null
     if (typeof savedAt !== 'string' || Number.isNaN(Date.parse(savedAt))) return null
     // An empty cache is nothing to fall back to — it would read as "there is nothing here".
