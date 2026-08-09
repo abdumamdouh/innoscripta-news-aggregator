@@ -345,7 +345,10 @@ describe('aggregate — total failure', () => {
   })
 
   it('resolves when even one source answers', async () => {
-    const result = await aggregate(query(), [dead('nyt', '429'), fakeSource('bbc', [article('bbc')])])
+    const result = await aggregate(query(), [
+      dead('nyt', '429'),
+      fakeSource('bbc', [article('bbc')]),
+    ])
 
     expect(result.articles).toHaveLength(1)
     expect(result.failures).toEqual([{ sourceId: 'nyt', reason: '429' }])

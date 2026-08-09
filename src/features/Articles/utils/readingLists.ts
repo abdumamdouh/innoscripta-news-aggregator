@@ -22,6 +22,7 @@ const asList = (entry: unknown): ReadingList | undefined => {
   const { id, name, articleIds } = entry as Record<string, unknown>
   // A nameless list has no way to be picked, so it is not a list.
   if (typeof id !== 'string' || typeof name !== 'string' || !name.trim()) return undefined
+
   return { id, name, articleIds: asIds(articleIds) }
 }
 
@@ -103,6 +104,7 @@ export function savedArticles(
   const ids = activeListId
     ? (lists.find((list) => list.id === activeListId)?.articleIds ?? [])
     : undefined
+
   return bookmarks
     .flatMap((bookmark) =>
       bookmark.article && (!ids || ids.includes(bookmark.id)) ? [bookmark.article] : [],

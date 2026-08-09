@@ -21,5 +21,6 @@ export function mergeAuthors(
     if (author) next.add(author)
   }
   if (selected.trim()) next.add(selected.trim())
+
   return [...next].sort((a, b) => a.localeCompare(b))
 }

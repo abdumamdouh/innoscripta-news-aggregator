@@ -43,6 +43,7 @@ const asBookmark = (entry: unknown): Bookmark | undefined => {
       return snapshot ? { id, article: snapshot } : { id }
     }
   }
+
   return undefined
 }
 

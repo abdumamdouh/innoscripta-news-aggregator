@@ -56,6 +56,7 @@ function sections(categories: string[] | undefined): string | undefined {
     .filter(isArticleCategory)
     .map((category) => GUARDIAN_SECTIONS[category])
     .filter((section): section is string => Boolean(section))
+
   return mapped.length ? mapped.join('|') : undefined
 }
 
@@ -99,6 +100,7 @@ export const guardianSource: NewsSource<GuardianRaw> = {
       // are thrown away by the visible-match guarantee in the aggregator.
       'query-fields': query.q ? 'headline,standfirst' : undefined,
     })
+
     return selectItems(await getJson<GuardianPayload>(`/api/guardian/search?${search}`, signal))
   },
   normalize,

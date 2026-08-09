@@ -97,6 +97,7 @@ export function parseArticlesState(
   if (stored && typeof stored === 'object') {
     return sanitizeArticlesState(stored as Partial<Record<keyof ArticlesState, unknown>>, allowed)
   }
+
   return { ...DEFAULT_ARTICLES_STATE }
 }
 
@@ -111,6 +112,7 @@ export function toSearchParams(state: ArticlesState): URLSearchParams {
   if (state.sources.length) params.set('sources', state.sources.join(','))
   if (state.sort !== DEFAULT_ARTICLES_STATE.sort) params.set('sort', state.sort)
   if (state.page !== DEFAULT_ARTICLES_STATE.page) params.set('page', String(state.page))
+
   return params
 }
 

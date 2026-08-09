@@ -51,6 +51,7 @@ function thumbnail(item: Element): string | undefined {
     const width = Number(node.getAttribute('width') ?? 0)
     return !best || width > Number(best.getAttribute('width') ?? 0) ? node : best
   }, undefined)
+
   return url(widest?.getAttribute('url'))
 }
 
@@ -59,6 +60,7 @@ export function selectItems(xml: string, category = 'general'): BbcRaw[] {
   if (document.getElementsByTagName('parsererror').length) {
     throw new Error('bbc: feed is not well-formed XML')
   }
+
   return [...document.getElementsByTagName('item')]
     .map((item) => ({ item, category }))
     .filter(

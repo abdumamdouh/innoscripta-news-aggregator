@@ -67,6 +67,7 @@ export function bodyText(value: unknown): string | undefined {
     .replace(/[^\S\n]+/g, ' ')
     .replace(/ *\n */g, '\n')
     .replace(/\n{3,}/g, '\n\n')
+
   return text(flat)
 }
 
@@ -90,6 +91,7 @@ export function isoDate(value: unknown): string | undefined {
   const raw = text(value)
   if (!raw) return undefined
   const at = new Date(raw).getTime()
+
   return Number.isNaN(at) ? undefined : new Date(at).toISOString()
 }
 
@@ -98,6 +100,7 @@ async function request(path: string, signal?: AbortSignal): Promise<Response> {
   // proxy is what appends the key.
   const response = await fetch(path, { signal, headers: { accept: '*/*' } })
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`)
+
   return response
 }
 
@@ -115,6 +118,7 @@ export function queryString(params: Record<string, string | number | undefined>)
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') search.set(key, String(value))
   }
+
   return search.toString()
 }
 

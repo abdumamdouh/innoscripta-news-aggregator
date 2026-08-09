@@ -32,7 +32,7 @@ export function AppSelect({
 }: AppSelectProps) {
   return (
     <div className="flex flex-col gap-1">
-      {hideLabel ? null : (
+      {!hideLabel && (
         <span className="text-sm font-medium text-ink-700 dark:text-ink-100">{label}</span>
       )}
       <Select.Root value={value} onValueChange={onValueChange}>

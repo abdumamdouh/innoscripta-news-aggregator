@@ -13,6 +13,7 @@ export function parsePreferences(raw: string | null): Preferences {
     const parsed: unknown = JSON.parse(raw ?? 'null')
     if (!parsed || typeof parsed !== 'object') return EMPTY_PREFERENCES
     const { sources, categories, authors } = parsed as Record<string, unknown>
+
     return {
       sources: asStrings(sources),
       categories: asStrings(categories),

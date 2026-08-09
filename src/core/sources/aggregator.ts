@@ -35,6 +35,7 @@ function urlKey(url: string): string {
     }
     parsed.searchParams.sort()
     const host = parsed.host.replace(/^www\./, '')
+
     return `${host}${parsed.pathname.replace(/\/+$/, '')}${parsed.search}`.toLowerCase()
   } catch {
     // Not a parseable URL — fall back to text folding so it still dedupes against itself.
@@ -51,6 +52,7 @@ function dedupe(articles: Article[]): Article[] {
     if (title) keys.push(`t:${title}`)
     if (keys.some((key) => seen.has(key))) return false
     for (const key of keys) seen.add(key)
+
     return true
   })
 }

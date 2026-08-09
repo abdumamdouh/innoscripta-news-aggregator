@@ -58,6 +58,7 @@ function image(multimedia: NytRaw['multimedia']): string | undefined {
     if (!crop?.url) return best
     return !best || (crop.width ?? 0) > (best.width ?? 0) ? crop : best
   }, undefined)
+
   return url(widest?.url, IMAGE_BASE)
 }
 
@@ -113,6 +114,7 @@ export const nytSource: NewsSource<NytRaw> = {
       // source contributes 10 to the window however large the window is.
       sort: 'newest',
     })
+
     return selectItems(await getJson<NytPayload>(`/api/nyt/articlesearch.json?${search}`, signal))
   },
   normalize,

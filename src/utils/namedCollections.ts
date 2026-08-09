@@ -18,5 +18,6 @@ export function nameError(
   const taken = items.some(
     (item) => item.id !== exceptId && item.name.toLowerCase() === trimmed.toLowerCase(),
   )
+
   return taken ? 'duplicate' : undefined
 }

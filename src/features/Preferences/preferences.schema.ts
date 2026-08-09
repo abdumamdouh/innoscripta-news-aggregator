@@ -53,6 +53,7 @@ export function validatePreferences(values: Preferences, t: TFunction): Preferen
       const field = fieldOf(issue.path)
       if (field && !errors[field]) errors[field] = issue.message
     }
+
     return errors
   }
 }

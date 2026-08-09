@@ -15,5 +15,6 @@ export function paginationRange(page: number, totalPages: number, siblings = 1):
   for (let current = start; current <= end; current += 1) items.push(current)
   if (end < totalPages - 1) items.push('gap')
   items.push(totalPages)
+
   return items
 }

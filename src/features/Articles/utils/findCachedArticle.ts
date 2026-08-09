@@ -17,5 +17,6 @@ export function findCachedArticle(
     const found = result?.articles.find((article) => article.id === id)
     if (found) return found
   }
+
   return undefined
 }

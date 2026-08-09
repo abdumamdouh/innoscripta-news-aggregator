@@ -35,5 +35,6 @@ export function sortArticles(articles: Article[], sort: ArticleSort, term = ''):
       (a, b) => relevanceScore(b, term) - relevanceScore(a, term) || time(b) - time(a),
     )
   }
+
   return sorted.sort((a, b) => time(b) - time(a))
 }
