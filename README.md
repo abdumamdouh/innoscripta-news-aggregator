@@ -108,7 +108,7 @@ src/
 
 | Suite                                       | Files | Tests | Command            |
 | ------------------------------------------- | ----- | ----- | ------------------ |
-| Unit / component (Vitest + Testing Library) | 35    | 395   | `npm test`         |
+| Unit / component (Vitest + Testing Library) | 36    | 405   | `npm test`         |
 | End-to-end (Playwright, Chromium)           | 15    | 129   | `npm run test:e2e` |
 
 E2E needs no real keys: every provider response is served from a fixture, and the stand-in keys the

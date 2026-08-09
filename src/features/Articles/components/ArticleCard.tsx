@@ -5,6 +5,7 @@ import { AppCard } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
+import { ArticleImage } from '@/features/Articles/components/ArticleImage'
 import { formatArticleDate } from '@/features/Articles/utils/formatArticleDate'
 
 export interface ArticleCardProps {
@@ -20,17 +21,8 @@ export function ArticleCard({ article, actions }: ArticleCardProps) {
 
   return (
     <AppCard as="article" className="motion-card flex h-full flex-col gap-3">
-      {article.imageUrl ? (
-        <img
-          src={article.imageUrl}
-          alt=""
-          loading="lazy"
-          className="aspect-video w-full rounded-lg bg-paper-50 object-cover dark:bg-ink-700"
-        />
-      ) : (
-        // A card with no picture keeps the same silhouette, so the grid stays level.
-        <div className="aspect-video w-full rounded-lg bg-paper-50 dark:bg-ink-700" aria-hidden />
-      )}
+      {/* A card with no picture keeps the same silhouette, so the grid stays level. */}
+      <ArticleImage src={article.imageUrl} />
 
       <div className="flex flex-wrap items-center gap-2">
         <SourceBadge sourceId={article.sourceId} sourceLabel={article.sourceLabel} />

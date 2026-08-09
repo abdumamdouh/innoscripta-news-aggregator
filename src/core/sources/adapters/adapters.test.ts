@@ -608,3 +608,39 @@ describe('description()', () => {
     expect(bbcNewsSource.normalize(bare!).description).toBe('')
   })
 })
+
+describe('guardian image rendition', () => {
+  const normalize = (thumbnail: unknown) =>
+    guardianSource.normalize({
+      webTitle: 't',
+      webUrl: 'https://e.test/a',
+      webPublicationDate: '2024-01-01T00:00:00Z',
+      fields: { thumbnail },
+    } as never).imageUrl
+
+  it('asks for a wider rendition than the 500px one show-fields returns', () => {
+    expect(normalize('https://media.guim.co.uk/abc/612_198_5360_4291/500.jpg')).toBe(
+      'https://media.guim.co.uk/abc/612_198_5360_4291/1000.jpg',
+    )
+  })
+
+  it('leaves a rendition that is already wide enough alone', () => {
+    const wide = 'https://media.guim.co.uk/abc/0_0_100_100/2000.jpg'
+    expect(normalize(wide)).toBe(wide)
+  })
+
+  it('only rewrites the width segment, never the crop box', () => {
+    // The crop box also ends in digits; a greedy pattern would corrupt it.
+    const src = normalize('https://media.guim.co.uk/abc/612_198_5360_4291/500.jpg')
+    expect(src).toContain('/612_198_5360_4291/')
+  })
+
+  it('passes through a url that does not carry a width segment', () => {
+    const odd = 'https://media.guim.co.uk/abc/master/image'
+    expect(normalize(odd)).toBe(odd)
+  })
+
+  it('stays undefined when the provider sends no thumbnail', () => {
+    expect(normalize(null)).toBeUndefined()
+  })
+})

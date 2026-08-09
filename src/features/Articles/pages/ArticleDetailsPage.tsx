@@ -14,6 +14,7 @@ import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
 import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
+import { ArticleImage } from '@/features/Articles/components/ArticleImage'
 import { useArticleDetails } from '@/features/Articles/hooks/useArticleDetails'
 import { useBookmark } from '@/features/Articles/hooks/useBookmark'
 import { useReadingLists } from '@/features/Articles/hooks/useReadingLists'
@@ -134,13 +135,7 @@ export function ArticleDetailsPage() {
       <BackLink search={search} />
 
       <AppCard as="article" className="flex flex-col gap-4">
-        {article.imageUrl && (
-          <img
-            src={article.imageUrl}
-            alt=""
-            className="aspect-video w-full rounded-lg bg-paper-50 object-cover dark:bg-ink-700"
-          />
-        )}
+        <ArticleImage src={article.imageUrl} priority />
 
         <div className="flex flex-wrap items-center gap-2">
           <SourceBadge sourceId={article.sourceId} sourceLabel={article.sourceLabel} />
