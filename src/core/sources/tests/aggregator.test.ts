@@ -253,16 +253,39 @@ describe('aggregate — capability degradation', () => {
     expect(result.articles.map((a) => a.title)).toEqual(['b story 12', 'b story 11', 'b story 10'])
   })
 
-  it('leaves a fully capable source untouched — it already applied the filters server-side', async () => {
-    // The source returns exactly one story despite `q` matching nothing in it; a
-    // client-side pass would wrongly drop it.
+  it('trusts a capable source on every filter except the keyword', async () => {
+    // Category and paging are taken at the provider's word: NewsAPI folds a category into its
+    // text expression and returns articles with no `category` field at all, so re-checking one
+    // downstream would throw away the very results it asked for.
     const capable = fakeSource('newsapi', [
       article('newsapi', { url: 'https://n.test/x', title: 'Whatever the API returned' }),
     ])
 
-    const result = await aggregate(query({ q: 'mars', categories: ['sport'], page: 3 }), [capable])
+    const result = await aggregate(query({ categories: ['sport'], page: 3 }), [capable])
 
     expect(result.articles).toHaveLength(1)
+  })
+
+  it('drops a capable source’s result when the match is invisible on the card', async () => {
+    // The Guardian and NYT search the full body, so a story whose only mention of the term is
+    // three paragraphs down arrives here looking unrelated. Shown on a card it reads as a
+    // broken filter, so the keyword is the one filter re-checked against what the card shows.
+    const bodyMatchOnly = fakeSource('guardian', [
+      article('guardian', {
+        url: 'https://g.test/ev',
+        title: 'Chinese EV sales surge to new high in Europe',
+        description: 'Tariffs under pressure as registrations climb.',
+      }),
+      article('guardian', {
+        url: 'https://g.test/t',
+        title: 'Trump signs new orders',
+        description: 'A second story, matching where a reader can see it.',
+      }),
+    ])
+
+    const result = await aggregate(query({ q: 'trump' }), [bodyMatchOnly])
+
+    expect(result.articles.map((a) => a.title)).toEqual(['Trump signs new orders'])
   })
 })
 

@@ -67,7 +67,12 @@ function degrade(
 ): Article[] {
   let out = articles
 
-  const needle = capabilities.query ? '' : normalizeSearchText(query.q)
+  // Applied to every source, capable or not — the one filter that does not trust the provider.
+  // The Guardian and NYT search the full article body, so "trump" legitimately returns a
+  // headline like "Chinese EV sales surge in Europe" whose match is three paragraphs down and
+  // invisible on a card. The provider's own query still runs and still does the useful work of
+  // narrowing candidates; this only guarantees that what reaches the grid shows why it is there.
+  const needle = normalizeSearchText(query.q)
   if (needle) {
     out = out.filter((a) =>
       normalizeSearchText(`${a.title} ${a.description} ${a.author ?? ''}`).includes(needle),

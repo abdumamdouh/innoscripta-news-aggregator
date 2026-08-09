@@ -152,11 +152,13 @@ describe('keyword filtering', () => {
     expect(await idsFor({ q: 'quidditch', sources: ['bbc'] }, bbcOnly)).toEqual([])
   })
 
-  it('leaves a source that queries server-side alone', async () => {
-    // Declaring `query: true` is a promise that the provider already filtered; the app
-    // must take it at its word rather than second-guessing the wire result.
+  it('re-checks the keyword even when the source says it already searched', async () => {
+    // `query: true` is trusted for narrowing, not for what reaches the grid. Providers that
+    // search the full body return stories whose match is invisible on a card, and a reader
+    // seeing an unrelated headline concludes the filter is broken.
     const capable = [source('bbc', ALL_CAPS)]
-    expect(await idsFor({ q: 'quidditch', sources: ['bbc'] }, capable)).toEqual(['b1'])
+    expect(await idsFor({ q: 'quidditch', sources: ['bbc'] }, capable)).toEqual([])
+    expect(await idsFor({ q: 'mars', sources: ['bbc'] }, capable)).toEqual(['b1'])
   })
 })
 

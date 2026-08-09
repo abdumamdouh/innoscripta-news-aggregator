@@ -80,6 +80,9 @@ export const guardianSource: NewsSource<GuardianRaw> = {
       'page-size': query.pageSize,
       'order-by': 'newest',
       'show-fields': 'trailText,thumbnail,byline,body',
+      // Narrow the provider's own search to the fields a card shows, so fewer of its results
+      // are thrown away by the visible-match guarantee in the aggregator.
+      'query-fields': query.q ? 'headline,standfirst' : undefined,
     })
     return selectItems(await getJson<GuardianPayload>(`/api/guardian/search?${search}`, signal))
   },
