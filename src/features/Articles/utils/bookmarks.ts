@@ -64,10 +64,13 @@ export function parseBookmarks(raw: string | null): Bookmark[] {
 export const isBookmarked = (bookmarks: readonly Bookmark[], id: string) =>
   bookmarks.some((bookmark) => bookmark.id === id)
 
+export const removeBookmark = (bookmarks: readonly Bookmark[], id: string): Bookmark[] =>
+  bookmarks.filter((bookmark) => bookmark.id !== id)
+
 /** Add or drop, order preserved so the newest save lands last. */
 export function toggleBookmark(bookmarks: readonly Bookmark[], article: Article): Bookmark[] {
   return isBookmarked(bookmarks, article.id)
-    ? bookmarks.filter((bookmark) => bookmark.id !== article.id)
+    ? removeBookmark(bookmarks, article.id)
     : [...bookmarks, { id: article.id, article }]
 }
 

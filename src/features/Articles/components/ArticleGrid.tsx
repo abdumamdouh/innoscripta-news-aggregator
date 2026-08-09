@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppCard } from '@/components/common/design-system'
 import { appTheme } from '@/config/theme'
@@ -21,7 +22,14 @@ function SkeletonGrid() {
   )
 }
 
-export function ArticleGrid({ articles, isLoading }: { articles: Article[]; isLoading: boolean }) {
+export interface ArticleGridProps {
+  articles: Article[]
+  isLoading: boolean
+  /** Per-card controls. Absent on the list pages, which show the story and nothing else. */
+  renderActions?: (article: Article) => ReactNode
+}
+
+export function ArticleGrid({ articles, isLoading, renderActions }: ArticleGridProps) {
   const { t } = useTranslation()
 
   if (isLoading) return <SkeletonGrid />
@@ -41,7 +49,7 @@ export function ArticleGrid({ articles, isLoading }: { articles: Article[]; isLo
     <ul className={GRID}>
       {articles.map((article) => (
         <li key={article.id}>
-          <ArticleCard article={article} />
+          <ArticleCard article={article} actions={renderActions?.(article)} />
         </li>
       ))}
     </ul>

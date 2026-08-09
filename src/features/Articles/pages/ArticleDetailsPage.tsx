@@ -1,12 +1,20 @@
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Bookmark, ExternalLink } from 'lucide-react'
-import { AppButton, AppCard, AppIconButton } from '@/components/common/design-system'
+import {
+  AppButton,
+  AppCard,
+  AppConfirmDialog,
+  AppIconButton,
+} from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
 import { useArticleDetails } from '@/features/Articles/hooks/useArticleDetails'
 import { useBookmark } from '@/features/Articles/hooks/useBookmark'
+import { useReadingLists } from '@/features/Articles/hooks/useReadingLists'
+import { isInAnyList } from '@/features/Articles/utils/readingLists'
 import { formatArticleDate } from '@/features/Articles/utils/formatArticleDate'
 import { cn } from '@/utils/cn'
 
@@ -27,18 +35,55 @@ function BackLink({ search }: { search: string }) {
 function BookmarkButton({ article }: { article: Article }) {
   const { t } = useTranslation()
   const { isBookmarked, toggle } = useBookmark(article)
+  const lists = useReadingLists()
+  const [confirming, setConfirming] = useState(false)
+  // ponytail: one live region, same as the saved page — `ToastProvider` ships with backlog
+  // item 11 and is deliberately absent from the provider stack. Swap for a toast when it lands.
+  const [message, setMessage] = useState('')
+
+  const remove = () => {
+    toggle()
+    setConfirming(false)
+    setMessage(t('bookmarks.toast.saveRemoved'))
+  }
+
+  // Unsaving cascades into every list holding the story, so when a list holds it the reader
+  // meets the same gate and the same wording the saved page puts in front of this mutation.
+  // Nothing filed anywhere is a plain toggle: one more click puts it straight back.
+  const onClick = () => {
+    if (isBookmarked && isInAnyList(lists, article.id)) return setConfirming(true)
+    toggle()
+    setMessage(t(isBookmarked ? 'bookmarks.toast.saveRemoved' : 'bookmarks.toast.saved'))
+  }
 
   return (
-    <AppIconButton
-      label={t(isBookmarked ? 'articles.details.unsave' : 'articles.details.save')}
-      aria-pressed={isBookmarked}
-      onClick={toggle}
-    >
-      <Bookmark
-        className={cn('size-5', isBookmarked && 'fill-current text-accent-600')}
-        aria-hidden
+    <>
+      <AppIconButton
+        label={t(isBookmarked ? 'articles.details.unsave' : 'articles.details.save')}
+        aria-pressed={isBookmarked}
+        onClick={onClick}
+      >
+        <Bookmark
+          className={cn('size-5', isBookmarked && 'fill-current text-accent-600')}
+          aria-hidden
+        />
+      </AppIconButton>
+      {/*
+        `aria-live` rather than `role="status"`: this page already spends that role on its
+        loading card, and one live region per page is enough for a screen reader to follow.
+      */}
+      <p aria-live="polite" className="sr-only">
+        {message}
+      </p>
+      <AppConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t('bookmarks.confirm.removeTitle')}
+        description={t('bookmarks.confirm.removeBody')}
+        confirmLabel={t('bookmarks.remove')}
+        onConfirm={remove}
       />
-    </AppIconButton>
+    </>
   )
 }
 

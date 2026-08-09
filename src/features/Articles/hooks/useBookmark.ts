@@ -5,9 +5,27 @@ import {
   isBookmarked,
   refreshBookmark,
   readBookmarks,
+  removeBookmark,
   toggleBookmark,
   writeBookmarks,
 } from '@/features/Articles/utils/bookmarks'
+import {
+  readReadingLists,
+  removeArticleFromLists,
+  writeReadingLists,
+} from '@/features/Articles/utils/readingLists'
+
+/**
+ * Dropping a save drops the snapshot with it, so any list still holding the id would hold a
+ * hole. Both stores move together here rather than at each call site — the details page and
+ * the saved page unsave through this one function.
+ */
+export function unsaveArticle(id: string) {
+  writeBookmarks(removeBookmark(readBookmarks(), id))
+  const lists = readReadingLists()
+  const pruned = removeArticleFromLists(lists, id)
+  if (pruned !== lists) writeReadingLists(pruned)
+}
 
 /**
  * ponytail: one article's saved flag, read through the shared `useBookmarks` snapshot rather
@@ -32,7 +50,9 @@ export function useBookmark(article: Article) {
   }, [article])
 
   const toggle = useCallback(() => {
-    writeBookmarks(toggleBookmark(readBookmarks(), article))
+    const current = readBookmarks()
+    if (isBookmarked(current, article.id)) unsaveArticle(article.id)
+    else writeBookmarks(toggleBookmark(current, article))
   }, [article])
 
   return { isBookmarked: isBookmarked(bookmarks, article.id), toggle }

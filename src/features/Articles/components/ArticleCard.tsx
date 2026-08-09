@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppCard } from '@/components/common/design-system'
@@ -6,7 +7,13 @@ import { ArticleDescription } from '@/features/Articles/components/ArticleDescri
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
 import { formatArticleDate } from '@/features/Articles/utils/formatArticleDate'
 
-export function ArticleCard({ article }: { article: Article }) {
+export interface ArticleCardProps {
+  article: Article
+  /** Per-card controls, e.g. the saved page's remove and add-to-list. The list pages pass none. */
+  actions?: ReactNode
+}
+
+export function ArticleCard({ article, actions }: ArticleCardProps) {
   const { i18n } = useTranslation()
   // The list's search, filters and page ride along, so the details page can hand them back.
   const { search } = useLocation()
@@ -30,6 +37,7 @@ export function ArticleCard({ article }: { article: Article }) {
         <time dateTime={article.publishedAt} className="text-xs text-ink-500">
           {formatArticleDate(article.publishedAt, i18n.language)}
         </time>
+        {actions ? <div className="ms-auto flex items-center gap-1">{actions}</div> : null}
       </div>
 
       <h2 className="text-base font-semibold text-ink-900 dark:text-ink-100">

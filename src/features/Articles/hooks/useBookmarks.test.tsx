@@ -8,6 +8,11 @@ import { useArticleDetails } from '@/features/Articles/hooks/useArticleDetails'
 import { useBookmark } from '@/features/Articles/hooks/useBookmark'
 import { useBookmarks } from '@/features/Articles/hooks/useBookmarks'
 import { isBookmarked, readBookmarks } from '@/features/Articles/utils/bookmarks'
+import {
+  createList,
+  readReadingLists,
+  writeReadingLists,
+} from '@/features/Articles/utils/readingLists'
 
 // A cold load with nothing to fetch: the point here is what the saved list resolves, not
 // what the network does. Without this the details hook would go looking for a provider.
@@ -38,6 +43,7 @@ function wrapper({ children }: { children: ReactNode }) {
 beforeEach(() => {
   localStorage.clear()
   readBookmarks()
+  readReadingLists()
 })
 
 describe('two readers of the saved list in one page lifecycle', () => {
@@ -91,6 +97,24 @@ describe('two readers of the saved list in one page lifecycle', () => {
     act(() => result.current.button.toggle())
     expect(result.current.button.isBookmarked).toBe(false)
     expect(result.current.details.article).toEqual(article)
+  })
+
+  it('takes an unsaved article out of every reading list holding it', () => {
+    const { result } = renderHook(() => useBookmark(article), { wrapper })
+    act(() => result.current.toggle())
+    writeReadingLists(
+      createList(readReadingLists(), 'Weekend').map((list) => ({
+        ...list,
+        articleIds: [article.id],
+      })),
+    )
+
+    act(() => result.current.toggle())
+
+    // The snapshot went with the save, so an id left behind would be a list entry that
+    // nothing can render.
+    expect(readBookmarks()).toEqual([])
+    expect(readReadingLists()[0]?.articleIds).toEqual([])
   })
 
   it('reads a save that happened before it mounted, without a second parse', () => {

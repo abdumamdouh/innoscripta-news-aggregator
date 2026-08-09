@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn'
 const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.articles' },
   { to: '/feed', labelKey: 'nav.feed' },
+  { to: '/bookmarks', labelKey: 'nav.bookmarks' },
 ] as const
 
 export function Navigation() {
