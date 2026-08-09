@@ -1,9 +1,36 @@
 import { describe, expect, it } from 'vitest'
-import { parseBookmarks, toggleBookmark } from '@/features/Articles/utils/bookmarks'
+import type { Article } from '@/core/sources/types'
+import {
+  backfillBookmark,
+  findBookmarkedArticle,
+  isBookmarked,
+  parseBookmarks,
+  toggleBookmark,
+} from '@/features/Articles/utils/bookmarks'
+
+const article = (id: string): Article => ({
+  id,
+  title: `Story ${id}`,
+  description: 'Summary',
+  url: `https://example.test/${id}`,
+  publishedAt: '2026-06-01T12:00:00.000Z',
+  sourceId: id.split(':')[0] as string,
+  sourceLabel: 'Example',
+})
 
 describe('parseBookmarks', () => {
-  it('reads a stored list of ids', () => {
-    expect(parseBookmarks('["guardian:1","nyt:2"]')).toEqual(['guardian:1', 'nyt:2'])
+  it('reads saved articles back with their snapshot intact', () => {
+    const saved = article('guardian:1')
+    expect(parseBookmarks(JSON.stringify([{ id: saved.id, article: saved }]))).toEqual([
+      { id: saved.id, article: saved },
+    ])
+  })
+
+  it('still reads the earlier id-only shape, without inventing a snapshot', () => {
+    expect(parseBookmarks('["guardian:1","nyt:2"]')).toEqual([
+      { id: 'guardian:1' },
+      { id: 'nyt:2' },
+    ])
   })
 
   it('treats nothing stored, corrupt JSON and a non-array as nothing saved', () => {
@@ -13,23 +40,114 @@ describe('parseBookmarks', () => {
     expect(parseBookmarks('{"guardian:1":true}')).toEqual([])
   })
 
-  it('drops non-string entries rather than handing them on', () => {
-    expect(parseBookmarks('["a",1,null,{"id":"b"},"c"]')).toEqual(['a', 'c'])
+  it('drops entries with no usable id rather than handing them on', () => {
+    expect(parseBookmarks('["a",1,null,{"title":"b"},{"id":2},"c"]')).toEqual([
+      { id: 'a' },
+      { id: 'c' },
+    ])
+  })
+
+  it('drops a snapshot that does not belong to the entry it was stored under', () => {
+    const stored = JSON.stringify([{ id: 'guardian:1', article: article('nyt:2') }])
+    expect(parseBookmarks(stored)).toEqual([{ id: 'guardian:1' }])
+  })
+
+  it('drops a half-written snapshot rather than rendering a blank article', () => {
+    const { description: _description, ...missingField } = article('guardian:1')
+    const wrongType = { ...article('guardian:1'), publishedAt: 1717243200000 }
+    expect(
+      parseBookmarks(
+        JSON.stringify([
+          { id: 'guardian:1', article: missingField },
+          { id: 'nyt:2', article: { id: 'nyt:2' } },
+          { id: 'guardian:1', article: wrongType },
+          { id: 'bbc:3', article: 'guardian:1' },
+        ]),
+      ),
+    ).toEqual([{ id: 'guardian:1' }, { id: 'nyt:2' }, { id: 'guardian:1' }, { id: 'bbc:3' }])
+  })
+
+  it('keeps a snapshot carrying the optional fields too', () => {
+    const saved = { ...article('guardian:1'), author: 'A. Reporter', imageUrl: 'https://i.test/1' }
+    expect(parseBookmarks(JSON.stringify([{ id: saved.id, article: saved }]))).toEqual([
+      { id: saved.id, article: saved },
+    ])
   })
 })
 
 describe('toggleBookmark', () => {
-  it('adds a missing id at the end and does not mutate its input', () => {
-    const ids = ['a']
-    expect(toggleBookmark(ids, 'b')).toEqual(['a', 'b'])
-    expect(ids).toEqual(['a'])
+  it('adds a missing article at the end, with its snapshot, and does not mutate its input', () => {
+    const bookmarks = [{ id: 'a' }]
+    const saved = article('guardian:1')
+    expect(toggleBookmark(bookmarks, saved)).toEqual([
+      { id: 'a' },
+      { id: saved.id, article: saved },
+    ])
+    expect(bookmarks).toEqual([{ id: 'a' }])
   })
 
-  it('removes an id that is already saved', () => {
-    expect(toggleBookmark(['a', 'b', 'c'], 'b')).toEqual(['a', 'c'])
+  it('removes an article that is already saved with its snapshot', () => {
+    const saved = article('guardian:1')
+    expect(toggleBookmark([{ id: 'a' }, { id: saved.id, article: saved }], saved)).toEqual([
+      { id: 'a' },
+    ])
+  })
+
+  it('removes an id-only entry on the first toggle, like any other saved article', () => {
+    const saved = article('guardian:1')
+    expect(toggleBookmark([{ id: saved.id }, { id: 'a' }], saved)).toEqual([{ id: 'a' }])
   })
 
   it('round-trips back to the original list', () => {
-    expect(toggleBookmark(toggleBookmark(['a'], 'b'), 'b')).toEqual(['a'])
+    const saved = article('guardian:1')
+    expect(toggleBookmark(toggleBookmark([{ id: 'a' }], saved), saved)).toEqual([{ id: 'a' }])
+  })
+})
+
+describe('backfillBookmark', () => {
+  it('fills in the snapshot an id-only entry lacks, in place', () => {
+    const saved = article('guardian:1')
+    const bookmarks = [{ id: saved.id }, { id: 'a' }]
+    expect(backfillBookmark(bookmarks, saved)).toEqual([
+      { id: saved.id, article: saved },
+      { id: 'a' },
+    ])
+    expect(bookmarks).toEqual([{ id: saved.id }, { id: 'a' }])
+  })
+
+  it('hands back the very same array when there is nothing to fill in', () => {
+    const saved = article('guardian:1')
+    const withSnapshot = [{ id: saved.id, article: saved }]
+    expect(backfillBookmark(withSnapshot, saved)).toBe(withSnapshot)
+
+    const unsaved = [{ id: 'a' }]
+    expect(backfillBookmark(unsaved, saved)).toBe(unsaved)
+  })
+
+  it('never saves an article that was not bookmarked', () => {
+    expect(backfillBookmark([], article('guardian:1'))).toEqual([])
+  })
+})
+
+describe('findBookmarkedArticle', () => {
+  it('resolves a permalink from the snapshot taken at save time', () => {
+    const saved = article('guardian:1')
+    expect(
+      findBookmarkedArticle([{ id: 'a' }, { id: saved.id, article: saved }], saved.id),
+    ).toEqual(saved)
+  })
+
+  it('resolves nothing for an id that was never saved, or was saved without a snapshot', () => {
+    expect(findBookmarkedArticle([{ id: 'guardian:1' }], 'guardian:1')).toBeUndefined()
+    expect(findBookmarkedArticle([], 'guardian:1')).toBeUndefined()
+  })
+})
+
+describe('isBookmarked', () => {
+  it('is true for a saved id in either shape and false otherwise', () => {
+    const saved = article('guardian:1')
+    expect(isBookmarked([{ id: saved.id, article: saved }], saved.id)).toBe(true)
+    expect(isBookmarked([{ id: saved.id }], saved.id)).toBe(true)
+    expect(isBookmarked([{ id: 'nyt:2' }], saved.id)).toBe(false)
   })
 })

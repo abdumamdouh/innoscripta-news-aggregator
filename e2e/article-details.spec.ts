@@ -129,6 +129,63 @@ test.describe('article details', () => {
     )
   })
 
+  test('opens a saved story from a bare permalink after it has left the first page', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    // Page 2 of the feed: nothing here is in the default first page a bare permalink
+    // would otherwise be resolved against.
+    const onPageOne = await firstHeading(page).innerText()
+    await page.getByRole('navigation', { name: 'Pagination' }).getByLabel('Page 2').click()
+    await page.waitForURL(/page=2/)
+    await expect(firstHeading(page)).not.toHaveText(onPageOne)
+
+    const title = await openFirstArticle(page)
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toBeVisible()
+
+    // The link a reader keeps: no query string, and here not even a provider to ask.
+    const permalink = new URL(page.url()).pathname
+    await page.route('**/api/**', (route) => route.abort())
+    await page.goto(permalink)
+
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Article not available' })).toHaveCount(0)
+  })
+
+  test('upgrades a bookmark saved by the earlier id-only shape so its permalink resolves', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const title = await openFirstArticle(page)
+    const permalink = new URL(page.url()).pathname
+    const id = decodeURIComponent(permalink.split('/articles/')[1] as string)
+
+    // Exactly what a reader who saved this before the snapshot shipped has in storage.
+    await page.evaluate((saved) => {
+      localStorage.setItem('ina-bookmarks', JSON.stringify([saved]))
+    }, id)
+    await page.goto(permalink)
+
+    // Just opening it reads as saved and upgrades the entry — no click, no surprise.
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+
+    await page.route('**/api/**', (route) => route.abort())
+    await page.goto(permalink)
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Article not available' })).toHaveCount(0)
+
+    // And the button still means what it says: one click unsaves it.
+    await page.getByRole('button', { name: 'Remove saved article' }).click()
+    await expect(page.getByRole('button', { name: 'Save article' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
   test('offers a way back instead of a broken page for an unknown article id', async ({ page }) => {
     await page.goto('/articles/guardian%3Ano-such-story')
 
