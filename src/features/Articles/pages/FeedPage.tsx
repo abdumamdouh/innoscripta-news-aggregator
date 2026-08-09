@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { AppEmptyState } from '@/components/common/design-system'
 import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
-import { CachedFeedNotice } from '@/features/Articles/components/CachedFeedNotice'
+import { CachedResultsNotice } from '@/features/Articles/components/CachedResultsNotice'
 import { PartialFailureBanner } from '@/features/Articles/components/PartialFailureBanner'
 import { useFeed } from '@/features/Articles/hooks/useFeed'
 import { PreferencesButton, usePreferences } from '@/features/Preferences'
@@ -36,7 +36,7 @@ export function FeedPage() {
       ) : (
         <>
           {cachedAt ? (
-            <CachedFeedNotice savedAt={cachedAt} actions={actions} />
+            <CachedResultsNotice savedAt={cachedAt} actions={actions} />
           ) : (
             <PartialFailureBanner failures={failures} />
           )}

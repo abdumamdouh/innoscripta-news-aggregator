@@ -3,7 +3,7 @@ import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
 import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { ArticlesFilters } from '@/features/Articles/components/ArticlesFilters'
 import { ArticlesToolbar } from '@/features/Articles/components/ArticlesToolbar'
-import { CachedFeedNotice } from '@/features/Articles/components/CachedFeedNotice'
+import { CachedResultsNotice } from '@/features/Articles/components/CachedResultsNotice'
 import { FilterChips } from '@/features/Articles/components/FilterChips'
 import { Pagination } from '@/features/Articles/components/Pagination'
 import { PartialFailureBanner } from '@/features/Articles/components/PartialFailureBanner'
@@ -45,7 +45,7 @@ export function ArticlesPage() {
       <SavedSearches state={state} onApply={update} />
 
       {cachedAt ? (
-        <CachedFeedNotice savedAt={cachedAt} actions={actions} />
+        <CachedResultsNotice savedAt={cachedAt} actions={actions} />
       ) : (
         <PartialFailureBanner failures={list.failures} />
       )}
