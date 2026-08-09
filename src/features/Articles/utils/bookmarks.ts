@@ -103,12 +103,34 @@ export const findBookmarkedArticle = (
   id: string,
 ): Article | undefined => bookmarks.find((bookmark) => bookmark.id === id)?.article
 
+/**
+ * localStorage is the one source of truth; this is the read model over it, so two readers
+ * in the same page see one list. It exists for identity, not speed: `useSyncExternalStore`
+ * (see `useBookmarks`) tears the render down if a snapshot is a fresh array every call, and
+ * a reader that re-parses on its own drifts the moment another one writes.
+ *
+ * Keyed on the raw string rather than invalidated by hand, so a change this module did not
+ * make — a cleared store, another tab — still reparses on the next read.
+ */
+let parsed: { raw: string | null; bookmarks: Bookmark[] } | undefined
+/** Shared so the unreadable-storage path is a stable snapshot too, not a new array. */
+const noBookmarks: Bookmark[] = []
+const listeners = new Set<() => void>()
+
 export function readBookmarks(): Bookmark[] {
   try {
-    return parseBookmarks(localStorage.getItem(appTheme.storageKeys.bookmarks))
+    const raw = localStorage.getItem(appTheme.storageKeys.bookmarks)
+    if (!parsed || parsed.raw !== raw) parsed = { raw, bookmarks: parseBookmarks(raw) }
+    return parsed.bookmarks
   } catch {
-    return []
+    return noBookmarks
   }
+}
+
+/** Returns the unsubscribe, which is the shape `useSyncExternalStore` asks for. */
+export function subscribeBookmarks(listener: () => void) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
 }
 
 export function writeBookmarks(bookmarks: readonly Bookmark[]) {
@@ -117,4 +139,8 @@ export function writeBookmarks(bookmarks: readonly Bookmark[]) {
   } catch {
     // Private mode / quota: saving is a convenience, never a blocker.
   }
+  // After the write, so every reader that wakes up re-reads what was actually stored —
+  // and unchanged storage (quota, private mode) is then honestly reported as unchanged.
+  readBookmarks()
+  listeners.forEach((listener) => listener())
 }

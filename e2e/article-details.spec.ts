@@ -253,6 +253,43 @@ test.describe('article details', () => {
     await expect(page.getByRole('heading', { level: 1, name: headline })).toBeVisible()
   })
 
+  test('keeps the story readable while the reader saves and unsaves it on a bare permalink', async ({
+    page,
+  }) => {
+    // Page 2, so this story is nowhere in the default first page a bare permalink resolves
+    // against — once the providers are gone, the saved copy is the only copy there is.
+    await page.goto('/')
+    const onPageOne = await firstHeading(page).innerText()
+    await page.getByRole('navigation', { name: 'Pagination' }).getByLabel('Page 2').click()
+    await page.waitForURL(/page=2/)
+    await expect(firstHeading(page)).not.toHaveText(onPageOne)
+
+    const title = await openFirstArticle(page)
+    await page.getByRole('button', { name: 'Save article' }).click()
+    const permalink = new URL(page.url()).pathname
+
+    await page.route('**/api/**', (route) => route.abort())
+    await page.goto(permalink)
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
+
+    // Saving and unsaving are read through one list now, so the button tracks the store on
+    // every click — and unsaving is not "the story is gone": it stays on screen either way.
+    await page.getByRole('button', { name: 'Remove saved article' }).click()
+    await expect(page.getByRole('button', { name: 'Save article' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Article not available' })).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Save article' }).click()
+    await expect(page.getByRole('button', { name: 'Remove saved article' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible()
+  })
+
   test('offers a way back instead of a broken page for an unknown article id', async ({ page }) => {
     await page.goto('/articles/guardian%3Ano-such-story')
 

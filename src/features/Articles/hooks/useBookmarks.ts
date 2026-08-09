@@ -1,0 +1,14 @@
+import { useSyncExternalStore } from 'react'
+import type { Bookmark } from '@/features/Articles/utils/bookmarks'
+import { readBookmarks, subscribeBookmarks } from '@/features/Articles/utils/bookmarks'
+
+/**
+ * The saved list, read by everyone through one subscription — so a save made in one place
+ * is on screen in another within the same page lifecycle, with no second parse to go stale.
+ *
+ * ponytail: `useSyncExternalStore` over a module store, no context and no provider to thread
+ * through the tree. Item 9 (reading lists) can grow this into a real store; it does not need
+ * one to keep two readers honest.
+ */
+export const useBookmarks = (): Bookmark[] =>
+  useSyncExternalStore(subscribeBookmarks, readBookmarks)
