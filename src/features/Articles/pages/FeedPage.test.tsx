@@ -117,3 +117,104 @@ describe('FeedPage — a feed that could not load', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
+
+describe('FeedPage — the offline fallback', () => {
+  const cached: Article = { ...article, id: 'guardian:2', title: 'Yesterday from storage' }
+
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem(
+      appTheme.storageKeys.preferences,
+      JSON.stringify({ sources: ['guardian'], categories: [], authors: [] }),
+    )
+    fetchFeedMock.mockReset()
+  })
+
+  it('keeps the last feed that loaded, so the next cold start has something to show', async () => {
+    fetchFeedMock.mockResolvedValue(resolved())
+    renderFeed()
+
+    await screen.findByRole('link', { name: article.title })
+    await waitFor(() =>
+      expect(
+        JSON.parse(localStorage.getItem(appTheme.storageKeys.feedCache) ?? 'null'),
+      ).toMatchObject({ articles: [article] }),
+    )
+  })
+
+  it('renders the cached feed under a dated notice instead of an error page', async () => {
+    localStorage.setItem(
+      appTheme.storageKeys.feedCache,
+      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+    )
+    fetchFeedMock.mockRejectedValue(new Error('network down'))
+    renderFeed()
+
+    // The stories are the stored ones, and the reader is told so rather than left guessing.
+    expect(await screen.findByRole('link', { name: cached.title })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent(/Showing cached results from/)
+    expect(screen.getByRole('alert')).toHaveTextContent(/2026/)
+    expect(screen.queryByText(en['articles.error.title'])).not.toBeInTheDocument()
+  })
+
+  it('falls back when every source failed without the query itself rejecting', async () => {
+    // The ordinary offline case: `aggregate` is `allSettled`, so it resolves with no
+    // stories and one failure per source rather than throwing.
+    localStorage.setItem(
+      appTheme.storageKeys.feedCache,
+      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+    )
+    fetchFeedMock.mockResolvedValue(
+      resolved({ articles: [], failures: [{ sourceId: 'guardian', reason: 'HTTP 503' }] }),
+    )
+    renderFeed()
+
+    expect(await screen.findByRole('link', { name: cached.title })).toBeInTheDocument()
+    // One message, not two: the notice replaces the partial-failure banner.
+    const alerts = screen.getAllByRole('alert')
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toHaveTextContent(/Showing cached results from/)
+  })
+
+  it('does not reach for the cache when stories did arrive, however few', async () => {
+    localStorage.setItem(
+      appTheme.storageKeys.feedCache,
+      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+    )
+    fetchFeedMock.mockResolvedValue(
+      resolved({ failures: [{ sourceId: 'nyt', reason: 'HTTP 503' }] }),
+    )
+    renderFeed()
+
+    await screen.findByRole('link', { name: article.title })
+    expect(screen.queryByRole('link', { name: cached.title })).not.toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('The New York Times')
+  })
+
+  it('drops the notice once a retry brings the live feed back', async () => {
+    localStorage.setItem(
+      appTheme.storageKeys.feedCache,
+      JSON.stringify({ savedAt: '2026-06-01T09:30:00.000Z', articles: [cached] }),
+    )
+    fetchFeedMock.mockRejectedValueOnce(new Error('network down'))
+    fetchFeedMock.mockResolvedValue(resolved())
+    renderFeed()
+
+    await screen.findByRole('link', { name: cached.title })
+    await userEvent.click(screen.getByRole('button', { name: en['articles.error.retry'] }))
+
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: article.title })).toBeInTheDocument(),
+    )
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the error card when the cache is corrupt', async () => {
+    localStorage.setItem(appTheme.storageKeys.feedCache, '{ not json')
+    fetchFeedMock.mockRejectedValue(new Error('network down'))
+    renderFeed()
+
+    await screen.findByRole('heading', { name: en['articles.error.title'] })
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})

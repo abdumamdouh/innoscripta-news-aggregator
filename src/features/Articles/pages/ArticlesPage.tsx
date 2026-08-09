@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { AppButton, AppCard } from '@/components/common/design-system'
 import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
+import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { ArticlesFilters } from '@/features/Articles/components/ArticlesFilters'
 import { ArticlesToolbar } from '@/features/Articles/components/ArticlesToolbar'
 import { FilterChips } from '@/features/Articles/components/FilterChips'
@@ -35,19 +35,7 @@ export function ArticlesPage() {
       <PartialFailureBanner failures={list.failures} />
 
       {isError ? (
-        <AppCard as="section" className="text-center">
-          <h2 className="text-lg font-semibold text-ink-900 dark:text-ink-100">
-            {t('articles.error.title')}
-          </h2>
-          <p className="mt-2 text-ink-500">{t('articles.error.body')}</p>
-          <AppButton
-            className="mt-4"
-            onClick={() => void actions.retry()}
-            disabled={actions.isRetrying}
-          >
-            {t('articles.error.retry')}
-          </AppButton>
-        </AppCard>
+        <ArticlesErrorState actions={actions} />
       ) : (
         <>
           <p role="status" className="text-sm text-ink-500">

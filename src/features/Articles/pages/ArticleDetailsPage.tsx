@@ -3,14 +3,16 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Bookmark, ExternalLink } from 'lucide-react'
 import {
-  AppButton,
   AppCard,
   AppConfirmDialog,
+  AppEmptyState,
   AppIconButton,
+  AppSkeleton,
   useToast,
 } from '@/components/common/design-system'
 import type { Article } from '@/core/sources/types'
 import { ArticleDescription } from '@/features/Articles/components/ArticleDescription'
+import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
 import { SourceBadge } from '@/features/Articles/components/SourceBadge'
 import { useArticleDetails } from '@/features/Articles/hooks/useArticleDetails'
 import { useBookmark } from '@/features/Articles/hooks/useBookmark'
@@ -96,9 +98,9 @@ export function ArticleDetailsPage() {
           aria-label={t('articles.details.loading')}
           className="flex flex-col gap-4"
         >
-          <div className="aspect-video w-full rounded-lg bg-paper-50 dark:bg-ink-700" />
-          <div className="h-6 w-2/3 rounded bg-paper-50 dark:bg-ink-700" />
-          <div className="h-20 w-full rounded bg-paper-50 dark:bg-ink-700" />
+          <AppSkeleton className="aspect-video w-full rounded-lg" />
+          <AppSkeleton className="h-6 w-2/3" />
+          <AppSkeleton className="h-20 w-full" />
         </AppCard>
       </section>
     )
@@ -109,19 +111,7 @@ export function ArticleDetailsPage() {
     return (
       <section className="flex flex-col gap-4">
         <BackLink search={search} />
-        <AppCard as="section" className="text-center">
-          <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">
-            {t('articles.error.title')}
-          </h1>
-          <p className="mt-2 text-ink-500">{t('articles.error.body')}</p>
-          <AppButton
-            className="mt-4"
-            onClick={() => void actions.retry()}
-            disabled={actions.isRetrying}
-          >
-            {t('articles.error.retry')}
-          </AppButton>
-        </AppCard>
+        <ArticlesErrorState actions={actions} headingLevel={1} />
       </section>
     )
   }
@@ -130,12 +120,11 @@ export function ArticleDetailsPage() {
     return (
       <section className="flex flex-col gap-4">
         <BackLink search={search} />
-        <AppCard as="section" className="text-center">
-          <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">
-            {t('articles.details.missing.title')}
-          </h1>
-          <p className="mt-2 text-ink-500">{t('articles.details.missing.body')}</p>
-        </AppCard>
+        <AppEmptyState
+          headingLevel={1}
+          title={t('articles.details.missing.title')}
+          body={t('articles.details.missing.body')}
+        />
       </section>
     )
   }

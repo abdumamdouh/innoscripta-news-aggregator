@@ -143,15 +143,27 @@
   animation: app-toast-enter 220ms ease-out both;
 }
 
+/* Rides over whatever base colour the element carries, so one class serves both themes'
+   skeletons. The blueprint's `--color-aeblack-*`/`--color-whitely-*` vars do not exist in
+   this palette — the highlight is our own tokens instead. */
 .motion-shimmer {
   background-image: linear-gradient(
     90deg,
-    var(--color-aeblack-100) 0%,
-    var(--color-whitely-50) 45%,
-    var(--color-aeblack-100) 90%
+    transparent 0%,
+    var(--color-paper-0) 45%,
+    transparent 90%
   );
   background-size: 240% 100%;
   animation: app-soft-shimmer 1.35s ease-in-out infinite;
+}
+
+.dark .motion-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-ink-500) 45%,
+    transparent 90%
+  );
 }
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { AppButton, AppCard } from '@/components/common/design-system'
+import { AppEmptyState } from '@/components/common/design-system'
 import { ArticleGrid } from '@/features/Articles/components/ArticleGrid'
+import { ArticlesErrorState } from '@/features/Articles/components/ArticlesErrorState'
+import { CachedFeedNotice } from '@/features/Articles/components/CachedFeedNotice'
 import { PartialFailureBanner } from '@/features/Articles/components/PartialFailureBanner'
 import { useFeed } from '@/features/Articles/hooks/useFeed'
 import { PreferencesButton, usePreferences } from '@/features/Preferences'
@@ -9,12 +11,13 @@ import { PreferencesButton, usePreferences } from '@/features/Preferences'
  * The article list narrowed to what this reader asked for, and nothing else on screen:
  * the feed's only filter is the preferences, so it carries no toolbar of its own. The three
  * fetch states are the list's: a provider that fell over is named, a whole failed load
- * offers the same retry.
+ * offers the same retry — unless the last good feed is still in storage, in which case the
+ * reader gets those stories under a notice saying how old they are.
  */
 export function FeedPage() {
   const { t } = useTranslation()
   const preferences = usePreferences()
-  const { ready, articles, failures, actions, isLoading, isFetching, isError } =
+  const { ready, articles, failures, cachedAt, actions, isLoading, isFetching, isError } =
     useFeed(preferences)
 
   return (
@@ -22,33 +25,21 @@ export function FeedPage() {
       <h1 className="text-2xl font-semibold text-ink-900 dark:text-ink-100">{t('nav.feed')}</h1>
 
       {!ready ? (
-        <AppCard as="section" className="text-center">
-          <h2 className="text-lg font-semibold text-ink-900 dark:text-ink-100">
-            {t('feed.empty.title')}
-          </h2>
-          <p className="mt-2 text-ink-500">{t('feed.empty.body')}</p>
-          {/* Preferences have no route, so the way in is the same trigger the header uses. */}
-          <div className="mt-4 flex justify-center">
-            <PreferencesButton />
-          </div>
-        </AppCard>
+        <AppEmptyState
+          title={t('feed.empty.title')}
+          body={t('feed.empty.body')}
+          // Preferences have no route, so the way in is the same trigger the header uses.
+          action={<PreferencesButton />}
+        />
       ) : isError ? (
-        <AppCard as="section" className="text-center">
-          <h2 className="text-lg font-semibold text-ink-900 dark:text-ink-100">
-            {t('articles.error.title')}
-          </h2>
-          <p className="mt-2 text-ink-500">{t('articles.error.body')}</p>
-          <AppButton
-            className="mt-4"
-            onClick={() => void actions.retry()}
-            disabled={actions.isRetrying}
-          >
-            {t('articles.error.retry')}
-          </AppButton>
-        </AppCard>
+        <ArticlesErrorState actions={actions} />
       ) : (
         <>
-          <PartialFailureBanner failures={failures} />
+          {cachedAt ? (
+            <CachedFeedNotice savedAt={cachedAt} actions={actions} />
+          ) : (
+            <PartialFailureBanner failures={failures} />
+          )}
           <p role="status" className="text-sm text-ink-500">
             {t('feed.results', { total: articles.length })}
           </p>
