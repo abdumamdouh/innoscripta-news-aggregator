@@ -58,7 +58,7 @@
   "articles.presets.toast.deleted": "تم حذف البحث.",
   "articles.presets.toast.renamed": "تمت إعادة تسمية البحث.",
   "articles.presets.toast.saved": "تم حفظ البحث.",
-  "articles.results": "{{total}} مقالات في هذه الصفحة",
+  "articles.results": "عرض {{shown}} من {{total}} مقالة",
   "articles.search.label": "ابحث في المقالات",
   "articles.search.placeholder": "ابحث في العناوين والملخصات",
   "articles.sort.label": "الترتيب",

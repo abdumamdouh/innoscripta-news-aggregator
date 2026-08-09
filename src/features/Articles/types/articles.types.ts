@@ -31,5 +31,7 @@ export interface ArticleListView {
   /** A full page back means there is at least one more. Providers report no usable total. */
   hasNextPage: boolean
   /** Pages we can prove exist: the ones already walked, plus the next if there is one. */
+  /** Articles in the merged window after filtering — the honest denominator. */
+  total: number
   knownPages: number
 }

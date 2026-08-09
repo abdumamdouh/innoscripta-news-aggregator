@@ -19,8 +19,7 @@ export function toFeedQuery(preferences: Preferences): ArticleQuery {
     categories: preferences.categories.length ? preferences.categories : undefined,
     authors: preferences.authors.length ? preferences.authors : undefined,
     sources: preferences.sources.length ? preferences.sources : undefined,
-    page: 1,
-    pageSize: appTheme.pageSize,
+    limit: appTheme.sourceWindow,
   }
 }
 

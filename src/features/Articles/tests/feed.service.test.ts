@@ -65,8 +65,7 @@ describe('toFeedQuery', () => {
       categories: undefined,
       authors: undefined,
       sources: undefined,
-      page: 1,
-      pageSize: appTheme.pageSize,
+      limit: appTheme.sourceWindow,
     })
   })
 

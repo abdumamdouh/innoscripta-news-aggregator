@@ -104,11 +104,11 @@ function degrade(
     })
   }
 
-  if (!capabilities.pagination) {
-    const start = (query.page - 1) * query.pageSize
-    // Sort before slicing: page boundaries are only meaningful on the ordering the
-    // feed is presented in. A capable source already paged its own sorted results.
-    out = [...out].sort((a, b) => time(b) - time(a)).slice(start, start + query.pageSize)
+  // Bound a source that cannot bound itself. BBC returns its whole feed every time, so
+  // without this one provider decides how much of the window everyone else gets. Newest
+  // first, because a window is the most recent N — not an arbitrary N.
+  if (!capabilities.pagination && out.length > query.limit) {
+    out = [...out].sort((a, b) => time(b) - time(a)).slice(0, query.limit)
   }
 
   return out
@@ -155,9 +155,8 @@ export async function aggregate(
 
   articles.sort((a, b) => time(b) - time(a))
 
-  // Per-source paging only bounds each source's own contribution, so N sources return
-  // up to N × pageSize. Trim the merged feed to one page. No offset here: every
-  // contribution is already the source's page `query.page`, so re-applying the offset
-  // would skip a page's worth of stories.
-  return { articles: dedupe(articles).slice(0, query.pageSize), failures }
+  // The whole merged window, not a page of it. Paging happens over this set, where every
+  // article is reachable; slicing here is what made 45 of 54 fetched stories unreachable
+  // from any page.
+  return { articles: dedupe(articles), failures }
 }

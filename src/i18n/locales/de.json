@@ -58,7 +58,7 @@
   "articles.presets.toast.deleted": "Suche gelöscht.",
   "articles.presets.toast.renamed": "Suche umbenannt.",
   "articles.presets.toast.saved": "Suche gespeichert.",
-  "articles.results": "{{total}} Artikel auf dieser Seite",
+  "articles.results": "{{shown}} von {{total}} Artikeln",
   "articles.search.label": "Artikel durchsuchen",
   "articles.search.placeholder": "Überschriften und Zusammenfassungen durchsuchen",
   "articles.sort.label": "Sortierung",

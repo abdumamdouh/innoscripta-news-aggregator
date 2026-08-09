@@ -36,7 +36,7 @@ const CANONICAL_KEYS = [
 /** What `new Date().toISOString()` produces, and nothing else. */
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
 
-const query = (over: Partial<ArticleQuery>): ArticleQuery => ({ page: 1, pageSize: 20, ...over })
+const query = (over: Partial<ArticleQuery>): ArticleQuery => ({ limit: 20, ...over })
 
 const fromNewsapi = () => selectNewsapi(newsapiFixture).map((raw) => newsapiSource.normalize(raw))
 const fromGuardian = () =>
@@ -287,7 +287,7 @@ describe('guardian adapter — provider quirks', () => {
       return Promise.resolve(new Response(JSON.stringify({ response: { results: [] } })))
     })
 
-    return guardianSource.fetch({ page: 1, pageSize: 10 }).then(() => {
+    return guardianSource.fetch({ limit: 10 }).then(() => {
       expect(requested[0]).toContain('show-fields=trailText%2Cthumbnail%2Cbyline%2Cbody')
       vi.restoreAllMocks()
     })

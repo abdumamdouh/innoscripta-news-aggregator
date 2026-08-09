@@ -11,6 +11,9 @@ import {
   url,
 } from '@/core/sources/adapters/shared'
 
+/** The Guardian caps `page-size` at 50. */
+const MAX_PAGE_SIZE = 50
+
 const ID = 'guardian'
 const LABEL = 'The Guardian'
 
@@ -88,8 +91,8 @@ export const guardianSource: NewsSource<GuardianRaw> = {
       // Our slugs are not the Guardian's: it files entertainment under `culture`. An
       // unmappable category contributes no constraint rather than a guess that matches nothing.
       section: sections(query.categories),
-      page: query.page,
-      'page-size': query.pageSize,
+      // One window, page 1: the merged set is what gets paginated.
+      'page-size': Math.min(query.limit, MAX_PAGE_SIZE),
       'order-by': 'newest',
       'show-fields': 'trailText,thumbnail,byline,body',
       // Narrow the provider's own search to the fields a card shows, so fewer of its results

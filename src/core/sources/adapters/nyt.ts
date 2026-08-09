@@ -109,8 +109,8 @@ export const nytSource: NewsSource<NytRaw> = {
       q: query.q,
       begin_date: compactDate(query.from),
       end_date: compactDate(query.to),
-      // Article Search pages are a fixed 10 docs; `page` is a page index, not an offset.
-      page: query.page - 1,
+      // Article Search pages are a fixed 10 docs and ignore any size we ask for, so this
+      // source contributes 10 to the window however large the window is.
       sort: 'newest',
     })
     return selectItems(await getJson<NytPayload>(`/api/nyt/articlesearch.json?${search}`, signal))

@@ -81,7 +81,7 @@ describe('ArticlesPage — cold load that fails', () => {
     )
     expect(screen.queryByText(en['articles.error.title'])).not.toBeInTheDocument()
     // Two live regions on this page now: the result count, then the toast region.
-    expect(screen.getAllByRole('status')[0]).toHaveTextContent('1 articles on this page')
+    expect(screen.getAllByRole('status')[0]).toHaveTextContent('Showing 1 of 1 articles')
     expect(fetchArticlesMock).toHaveBeenCalledTimes(2)
   })
 })

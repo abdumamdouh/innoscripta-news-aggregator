@@ -65,7 +65,7 @@ describe('category taxonomy', () => {
   it('keeps every BBC feed slug inside the shared taxonomy', () => {
     // BBC serves a category as a whole feed URL, so a slug it cannot resolve is dropped.
     for (const category of ARTICLE_CATEGORIES) {
-      const resolved = resolveCategories({ categories: [category], page: 1, pageSize: 9 })
+      const resolved = resolveCategories({ categories: [category], limit: 9 })
       expect(resolved.length, `bbc feed for ${category}`).toBeGreaterThan(0)
     }
   })

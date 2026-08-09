@@ -14,8 +14,7 @@ export function toArticleQuery(state: ArticlesState): ArticleQuery {
     categories: state.category ? [state.category] : undefined,
     authors: state.author ? [state.author] : undefined,
     sources: state.sources.length ? state.sources : undefined,
-    page: state.page,
-    pageSize: appTheme.pageSize,
+    limit: appTheme.sourceWindow,
   }
 }
 

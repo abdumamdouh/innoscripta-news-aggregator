@@ -18,8 +18,7 @@ const NO_CAPS: SourceCapabilities = {
 }
 
 const query = (over: Partial<ArticleQuery> = {}): ArticleQuery => ({
-  page: 1,
-  pageSize: 10,
+  limit: 10,
   ...over,
 })
 
@@ -227,12 +226,17 @@ describe('aggregate — capability degradation', () => {
     ])
   })
 
-  it('paginates a source that cannot', async () => {
-    const page2 = await aggregate(query({ page: 2, pageSize: 2 }), [poor()])
-    expect(page2.articles.map((a) => a.title)).toEqual(['Mars rover finds ice'])
+  it('bounds a source that cannot bound itself, newest first', async () => {
+    // BBC returns its whole feed however small the window; without this one provider would
+    // decide how much of the window everyone else gets.
+    const bounded = await aggregate(query({ limit: 2 }), [poor()])
+    expect(bounded.articles.map((a) => a.title)).toEqual([
+      'Budget reaction',
+      'Election night results',
+    ])
   })
 
-  it('bounds the merged feed to pageSize even when several sources each return a full page', async () => {
+  it('keeps every article from every source — the merged window is not a page', async () => {
     const page = (id: string, offset: number) =>
       fakeSource(
         id,
@@ -246,11 +250,20 @@ describe('aggregate — capability degradation', () => {
         }),
       )
 
-    const result = await aggregate(query({ pageSize: 3 }), [page('a', 0), page('b', 10)])
+    const result = await aggregate(query({ limit: 3 }), [page('a', 0), page('b', 10)])
 
-    expect(result.articles).toHaveLength(3)
-    // The three newest across both sources, newest first.
-    expect(result.articles.map((a) => a.title)).toEqual(['b story 12', 'b story 11', 'b story 10'])
+    // The regression that mattered: this used to slice the merged feed to one page, so four
+    // sources fetched ~54 articles, showed 9, and discarded 45 — unreachably, because page 2
+    // then asked each source for *its* page 2 and never came back for them.
+    expect(result.articles).toHaveLength(6)
+    expect(result.articles.map((a) => a.title)).toEqual([
+      'b story 12',
+      'b story 11',
+      'b story 10',
+      'a story 2',
+      'a story 1',
+      'a story 0',
+    ])
   })
 
   it('trusts a capable source on every filter except the keyword', async () => {
@@ -261,7 +274,7 @@ describe('aggregate — capability degradation', () => {
       article('newsapi', { url: 'https://n.test/x', title: 'Whatever the API returned' }),
     ])
 
-    const result = await aggregate(query({ categories: ['sport'], page: 3 }), [capable])
+    const result = await aggregate(query({ categories: ['sport'] }), [capable])
 
     expect(result.articles).toHaveLength(1)
   })
@@ -304,7 +317,7 @@ describe('cancellation', () => {
 
   it('propagates the abort instead of reporting every source as failed', async () => {
     const controller = new AbortController()
-    const promise = aggregate({ page: 1, pageSize: 9 }, [hangs('a'), hangs('b')], controller.signal)
+    const promise = aggregate({ limit: 9 }, [hangs('a'), hangs('b')], controller.signal)
     controller.abort()
 
     // The trap: allSettled swallows each rejection, so without an explicit check this
@@ -314,7 +327,7 @@ describe('cancellation', () => {
 
   it('still reports a genuine failure when nothing was cancelled', async () => {
     const dead: NewsSource = { ...hangs('dead'), fetch: () => Promise.reject(new Error('502')) }
-    const result = await aggregate({ page: 1, pageSize: 9 }, [dead])
+    const result = await aggregate({ limit: 9 }, [dead])
 
     expect(result.articles).toEqual([])
     expect(result.failures).toEqual([{ sourceId: 'dead', reason: '502' }])

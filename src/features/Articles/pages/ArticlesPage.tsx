@@ -85,7 +85,7 @@ export function ArticlesPage() {
       ) : (
         <>
           <p role="status" className="text-sm text-ink-500">
-            {t('articles.results', { total: list.articles.length })}
+            {t('articles.results', { shown: list.articles.length, total: list.total })}
           </p>
           <ArticleGrid articles={list.articles} isLoading={isLoading} />
           <Pagination

@@ -46,6 +46,7 @@ export function useArticlesDirectory() {
           articles: cached.articles,
           // The cached notice already says why the live stories are missing — one message.
           failures: [],
+          total: cached.articles.length,
           // Nothing was proved about the next page by a load that never landed.
           hasNextPage: false,
           knownPages: state.page,

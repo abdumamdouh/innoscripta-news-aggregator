@@ -130,8 +130,7 @@ export const newsapiSource: NewsSource<NewsApiItem> = {
       // NewsAPI reads a date-only `to` as T00:00:00, which drops the final day the reader
       // asked for. The other providers treat it as the whole day.
       to: endOfDay(query.to),
-      page: query.page,
-      pageSize: Math.min(query.pageSize, MAX_PAGE_SIZE),
+      pageSize: Math.min(query.limit, MAX_PAGE_SIZE),
       sortBy: 'publishedAt',
     })
     const payload = await getJson<NewsApiPayload>(`/api/newsapi/everything?${search}`, signal)

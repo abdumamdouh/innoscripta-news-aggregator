@@ -28,8 +28,17 @@ export interface ArticleQuery {
   /** Source ids to fan out to. Empty or absent means every available source. */
   sources?: string[]
   authors?: string[]
-  page: number
-  pageSize: number
+  /**
+   * How many articles to ask each source for — a window, not a page.
+   *
+   * Global page N is not the union of each source's page N: they disagree on page size
+   * (the Guardian honours it, NewsAPI under-delivers, NYT is fixed at 10, BBC has no paging
+   * at all), so merging four page-1s and slicing to 9 threw away the rest permanently —
+   * page 2 asked each source for *its* page 2 and never went back. Each source contributes
+   * up to `limit`; the merged, deduped, sorted result is what gets paginated, in the one
+   * place the whole set actually exists.
+   */
+  limit: number
 }
 
 /** What a provider can do server-side. Anything false, the aggregator does client-side. */
