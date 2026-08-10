@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SlidersHorizontal } from 'lucide-react'
 import { AppButton, AppModal } from '@/components/common/design-system'
@@ -30,6 +30,24 @@ export function ArticlesPage() {
     isFetching,
     isError,
   } = useArticlesDirectory()
+
+  // The pager sits below a full grid, so page 4 would otherwise open at its own footer.
+  //
+  // In an effect keyed on the page, not in the click handler: paging is client-side, so the
+  // handler runs before React swaps the grid, and the browser then scrolls the still-focused
+  // pager button back into view — which cancels a smooth scroll outright. After the commit,
+  // there is nothing left to fight it. `behavior: 'smooth'` is downgraded to an instant jump
+  // by the browser under prefers-reduced-motion, so there is no media query to branch on.
+  const firstRender = useRef(true)
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [state.page])
 
   // Every byline seen so far, not just this page's — see `useAuthorFacet`.
   const authors = useAuthorFacet(list.articles, state.author)
@@ -91,13 +109,7 @@ export function ArticlesPage() {
           <Pagination
             page={state.page}
             totalPages={list.knownPages}
-            onPageChange={(page) => {
-              update({ page })
-              // The pager sits below a full grid, so the next page would otherwise open
-              // scrolled to its own footer. `behavior: 'smooth'` is ignored under
-              // prefers-reduced-motion by the browser itself — nothing to branch on here.
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
+            onPageChange={(page) => update({ page })}
           />
         </>
       )}

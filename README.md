@@ -129,7 +129,7 @@ src/
 | Suite                                       | Files | Tests | Command            |
 | ------------------------------------------- | ----- | ----- | ------------------ |
 | Unit / component (Vitest + Testing Library) | 35    | 416   | `npm test`         |
-| End-to-end (Playwright, Chromium)           | 16    | 136   | `npm run test:e2e` |
+| End-to-end (Playwright, Chromium)           | 16    | 137   | `npm run test:e2e` |
 
 E2E needs no real keys: every provider response is served from a fixture, and the stand-in keys the
 Playwright config injects are what makes "no key reached the browser" a real assertion. `e2e/docker.spec.ts`

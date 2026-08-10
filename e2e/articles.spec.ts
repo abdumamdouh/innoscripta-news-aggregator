@@ -282,6 +282,25 @@ test.describe('article list', () => {
     for (const byline of bylines) expect(byline).toContain(author)
   })
 
+  test('returns to the top of the grid when the page changes', async ({ page }) => {
+    await page.goto('/')
+    await expect(cards(page)).toHaveCount(PAGE_SIZE)
+
+    // Down at the pager, which is where a reader is when they click one.
+    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight }))
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+
+    await page.getByRole('button', { name: 'Page 2' }).click()
+    await settle(page)
+
+    // Polled, not sampled: the scroll is smooth, so it lands over several frames — and the
+    // first attempt fired from the click handler was cancelled by the browser restoring the
+    // focused pager button, which a single immediate read would have called a pass.
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 3000 })
+      .toBeLessThanOrEqual(1)
+  })
+
   test('offers an empty state rather than a blank grid when nothing matches', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('searchbox', { name: 'Search articles' }).fill('quidditch')
