@@ -8,7 +8,7 @@ import {
   text,
   url,
   longerThan,
-  widenDay,
+  dayInstant,
 } from '@/core/sources/adapters/shared'
 
 const ID = 'newsapi'
@@ -53,10 +53,6 @@ export interface NewsApiItem {
  * comes back. Terms are OR-ed, not AND-ed: two preferred categories AND-ed together asked
  * for articles containing both words and returned almost nothing.
  */
-/** A date-only bound means the end of that day, not its first instant. */
-const endOfDay = (value: string | undefined) =>
-  value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T23:59:59` : value
-
 function expression(query: ArticleQuery): string {
   const categories = (query.categories ?? [])
     .filter(isArticleCategory)
@@ -127,10 +123,10 @@ export const newsapiSource: NewsSource<NewsApiItem> = {
   async fetch(query, signal) {
     const search = queryString({
       q: expression(query),
-      from: widenDay(query.from, -1),
+      from: dayInstant(query.from, 'start'),
       // NewsAPI reads a date-only `to` as T00:00:00, which drops the final day the reader
       // asked for. The other providers treat it as the whole day.
-      to: endOfDay(widenDay(query.to, 1)),
+      to: dayInstant(query.to, 'end'),
       pageSize: Math.min(query.limit, MAX_PAGE_SIZE),
       sortBy: 'publishedAt',
     })

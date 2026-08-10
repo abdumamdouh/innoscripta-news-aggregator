@@ -9,7 +9,7 @@ import {
   text,
   upscale,
   url,
-  widenDay,
+  dayInstant,
 } from '@/core/sources/adapters/shared'
 
 /** The Guardian caps `page-size` at 50. */
@@ -88,8 +88,8 @@ export const guardianSource: NewsSource<GuardianRaw> = {
   async fetch(query, signal) {
     const search = queryString({
       q: query.q,
-      'from-date': widenDay(query.from, -1),
-      'to-date': widenDay(query.to, 1),
+      'from-date': dayInstant(query.from, 'start'),
+      'to-date': dayInstant(query.to, 'end'),
       // Our slugs are not the Guardian's: it files entertainment under `culture`. An
       // unmappable category contributes no constraint rather than a guess that matches nothing.
       section: sections(query.categories),

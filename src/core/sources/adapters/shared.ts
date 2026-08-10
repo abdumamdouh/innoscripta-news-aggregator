@@ -72,20 +72,27 @@ export function bodyText(value: unknown): string | undefined {
 }
 
 /**
- * Nudge a `YYYY-MM-DD` bound outwards by a day before asking a provider for it.
+ * Turn a `YYYY-MM-DD` bound into the exact instant it means for this reader.
  *
- * Providers bound by UTC days, readers mean their own. Anywhere east or west of Greenwich the
- * two disagree at the edges: a story published 00:30 on 1 August in Cairo is 21:30 on 31 July
- * in UTC, and a provider asked for `from=2026-08-01` never returns it. Asking a day wide costs
- * one day of extra payload and lets the aggregator's local-day filter make the real decision.
+ * Providers bound by UTC days; a reader means their own. Anywhere but Greenwich the two
+ * disagree at the edges — 00:30 on 1 August in Cairo is 21:30 on 31 July in UTC — so a
+ * provider asked for `from=2026-08-01` silently drops the reader's first half-hour.
+ *
+ * Asking a day wide instead was worse, and shipped for exactly one deploy: NewsAPI returns the
+ * newest 50 *of the window*, so the spare day filled the whole page and the requested days
+ * never arrived at all. An instant is what the reader actually meant, and every provider that
+ * takes a datetime gets it precisely.
  */
-export function widenDay(value: string | undefined, days: number): string | undefined {
+export function dayInstant(value: string | undefined, edge: 'start' | 'end'): string | undefined {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
 
-  const at = new Date(`${value}T00:00:00.000Z`)
-  at.setUTCDate(at.getUTCDate() + days)
+  const [year, month, day] = value.split('-').map(Number) as [number, number, number]
+  const at =
+    edge === 'start'
+      ? new Date(year, month - 1, day, 0, 0, 0, 0)
+      : new Date(year, month - 1, day, 23, 59, 59, 999)
 
-  return at.toISOString().slice(0, 10)
+  return at.toISOString()
 }
 
 /** An absolute http(s) URL, or undefined. Relative provider paths are resolved against `base`. */
