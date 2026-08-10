@@ -36,8 +36,8 @@ export function ArticlesPage() {
   // In an effect keyed on the page, not in the click handler: paging is client-side, so the
   // handler runs before React swaps the grid, and the browser then scrolls the still-focused
   // pager button back into view — which cancels a smooth scroll outright. After the commit,
-  // there is nothing left to fight it. `behavior: 'smooth'` is downgraded to an instant jump
-  // by the browser under prefers-reduced-motion, so there is no media query to branch on.
+  // there is nothing left to fight it. The smoothness is `scroll-behavior` on `html`, which
+  // prefers-reduced-motion already overrides — so nothing here branches on the preference.
   const firstRender = useRef(true)
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export function ArticlesPage() {
       return
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0 })
   }, [state.page])
 
   // Every byline seen so far, not just this page's — see `useAuthorFacet`.

@@ -5,6 +5,12 @@
 
 html {
   color-scheme: light;
+
+  /* Paging scrolls back to the top. Declared here rather than passed as
+     `behavior: 'smooth'` at the call site: the CSS property is the portable one, and the
+     reduced-motion block in animations.css already resets it to `auto !important`, so the
+     preference is honoured in one place instead of at every scroll in the app. */
+  scroll-behavior: smooth;
 }
 
 html.dark {
