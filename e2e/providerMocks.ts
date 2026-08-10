@@ -103,6 +103,36 @@ export const narrow = (items: Fake[], term: string) => {
     : items
 }
 
+/**
+ * The providers really do bound by date, so the mocks must too — otherwise a spec asserting
+ * "no card falls outside the range" passes against a provider that ignored the range entirely,
+ * and proves only that a request was sent. Each names its bounds differently, and the adapters
+ * deliberately ask a day wide, so this parses whatever arrived.
+ */
+function withinRange(items: Fake[], from: string | null, to: string | null): Fake[] {
+  const at = (value: string | null, edge: number) => {
+    if (!value) return undefined
+    // NYT sends YYYYMMDD; the others send a date or a full ISO instant.
+    const iso = /^\d{8}$/.test(value)
+      ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}`
+      : value
+    const parsed = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T00:00:00.000Z` : iso)
+
+    return Number.isNaN(parsed) ? undefined : parsed + edge
+  }
+
+  const lower = at(from, 0)
+  const upper = at(to, 86_399_999)
+
+  return items.filter((item) => {
+    const published = Date.parse(item.publishedAt)
+
+    return (
+      (lower === undefined || published >= lower) && (upper === undefined || published <= upper)
+    )
+  })
+}
+
 const slice = (items: Fake[], page: number) => items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
 const guardianBody = (items: Fake[]) =>
@@ -163,14 +193,22 @@ export async function mockProviders(target: Page | BrowserContext, blocked: stri
   await target.route('**/api/guardian/**', (route) => {
     if (blocked.includes('guardian')) return route.fulfill({ status: 503, body: 'down' })
     const params = new URL(route.request().url()).searchParams
-    const items = narrow(FEEDS.guardian, params.get('q') ?? '')
+    const items = withinRange(
+      narrow(FEEDS.guardian, params.get('q') ?? ''),
+      params.get('from-date'),
+      params.get('to-date'),
+    )
     return route.fulfill(json(guardianBody(slice(items, Number(params.get('page') ?? 1)))))
   })
 
   await target.route('**/api/nyt/**', (route) => {
     if (blocked.includes('nyt')) return route.fulfill({ status: 503, body: 'down' })
     const params = new URL(route.request().url()).searchParams
-    const items = narrow(FEEDS.nyt, params.get('q') ?? '')
+    const items = withinRange(
+      narrow(FEEDS.nyt, params.get('q') ?? ''),
+      params.get('begin_date'),
+      params.get('end_date'),
+    )
     // NYT's `page` is a zero-based index, which is why the adapter sends `page - 1`.
     return route.fulfill(json(nytBody(slice(items, Number(params.get('page') ?? 0) + 1))))
   })
@@ -181,7 +219,7 @@ export async function mockProviders(target: Page | BrowserContext, blocked: stri
     // `/everything` refuses an empty query, so the adapter sends "news" when there is
     // no term. That is not a search — it must not narrow anything.
     const term = params.get('q') === 'news' ? '' : (params.get('q') ?? '')
-    const items = narrow(FEEDS.newsapi, term)
+    const items = withinRange(narrow(FEEDS.newsapi, term), params.get('from'), params.get('to'))
     return route.fulfill(json(newsapiBody(slice(items, Number(params.get('page') ?? 1)))))
   })
 

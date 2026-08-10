@@ -17,10 +17,23 @@ const time = (article: Article) => Date.parse(article.publishedAt) || 0
 
 const reasonOf = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-/** A date-only bound means the whole day, not its first millisecond. */
-function upperBound(value: string): number {
-  const parsed = Date.parse(value)
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? parsed + 86_399_999 : parsed
+/**
+ * A `YYYY-MM-DD` from a date input means that day *where the reader is*, because that is the
+ * day the card shows them. Parsing it as UTC is what put stories captioned "Aug 3" under a
+ * filter ending Aug 2: published 2026-08-02T23:59Z, inside the UTC day, printed as Aug 3 in
+ * Cairo. The bound and the caption have to be reading the same calendar.
+ *
+ * A value carrying its own time is left alone — it already says which instant it means.
+ */
+function dayBound(value: string, edge: 'start' | 'end'): number {
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!parts) return Date.parse(value)
+
+  const [year, month, day] = [Number(parts[1]), Number(parts[2]) - 1, Number(parts[3])]
+
+  return edge === 'start'
+    ? new Date(year, month, day, 0, 0, 0, 0).getTime()
+    : new Date(year, month, day, 23, 59, 59, 999).getTime()
 }
 
 /**
@@ -81,9 +94,14 @@ function degrade(
     )
   }
 
-  if (!capabilities.dateRange && (query.from || query.to)) {
-    const from = query.from ? Date.parse(query.from) : undefined
-    const to = query.to ? upperBound(query.to) : undefined
+  // Applied to every source, capable or not — the second filter that does not trust the
+  // provider, for the same reason as the keyword above. A provider bounds by UTC days; the
+  // card captions a local one, so trusting the provider hands a reader stories dated outside
+  // the range they picked. The provider's bound still runs and still narrows the payload;
+  // this is what makes the grid agree with the dates printed on it.
+  if (query.from || query.to) {
+    const from = query.from ? dayBound(query.from, 'start') : undefined
+    const to = query.to ? dayBound(query.to, 'end') : undefined
     out = out.filter((a) => {
       const at = time(a)
       return (from === undefined || at >= from) && (to === undefined || at <= to)

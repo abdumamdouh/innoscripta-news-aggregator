@@ -91,7 +91,13 @@ export function ArticlesPage() {
           <Pagination
             page={state.page}
             totalPages={list.knownPages}
-            onPageChange={(page) => update({ page })}
+            onPageChange={(page) => {
+              update({ page })
+              // The pager sits below a full grid, so the next page would otherwise open
+              // scrolled to its own footer. `behavior: 'smooth'` is ignored under
+              // prefers-reduced-motion by the browser itself — nothing to branch on here.
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
           />
         </>
       )}

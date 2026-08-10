@@ -20,7 +20,14 @@ export function ArticleCard({ article, actions }: ArticleCardProps) {
   const { search } = useLocation()
 
   return (
-    <AppCard as="article" className="motion-card flex h-full flex-col gap-3">
+    // `data-category` is not read by anything in the app — it is here so the category filter
+    // can be checked against what the grid actually holds. Without it the only observable
+    // effect of filtering by category is the URL, which proves the click, not the result.
+    <AppCard
+      as="article"
+      data-category={article.category ?? ''}
+      className="motion-card flex h-full flex-col gap-3"
+    >
       {/* A card with no picture keeps the same silhouette, so the grid stays level. */}
       <ArticleImage src={article.imageUrl} />
 

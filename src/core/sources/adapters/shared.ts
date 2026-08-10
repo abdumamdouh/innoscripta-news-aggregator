@@ -71,6 +71,23 @@ export function bodyText(value: unknown): string | undefined {
   return text(flat)
 }
 
+/**
+ * Nudge a `YYYY-MM-DD` bound outwards by a day before asking a provider for it.
+ *
+ * Providers bound by UTC days, readers mean their own. Anywhere east or west of Greenwich the
+ * two disagree at the edges: a story published 00:30 on 1 August in Cairo is 21:30 on 31 July
+ * in UTC, and a provider asked for `from=2026-08-01` never returns it. Asking a day wide costs
+ * one day of extra payload and lets the aggregator's local-day filter make the real decision.
+ */
+export function widenDay(value: string | undefined, days: number): string | undefined {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+
+  const at = new Date(`${value}T00:00:00.000Z`)
+  at.setUTCDate(at.getUTCDate() + days)
+
+  return at.toISOString().slice(0, 10)
+}
+
 /** An absolute http(s) URL, or undefined. Relative provider paths are resolved against `base`. */
 export function url(value: unknown, base?: string): string | undefined {
   const raw = text(value)

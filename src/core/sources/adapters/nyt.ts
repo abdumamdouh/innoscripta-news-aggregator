@@ -8,6 +8,7 @@ import {
   text,
   url,
   longerThan,
+  widenDay,
 } from '@/core/sources/adapters/shared'
 
 const ID = 'nyt'
@@ -108,8 +109,8 @@ export const nytSource: NewsSource<NytRaw> = {
   async fetch(query, signal) {
     const search = queryString({
       q: query.q,
-      begin_date: compactDate(query.from),
-      end_date: compactDate(query.to),
+      begin_date: compactDate(widenDay(query.from, -1)),
+      end_date: compactDate(widenDay(query.to, 1)),
       // Article Search pages are a fixed 10 docs and ignore any size we ask for, so this
       // source contributes 10 to the window however large the window is.
       sort: 'newest',

@@ -8,6 +8,7 @@ import {
   text,
   url,
   longerThan,
+  widenDay,
 } from '@/core/sources/adapters/shared'
 
 const ID = 'newsapi'
@@ -126,10 +127,10 @@ export const newsapiSource: NewsSource<NewsApiItem> = {
   async fetch(query, signal) {
     const search = queryString({
       q: expression(query),
-      from: query.from,
+      from: widenDay(query.from, -1),
       // NewsAPI reads a date-only `to` as T00:00:00, which drops the final day the reader
       // asked for. The other providers treat it as the whole day.
-      to: endOfDay(query.to),
+      to: endOfDay(widenDay(query.to, 1)),
       pageSize: Math.min(query.limit, MAX_PAGE_SIZE),
       sortBy: 'publishedAt',
     })

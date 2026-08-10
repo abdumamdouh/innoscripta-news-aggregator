@@ -41,7 +41,13 @@ export function useArticlesDirectory() {
     /** ISO timestamp when the grid on screen predates this session. */
     cachedAt: servedFromCache ? new Date(query.dataUpdatedAt).toISOString() : undefined,
     actions,
-    isLoading: query.isLoading,
+    // `isLoading` alone is only the very first load. `keepPreviousData` means a page or filter
+    // change leaves the old grid sitting there — right for a keystroke, wrong for a click on
+    // page 4, where the reader is looking at nine articles that are not the ones they asked
+    // for. `isPlaceholderData` is exactly "what you see belongs to the previous query", and it
+    // stays false for the refetch that follows a restore from cache, so the offline grid keeps
+    // its stories instead of flashing back to skeletons.
+    isLoading: query.isLoading || query.isPlaceholderData,
     isFetching: query.isFetching,
     // Cached stories under a notice beat an error card with nothing behind it.
     isError: query.isError && !query.data,

@@ -212,6 +212,37 @@ describe('aggregate — capability degradation', () => {
     expect(result.articles.map((a) => a.title)).toEqual(['Election night results'])
   })
 
+  it('reads a date bound as the reader’s day, not as UTC', async () => {
+    // The bug this pins: a story published 23:59 UTC on 2 August is inside the UTC day, so a
+    // range ending "2026-08-02" kept it — and the card, printing local time, captioned it
+    // "Aug 3". Filter and caption have to agree, so the bound is built the way the card reads.
+    const localEnd = new Date(2026, 7, 2, 23, 59, 59, 999)
+    const nextDay = new Date(2026, 7, 3, 0, 0, 0, 0)
+
+    const source = fakeSource(
+      'newsapi',
+      [
+        article('newsapi', {
+          url: 'https://n.test/in',
+          title: 'last thing that day',
+          publishedAt: localEnd.toISOString(),
+        }),
+        article('newsapi', {
+          url: 'https://n.test/out',
+          title: 'the next morning',
+          publishedAt: nextDay.toISOString(),
+        }),
+      ],
+      // Declared capable on purpose: the provider bounding by UTC is exactly why this filter
+      // no longer trusts it. Before the fix, `dateRange: true` skipped the check entirely.
+      { capabilities: ALL_CAPS },
+    )
+
+    const result = await aggregate(query({ from: '2026-08-01', to: '2026-08-02' }), [source])
+
+    expect(result.articles.map((a) => a.title)).toEqual(['last thing that day'])
+  })
+
   it('category- and author-filters a source that cannot', async () => {
     const byCategory = await aggregate(query({ categories: ['politics'] }), [poor()])
     expect(byCategory.articles.map((a) => a.title)).toEqual([

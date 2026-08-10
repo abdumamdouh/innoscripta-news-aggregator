@@ -218,6 +218,70 @@ test.describe('article list', () => {
     await expect(page.locator('article [data-source-id="guardian"]').first()).toBeVisible()
   })
 
+  /**
+   * The three filters whose effect was previously only inferred from the URL or from a unit
+   * test on `degrade()`. A filter that fires the right request and renders the wrong articles
+   * looks identical to a working one until you read the cards, so these read the cards.
+   */
+  test('drops every article published outside the chosen date range', async ({ page }) => {
+    await page.goto('/')
+    const unfiltered = await dates(page)
+
+    // The fixtures run backwards in four-hour steps from 2026-06-01T12:00Z, so this window
+    // lands mid-feed: it must exclude stories on both sides, not just trim one end.
+    const from = '2026-05-30'
+    const to = '2026-05-31'
+    await page.goto(`/?from=${from}&to=${to}`)
+    const filtered = await dates(page)
+
+    expect(filtered.length).toBeGreaterThan(0)
+    expect(filtered).not.toEqual(unfiltered)
+
+    // Local days, not UTC ones — the bound has to mean the same day the card prints. Filtering
+    // in UTC is what put stories captioned "Aug 3" under a range ending Aug 2, for any reader
+    // east of Greenwich. Building the bounds the same way the app does keeps this test honest
+    // in whatever timezone it runs.
+    const [y1, m1, d1] = from.split('-').map(Number) as [number, number, number]
+    const [y2, m2, d2] = to.split('-').map(Number) as [number, number, number]
+    const lower = new Date(y1, m1 - 1, d1, 0, 0, 0, 0).getTime()
+    const upper = new Date(y2, m2 - 1, d2, 23, 59, 59, 999).getTime()
+
+    for (const at of filtered) {
+      expect(at).toBeGreaterThanOrEqual(lower)
+      expect(at).toBeLessThanOrEqual(upper)
+    }
+  })
+
+  test('leaves only articles of the chosen category in the grid', async ({ page }) => {
+    await page.goto('/?category=technology')
+    await settle(page)
+    await expect(cards(page).first()).toBeVisible()
+
+    const categories = await cards(page).evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('data-category')),
+    )
+
+    expect(categories.length).toBeGreaterThan(0)
+    for (const category of categories) expect(category).toBe('technology')
+  })
+
+  test('leaves only the chosen byline in the grid', async ({ page }) => {
+    await page.goto('/')
+    await expect(cards(page)).toHaveCount(PAGE_SIZE)
+
+    const author = 'Guardian Reporter 2'
+    await page.goto(`/?author=${encodeURIComponent(author)}`)
+    await settle(page)
+    await expect(cards(page).first()).toBeVisible()
+
+    // Containment, not equality: a real byline is often several people, and the filter is
+    // built to match one name inside "Tripp Mickle and Cade Metz".
+    const bylines = await cards(page).evaluateAll((nodes) => nodes.map((node) => node.textContent))
+
+    expect(bylines.length).toBeGreaterThan(0)
+    for (const byline of bylines) expect(byline).toContain(author)
+  })
+
   test('offers an empty state rather than a blank grid when nothing matches', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('searchbox', { name: 'Search articles' }).fill('quidditch')
